@@ -148,7 +148,8 @@ button{font-family:inherit;cursor:pointer}
   .chart-wrap{height:280px}
   .header{padding:12px 20px}
   .header h1{font-size:1.2em}
-  .stock-input-group{width:auto;margin-left:auto;flex:none}
+  .stock-input-group{width:auto;margin-left:auto}
+  .stock-input-group input{width:220px;flex:none}
   .stock-input-group .examples{width:auto;margin-left:0}
 }
 
@@ -367,15 +368,31 @@ function buildData(quote,kl,info){
   var volMA=kl.slice(-20).reduce(function(s,x){return s+x.volume;},0)/20;
   var currentVol=kl[lastIdx].volume;
 
+  // Eastmoney API scaling:
+  // HK/US: prices × 1000, A-share: × 100
+  // Percentages (PB, turnover, change%): × 100
+  // Market cap, amount: actual value
+  var priceScale=(info.market==='港股'||info.market==='美股')?1000:100;
+  var pct=function(v){return v==null?null:v/100;};
+  var num=function(v,sc){if(v==null)return null;return v/(sc||1);};
+
   return {
     code:info.raw,secid:info.secid,market:info.market,
     name:quote.f58||('股票'+info.raw),
     currency:info.market==='美股'?'USD':info.market==='港股'?'HKD':'CNY',
-    price:quote.f43,open:quote.f46,high:quote.f44,low:quote.f45,prevClose:quote.f60,
-    change:quote.f169,changePct:quote.f170,
-    volume:currentVol,amount:quote.f48||0,
-    turnoverRate:quote.f168,
-    marketCap:quote.f116||0,peTTM:quote.f162||0,pb:quote.f167||0,
+    price:num(quote.f43,priceScale),
+    open:num(quote.f46,priceScale),
+    high:num(quote.f44,priceScale),
+    low:num(quote.f45,priceScale),
+    prevClose:num(quote.f60,priceScale),
+    change:num(quote.f169,priceScale),
+    changePct:pct(quote.f170),
+    volume:currentVol,
+    amount:quote.f48||0,
+    turnoverRate:pct(quote.f168),
+    marketCap:quote.f116||0,
+    peTTM:quote.f162||0,
+    pb:pct(quote.f167),
     ma:maArr,
     macd:{dif:m.dif[lastIdx]||0,dea:m.dea[lastIdx]||0,mval:m.macd[lastIdx]||0},
     rsi:{rsi6:lastR6,rsi14:lastR,rsi24:lastR24},
