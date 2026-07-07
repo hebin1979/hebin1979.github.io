@@ -2,31 +2,119 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>hebin1979.github.io</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>投资工具箱</title>
 <style>
+:root {
+  --bg: #0a0e17;
+  --card: #111827;
+  --text: #e5e7eb;
+  --sub: #9ca3af;
+  --accent1: #f59e0b;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --accent4: #8b5cf6;
+  --border: #1f2937;
+}
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system,"Microsoft YaHei",sans-serif; background:#0f0f1a; color:#e0e0e0; min-height:100vh; display:flex; align-items:center; justify-content:center; }
-.card { background:#1a1a2e; border-radius:16px; padding:48px; max-width:500px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.4); }
-.card h1 { font-size:28px; margin-bottom:8px; color:#fff; }
-.card p { color:#8899aa; margin-bottom:32px; font-size:14px; }
-.card a { display:block; background:linear-gradient(135deg,#3861fb,#6c5ce7); color:#fff; text-decoration:none; padding:16px 24px; border-radius:10px; margin-bottom:12px; font-size:16px; font-weight:600; transition:transform 0.2s; }
-.card a:hover { transform:translateY(-2px); }
-.card a .desc { display:block; font-size:12px; font-weight:400; opacity:0.7; margin-top:4px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.hero { text-align: center; padding: 60px 20px 40px; }
+.hero h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.hero p { color: var(--sub); font-size: 0.95rem; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; text-decoration: none; color: inherit; transition: all 0.25s; position: relative; overflow: hidden; }
+.card:hover { transform: translateY(-4px); border-color: var(--accent2); box-shadow: 0 8px 30px rgba(59,130,246,0.15); }
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; }
+.card:nth-child(1)::before { background: var(--accent1); }
+.card:nth-child(2)::before { background: var(--accent2); }
+.card:nth-child(3)::before { background: var(--accent3); }
+.card:nth-child(4)::before { background: var(--accent4); }
+.card .icon { font-size: 2rem; margin-bottom: 12px; }
+.card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+.card .desc { font-size: 0.85rem; color: var(--sub); line-height: 1.6; margin-bottom: 14px; }
+.card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.tag:nth-child(1) { background: rgba(245,158,11,0.15); color: var(--accent1); }
+.tag:nth-child(2) { background: rgba(59,130,246,0.15); color: var(--accent2); }
+.tag:nth-child(3) { background: rgba(16,185,129,0.15); color: var(--accent3); }
+.tag:nth-child(4) { background: rgba(139,92,246,0.15); color: var(--accent4); }
+.footer { text-align: center; padding: 30px 20px; color: #4b5563; font-size: 0.75rem; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer a { color: #6b7280; }
+@media (max-width: 600px) {
+  .hero { padding: 40px 16px 24px; }
+  .hero h1 { font-size: 1.5rem; }
+  .cards { grid-template-columns: 1fr; }
+  .card { padding: 22px 18px; }
+}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>hebin1979.github.io</h1>
-  <p>个人项目集合</p>
-  <a href="/portfolio-tracker/">
-    永久投资组合跟踪统计
-    <span class="desc">黄金 · 纳指 · 红利 · 现金 | 1:1:1:1</span>
-  </a>
-  <a href="/hk-ipo-monitor/">
-    港股IPO监控
-    <span class="desc">新股申购数据追踪</span>
-  </a>
+
+<div class="hero">
+  <h1>投资工具箱</h1>
+  <p>量化 · 信号 · 回测，辅助投资决策</p>
 </div>
+
+<div class="container">
+  <div class="cards">
+
+    <!-- 红利投资助手 -->
+    <a href="/dividend-spread-tool.html" class="card">
+      <div class="icon">📊</div>
+      <h2>红利低波定投助手</h2>
+      <div class="desc">沪深300股债利差监控，触发阈值自动提示定投红利低波。含10年回测、动态仓位管理、分红+逆回购收益。</div>
+      <div class="tags">
+        <span class="tag">股债利差</span>
+        <span class="tag">红利低波</span>
+        <span class="tag">策略回测</span>
+        <span class="tag">定投信号</span>
+      </div>
+    </a>
+
+    <!-- 股票预判 -->
+    <a href="/stock_predictor.html" class="card">
+      <div class="icon">🔮</div>
+      <h2>股票智能预判</h2>
+      <div class="desc">多维度技术分析+AI信号评分，自动判断买入/卖出/持有。涵盖趋势、量价、形态等核心指标。</div>
+      <div class="tags">
+        <span class="tag">技术分析</span>
+        <span class="tag">AI评分</span>
+        <span class="tag">多维度</span>
+        <span class="tag">信号</span>
+      </div>
+    </a>
+
+    <!-- 永久投资组合 -->
+    <a href="/portfolio-tracker/" class="card">
+      <div class="icon">🏛️</div>
+      <h2>永久投资组合跟踪</h2>
+      <div class="desc">黄金·纳指·红利·现金 1:1:1:1 组合跟踪，净值统计与回测分析。</div>
+      <div class="tags">
+        <span class="tag">资产配置</span>
+        <span class="tag">组合跟踪</span>
+        <span class="tag">回测</span>
+      </div>
+    </a>
+
+    <!-- 港股IPO -->
+    <a href="/hk-ipo-monitor/" class="card">
+      <div class="icon">🚀</div>
+      <h2>港股IPO监控</h2>
+      <div class="desc">港股新股申购数据实时追踪，暗盘/首日表现、中签率、盈亏统计。</div>
+      <div class="tags">
+        <span class="tag">港股打新</span>
+        <span class="tag">暗盘数据</span>
+        <span class="tag">IPO</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  <p>数据仅供参考，不构成投资建议 · <a href="https://github.com/hebin1979">GitHub</a></p>
+</div>
+
 </body>
 </html>
