@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>永久投资组合跟踪统计</title>
+<title>永久投资助手</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,7 +13,7 @@ body {
   color: #2d3436;
   padding: 20px;
 }
-.container { max-width: 1100px; margin: 0 auto; }
+.container { max-width: 1280px; margin: 0 auto; }
 
 /* Header */
 .header {
@@ -30,6 +30,7 @@ body {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 .header .sync-bar .btn-sm {
   padding: 6px 14px;
@@ -53,7 +54,7 @@ body {
   margin-left: 4px;
 }
 
-/* Summary Cards */
+/* Summary Cards (4 categories) */
 .summary-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -153,11 +154,6 @@ body {
   gap: 16px;
   align-items: end;
 }
-@media (max-width: 768px) {
-  .summary-row { grid-template-columns: repeat(2, 1fr); }
-  .input-grid { grid-template-columns: repeat(2, 1fr); }
-  .bottom-row { grid-template-columns: 1fr !important; }
-}
 .input-group { }
 .input-group label {
   display: block;
@@ -203,35 +199,62 @@ body {
 }
 .btn-reset:hover { background: #ddd; }
 
-/* Chart + History */
-.bottom-row {
+/* Details row: 组合详情 (left) + 当前仓位占比 (right) */
+.details-row {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.1fr;
   gap: 24px;
   margin-bottom: 24px;
 }
-.chart-panel, .history-panel {
+.details-panel, .position-panel {
   background: #fff;
   border-radius: 10px;
   padding: 24px;
   box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
-.chart-panel h2, .history-panel h2 {
+.details-panel h2, .position-panel h2, .history-panel h2 {
   font-size: 16px;
   margin-bottom: 16px;
   padding-bottom: 10px;
   border-bottom: 1px solid #eee;
 }
-.chart-wrap { max-width: 320px; margin: 0 auto; }
+.total-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.total-card {
+  background: #fafbff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  border-left: 3px solid #6c5ce7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.total-card .label { font-size: 13px; color: #666; }
+.total-card .value-box { text-align: right; }
+.total-card .amount { font-size: 22px; font-weight: 700; }
+.total-card .sub-info { font-size: 12px; margin-top: 2px; font-weight: 600; }
 
-/* History */
+.chart-wrap { max-width: 340px; margin: 0 auto; }
+
+/* History (full width) */
+.history-panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 th, td {
-  padding: 10px 6px;
+  padding: 12px 10px;
   text-align: right;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -246,7 +269,7 @@ th {
 }
 th:first-child, td:first-child { text-align: left; }
 td:last-child { text-align: center; }
-.history-wrap { max-height: 420px; overflow-y: auto; }
+.history-wrap { max-height: 480px; overflow-y: auto; }
 
 /* Delta sub-text in cells */
 .cell-main { display: block; }
@@ -270,23 +293,11 @@ td:last-child { text-align: center; }
   padding: 16px;
 }
 
-/* Total Summary Card */
-.total-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+@media (max-width: 900px) {
+  .summary-row { grid-template-columns: repeat(2, 1fr); }
+  .details-row { grid-template-columns: 1fr; }
+  .input-grid { grid-template-columns: repeat(2, 1fr); }
 }
-.total-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 18px 20px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-  border-left: 3px solid #6c5ce7;
-}
-.total-card .label { font-size: 12px; color: #888; margin-bottom: 4px; }
-.total-card .amount { font-size: 26px; font-weight: 700; }
-.total-card .sub-info { font-size: 13px; margin-top: 4px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -294,7 +305,7 @@ td:last-child { text-align: center; }
 
 <!-- Header -->
 <div class="header">
-  <h1>永久投资组合跟踪统计</h1>
+  <h1>永久投资助手</h1>
   <p class="subtitle">黄金 : 纳指 : 红利 : 现金 = 1 : 1 : 1 : 1 ｜ 初始每类 ¥100</p>
   <div class="sync-bar">
     <button class="btn-sm" onclick="exportData()">导出数据</button>
@@ -374,23 +385,6 @@ td:last-child { text-align: center; }
   </div>
 </div>
 
-<!-- Total Summary -->
-<div class="total-summary">
-  <div class="total-card">
-    <div class="label">组合总金额</div>
-    <div class="amount" id="totalAmt">¥400.00</div>
-  </div>
-  <div class="total-card">
-    <div class="label">累计总收益率</div>
-    <div class="amount" id="totalRet">0.00%</div>
-  </div>
-  <div class="total-card">
-    <div class="label">较上期总变动</div>
-    <div class="amount" id="totalDeltaAmt">--</div>
-    <div class="sub-info" id="totalDeltaPct">--</div>
-  </div>
-</div>
-
 <!-- Input Section -->
 <div class="input-section">
   <h2>录入最新净值</h2>
@@ -422,36 +416,62 @@ td:last-child { text-align: center; }
   </div>
 </div>
 
-<!-- Chart + History -->
-<div class="bottom-row">
-  <div class="chart-panel">
+<!-- Details row: 组合详情 (left) + 当前仓位占比 (right) -->
+<div class="details-row">
+  <div class="details-panel">
+    <h2>组合详情</h2>
+    <div class="total-cards">
+      <div class="total-card">
+        <span class="label">组合总金额</span>
+        <div class="value-box">
+          <div class="amount" id="totalAmt">¥400.00</div>
+        </div>
+      </div>
+      <div class="total-card">
+        <span class="label">累计总收益率</span>
+        <div class="value-box">
+          <div class="amount" id="totalRet">0.00%</div>
+        </div>
+      </div>
+      <div class="total-card">
+        <span class="label">较上期总变动</span>
+        <div class="value-box">
+          <div class="amount" id="totalDeltaAmt">--</div>
+          <div class="sub-info" id="totalDeltaPct">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="position-panel">
     <h2>当前仓位占比</h2>
     <div class="chart-wrap">
       <canvas id="pieChart"></canvas>
     </div>
   </div>
-  <div class="history-panel">
-    <h2>历史记录</h2>
-    <div class="history-wrap">
-      <table id="historyTable">
-        <thead>
-          <tr>
-            <th>日期</th>
-            <th>黄金</th>
-            <th>纳指</th>
-            <th>红利</th>
-            <th>现金</th>
-            <th>总金额</th>
-            <th>较上期Δ</th>
-            <th>累计收益</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="historyBody">
-        </tbody>
-      </table>
-      <div class="no-data" id="noData">暂无记录，请在上方添加</div>
-    </div>
+</div>
+
+<!-- History (full width, widened) -->
+<div class="history-panel">
+  <h2>历史记录</h2>
+  <div class="history-wrap">
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>黄金</th>
+          <th>纳指</th>
+          <th>红利</th>
+          <th>现金</th>
+          <th>总金额</th>
+          <th>较上期Δ</th>
+          <th>累计收益</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+      </tbody>
+    </table>
+    <div class="no-data" id="noData">暂无记录，请在上方添加</div>
   </div>
 </div>
 
@@ -495,7 +515,6 @@ function loadFromStorage() {
   if (saved) {
     try { history = JSON.parse(saved); } catch(e) { history = []; }
   }
-  // Sort by date on load
   if (history.length) history.sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -536,7 +555,6 @@ function importData(event) {
         alert('文件格式不正确，需要 JSON 数组');
         return;
       }
-      // Validate entries
       for (const entry of imported) {
         if (!entry.date || typeof entry.gold !== 'number' ||
             typeof entry.nasdaq !== 'number' || typeof entry.dividend !== 'number' ||
@@ -546,7 +564,6 @@ function importData(event) {
         }
       }
 
-      // Merge strategy
       const existingDates = new Set(history.map(h => h.date));
       if (imported.some(e => existingDates.has(e.date))) {
         const choice = confirm(
@@ -555,7 +572,6 @@ function importData(event) {
           '点击"取消"：放弃导入'
         );
         if (!choice) { event.target.value = ''; return; }
-        // Merge: remove existing overlapping, add imported, sort
         const importDates = new Set(imported.map(e => e.date));
         history = history.filter(h => !importDates.has(h.date));
         history = [...history, ...imported];
@@ -576,7 +592,7 @@ function importData(event) {
       alert('文件解析失败：' + err.message);
     }
   };
-  reader.readAsText(file);
+  reader.readAsText(event.target.files[0]);
   event.target.value = '';
 }
 
@@ -594,13 +610,11 @@ function getLatestValues() {
   };
 }
 
-// Returns the previous period's values (second-latest, or initial if only 1 record)
 function getPreviousValues() {
   if (history.length === 0) {
     return { gold: INITIAL_EACH, nasdaq: INITIAL_EACH, dividend: INITIAL_EACH, cash: INITIAL_EACH };
   }
   if (history.length === 1) {
-    // Only one record, compare with initial
     return { gold: INITIAL_EACH, nasdaq: INITIAL_EACH, dividend: INITIAL_EACH, cash: INITIAL_EACH };
   }
   const prev = history[history.length - 2];
@@ -693,7 +707,6 @@ function renderAll() {
   const total = vals.gold + vals.nasdaq + vals.dividend + vals.cash;
   const prevTotal = prevVals.gold + prevVals.nasdaq + prevVals.dividend + prevVals.cash;
 
-  // Update each category card
   CATEGORIES.forEach(cat => {
     const amt = vals[cat];
     const ret = calcReturn(amt, INITIAL_EACH);
@@ -715,7 +728,6 @@ function renderAll() {
     ratioEl.className = 'ratio-badge ' + (ratio > WARN_THRESHOLD ? 'warn' : 'normal');
   });
 
-  // Update total cards
   const totalRet = calcReturn(total, INITIAL_TOTAL);
   const totalDeltaAmt = total - prevTotal;
   const totalDeltaPct = calcReturn(total, prevTotal);
@@ -734,7 +746,6 @@ function renderAll() {
   totalDeltaPctEl.textContent = '收益率 ' + formatPct(totalDeltaPct, true);
   totalDeltaPctEl.className = 'sub-info ' + getReturnClass(totalDeltaPct);
 
-  // Rebalance warning
   const overThreshold = CATEGORIES.filter(cat => {
     return total > 0 && (vals[cat] / total * 100) > WARN_THRESHOLD;
   });
@@ -812,21 +823,18 @@ function renderHistory() {
     const total = h.gold + h.nasdaq + h.dividend + h.cash;
     const totalRet = calcReturn(total, INITIAL_TOTAL);
 
-    // Previous values for this row
     const prevH = i > 0 ? history[i - 1] : null;
     const prevTotal = prevH ? (prevH.gold + prevH.nasdaq + prevH.dividend + prevH.cash) : INITIAL_TOTAL;
 
     const deltaAmt = total - prevTotal;
     const deltaPct = calcReturn(total, prevTotal);
 
-    // Per-category deltas
     const catDeltas = {};
     CATEGORIES.forEach(cat => {
       const prevAmt = prevH ? prevH[cat] : INITIAL_EACH;
       catDeltas[cat] = calcReturn(h[cat], prevAmt);
     });
 
-    // First row may not have meaningful deltas
     const showDelta = i > 0 || history.length > 1;
 
     return `
