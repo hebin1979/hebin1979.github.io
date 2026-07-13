@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-QQQ 卖 Put 交易助手 (Sell-Put Assistant for QQQ LEAPS)
+纳指交易助手 (Nasdaq / QQQ Trading Assistant)
 ========================================================
-目的：综合多个市场指标，判断"现在是否适合开始卖一年期(LEAPS) QQQ Put"，
-      并筛选最合适的行权价、给出获利了结与风控建议。
+目的：综合多个市场指标，判断"现在是否适合交易纳指(QQQ)"，
+      并以卖出一年期(LEAPS) 价外 Put 作为核心建仓策略，
+      筛选最合适的行权价、给出获利了结与风控建议。
 
 指标框架（7 个，权重合计 100）：
   1. 波动率环境 VIX       权重 22  —— 权利金丰厚程度（水平+1年分位）
@@ -29,6 +30,7 @@ QQQ 卖 Put 交易助手 (Sell-Put Assistant for QQQ LEAPS)
   python qqq_put_assistant.py --offline      # 强制使用内置快照(演示/离线)
   python qqq_put_assistant.py --fred-key X  # 提供 FRED API Key(获取 HY OAS)
   python qqq_put_assistant.py --manual json # 手动覆盖关键数值(见 SNAPSHOT)
+（注：本工具以纳指100 ETF QQQ 为标的，"卖 Put"为具体建仓手法）
 """
 
 import argparse
@@ -631,7 +633,7 @@ def build_html(d, ctx, strikes, status):
     html_doc = f'''<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QQQ 卖 Put 交易助手 · 报告</title>
+<title>纳指交易助手 · 报告</title>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
@@ -679,8 +681,8 @@ td:nth-child(2){{font-weight:700}}
 footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 </style></head><body><div class="wrap">
 <header>
-  <h1>📉 QQQ 卖 Put 交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：QQQ(纳指100 ETF) ｜ 策略：卖出 1 年远期(LEAPS) 价外 Put</div>
+  <h1>📉 纳指交易助手</h1>
+  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：纳指100(QQQ ETF) ｜ 策略：卖出 1 年远期(LEAPS) 价外 Put 以折扣价建仓</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
 </header>
@@ -722,7 +724,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 </div>
 
 <footer>
-  QQQ 卖 Put 交易助手 · 仅供研究参考，非投资建议<br>
+  纳指交易助手 · 仅供研究参考，非投资建议<br>
   生成于 {datetime.now().strftime('%Y-%m-%d %H:%M')} ·
   <a href="{HOMEPAGE_URL}" style="color:#2563eb">返回工具箱首页</a> ·
   <a href="{FEEDBACK_URL}" style="color:#2563eb">反馈/建议</a>
@@ -734,7 +736,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 # 9. 主流程
 # ----------------------------------------------------------------------------
 def main():
-    ap = argparse.ArgumentParser(description="QQQ 卖 Put 交易助手")
+    ap = argparse.ArgumentParser(description="纳指交易助手 (Nasdaq/QQQ Trading Assistant)")
     ap.add_argument("--offline", action="store_true", help="强制使用内置快照")
     ap.add_argument("--fred-key", default=None, help="FRED API Key")
     ap.add_argument("--manual", default=None, help="手动覆盖JSON(覆盖SNAPSHOT字段)")
@@ -751,7 +753,7 @@ def main():
             print("manual JSON 解析失败:", e)
 
     print("=" * 60)
-    print("  QQQ 卖 Put 交易助手  ·  拉取市场数据 ...")
+    print("  纳指交易助手  ·  拉取市场数据 ...")
     print("=" * 60)
     d, status = fetch_market_data(fred_key=args.fred_key, offline=offline)
 
@@ -787,7 +789,7 @@ def main():
     print("=" * 60)
 
     out = args.out or os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "qqq_put_report.html")
+                                   "nasdaq_trading_report.html")
     html_doc = build_html(d, ctx, strikes, status)
     with open(out, "w", encoding="utf-8") as f:
         f.write(html_doc)

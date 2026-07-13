@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>黄金交易助手 · 报告</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+ background:#f8fafc;color:#0f172a;padding:24px}
+.wrap{max-width:1080px;margin:0 auto}
+header{background:linear-gradient(135deg,#78350f,#b45309);color:#fff;border-radius:16px;
+ padding:24px 28px;margin-bottom:20px}
+header h1{font-size:22px;margin-bottom:6px}
+header .meta{font-size:12px;opacity:.85}
+.signal{display:inline-block;margin-top:12px;padding:8px 18px;border-radius:10px;
+ background:#d97706;color:#fff;font-size:18px;font-weight:700}
+.advice{margin-top:12px;font-size:14px;line-height:1.6;opacity:.96}
+.comp-wrap{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;
+ padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.comp-gauge{flex:0 0 220px}
+.section{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;
+ box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.section h2{font-size:16px;margin-bottom:14px;color:#1e293b}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+.c-head{display:flex;justify-content:space-between;align-items:baseline}
+.c-name{font-size:13px;font-weight:600}
+.c-score{font-size:22px;font-weight:800}
+.c-val{font-size:12px;color:#475569;margin:6px 0}
+.bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.c-note{font-size:11px;color:#94a3b8;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7}
+th{background:#f8fafc;color:#475569;font-weight:600}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rule{border-left:4px solid #16a34a;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.6}
+.rule-bull{border-left-color:#16a34a}
+.rule-bear{border-left-color:#dc2626}
+.r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;
+ border-radius:4px;padding:1px 8px;margin-bottom:6px}
+.now-card{border:2px solid #65a30d;border-radius:12px;padding:16px;background:#fffdf7;margin-bottom:14px}
+.now-card .nc-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.now-card .nc-zone{font-size:20px;font-weight:800;color:#65a30d}
+.now-card .nc-desc{font-size:12px;color:#64748b;margin-top:6px}
+.status{font-size:12px;color:#64748b}
+.status li{margin:2px 0}
+footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
+</style></head><body><div class="wrap">
+<header>
+  <h1>🪙 黄金交易助手</h1>
+  <div class="meta">数据时间：2026-07-13 手动刷新 | 黄金/美元/VIX盘前7/13 TIPS 7/9 ｜ 标的：现货黄金 XAU/USD ｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口</div>
+  <div class="signal">中性 · 观望　综合评分 52/100</div>
+  <div class="advice">估值不贵但宏观(强美元/正实际利率)与淡季构成压制。可极少量试仓，主仓等待更好时点。</div>
+</header>
+
+<div class="comp-wrap">
+  <div class="comp-gauge"><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 104.8 20.1" fill="none" stroke="#d97706" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#d97706">52</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">综合评分</div>
+      <div class="g-sub">中性 · 观望</div>
+    </div></div>
+  <div style="flex:1">
+    <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积黄金）</h2>
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+      <div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 145.4 34.1" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">69</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">估值</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 116.9 21.8" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">57</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">趋势</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 154.8 41.7" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">74</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">RSI</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 86.0 21.2" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">44</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">实际利率</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 43.1 43.8" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">25</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">美元</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 59.9 30.8" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">33</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">避险</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 75.3 23.9" fill="none" stroke="#b45309" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b45309">40</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">季节</div>
+      <div class="g-sub"></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="now-card">
+  <div class="nc-title">📍 当前金价 $4,073 所处区间</div>
+  <div class="nc-zone">分批建仓区</div>
+  <div class="nc-desc">低于或略高于 200 日线，逢低累积的主战场</div>
+</div>
+
+<div class="section"><h2>① 七维指标明细</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">估值分位 (价格 vs 52周)</span><span class="c-score" style="color:#b45309">69</span></div><div class="c-val">金价位于年内 33% 分位</div><div class="bar"><div class="bar-fill" style="width:69%;background:#b45309"></div></div><div class="c-note">越接近年内低位越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">趋势 (价格/200MA)</span><span class="c-score" style="color:#16a34a">57</span></div><div class="c-val">比值 0.99×</div><div class="bar"><div class="bar-fill" style="width:57%;background:#16a34a"></div></div><div class="c-note">不逆强下行趋势</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">74</span></div><div class="c-val">RSI = 43</div><div class="bar"><div class="bar-fill" style="width:74%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div><div class="card"><div class="c-head"><span class="c-name">实际利率 (10Y TIPS)</span><span class="c-score" style="color:#7c3aed">44</span></div><div class="c-val">实际收益率 2.31%</div><div class="bar"><div class="bar-fill" style="width:44%;background:#7c3aed"></div></div><div class="c-note">黄金核心驱动：越低越利多</div></div><div class="card"><div class="c-head"><span class="c-name">美元指数 DXY</span><span class="c-score" style="color:#0891b2">25</span></div><div class="c-val">DXY 100.9 (分位86%)</div><div class="bar"><div class="bar-fill" style="width:25%;background:#0891b2"></div></div><div class="c-note">美元越强越压制金价</div></div><div class="card"><div class="c-head"><span class="c-name">避险情绪 VIX</span><span class="c-score" style="color:#dc2626">33</span></div><div class="c-val">VIX 16.2 (分位13%)</div><div class="bar"><div class="bar-fill" style="width:33%;background:#dc2626"></div></div><div class="c-note">避险需求支撑金价</div></div><div class="card"><div class="c-head"><span class="c-name">季节因子</span><span class="c-score" style="color:#ca8a04">40</span></div><div class="c-val">7月 评分 40</div><div class="bar"><div class="bar-fill" style="width:40%;background:#ca8a04"></div></div><div class="c-note">夏淡·观望</div></div></div></div>
+
+<div class="section"><h2>② 买入 / 卖出价位区间（随实时数据动态计算）</h2>
+  <table><thead><tr>
+    <th>区间</th><th>下沿</th><th>上沿</th><th>策略含义</th><th>状态</th>
+  </tr></thead><tbody><tr><td><b style='color:#16a34a'>强力买入区</b></td><td>$3,453</td><td>$3,706</td><td style='text-align:left;font-size:12px;color:#475569'>接近/跌破 52 周低位，长期价值凸显，可重仓</td><td></td></tr><tr><td><b style='color:#65a30d'>分批建仓区</b></td><td>$3,911</td><td>$4,323</td><td style='text-align:left;font-size:12px;color:#475569'>低于或略高于 200 日线，逢低累积的主战场</td><td>◀ 当前</td></tr><tr><td><b style='color:#d97706'>观望持有区</b></td><td>$4,323</td><td>$4,614</td><td style='text-align:left;font-size:12px;color:#475569'>估值合理偏高，持有不加仓、不追高</td><td></td></tr><tr><td><b style='color:#ea580c'>分批止盈区</b></td><td>$4,614</td><td>$5,064</td><td style='text-align:left;font-size:12px;color:#475569'>接近历史高位，开始减仓锁定利润</td><td></td></tr><tr><td><b style='color:#dc2626'>强力止盈区</b></td><td>$5,064</td><td>$5,627</td><td style='text-align:left;font-size:12px;color:#475569'>逼近/刷新历史高位，清仓或仅留底仓</td><td></td></tr></tbody></table>
+  <p style="font-size:12px;color:#64748b;margin-top:10px">
+  区间基于 52 周高低(3,314–5,627) 与 200 日线(4,117) 动态生成；
+  绿区越跌越买，红区越涨越卖。建议采用分批而非一次性操作。</p>
+</div>
+
+<div class="section"><h2>③ 时间窗口与触发条件</h2>
+  <div class="now-card" style="border-color:#ca8a04;background:#fffdf5">
+    <div class="nc-title">🗓️ 季节窗口</div>
+    <div class="nc-desc">当前为 <b>7月</b>（季节评分 40），属夏淡·观望。<br>历史旺季在 <b>9–11 月</b>（印度婚季与排灯节实物需求）及 <b>12–1 月</b>（春节前中国买盘）；夏秋(6–8 月)通常偏弱，宜耐心等待回调分批布局。</div>
+  </div>
+  <div class="rules">
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">转多 / 加仓触发条件</div><div class="rule rule-bull"><span class="r-kind">转多</span><b>美元转弱</b><br>DXY 跌破 98（现 100.9）</div><div class="rule rule-bull"><span class="r-kind">转多</span><b>实际利率回落</b><br>10Y TIPS 降至 1.5% 以下（现 2.31%）</div><div class="rule rule-bull"><span class="r-kind">转多</span><b>避险升温</b><br>VIX 升至 25+ 地缘/衰退担忧（现 16.2）</div><div class="rule rule-bull"><span class="r-kind">转多</span><b>旺季窗口</b><br>9-11 月(印度婚季/排灯节) 与 12-1 月(春节前中国需求)</div></div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>逼近前高</b><br>金价升至 $5,064+ 且 RSI>65</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>美元转强</b><br>DXY 突破 102（现 100.9）</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>实际利率上行</b><br>10Y TIPS 升破 3.0%（现 2.31%）</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>动能转空</b><br>金价跌破 200 日线(4,117) 且 RSI<35</div></div>
+  </div>
+</div>
+
+<div class="section"><h2>④ 数据来源与新鲜度</h2>
+  <ul class="status"><li>as_of: 快照/离线</li><li>gold: 快照/离线</li><li>gold_52w_high: 快照/离线</li><li>gold_52w_low: 快照/离线</li><li>gold_200ma: 快照/离线</li><li>gold_rsi: 快照/离线</li><li>dxy: 快照/离线</li><li>dxy_52w_high: 快照/离线</li><li>dxy_52w_low: 快照/离线</li><li>tips: 快照/离线</li><li>vix: 快照/离线</li><li>vix_52w_high: 快照/离线</li><li>vix_52w_low: 快照/离线</li><li>vix_1y_pct: 快照/离线</li></ul>
+  <p style="font-size:12px;color:#94a3b8;margin-top:8px">
+  数据源：Yahoo Finance (黄金 GC=F / 美元指数 DX-Y.NYB / VIX) + FRED (10Y TIPS 实际利率 DFII10)。
+  若标注"回退-快照"表示实时抓取失败，使用内置快照，请以实时数据为准。</p>
+</div>
+
+<footer>
+  黄金交易助手 · 仅供研究参考，非投资建议<br>
+  生成于 2026-07-13 17:52 ·
+  <a href="https://hebin1979.github.io/" style="color:#b45309">返回工具箱首页</a> ·
+  <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#b45309">反馈/建议</a>
+</footer>
+</div></body></html>

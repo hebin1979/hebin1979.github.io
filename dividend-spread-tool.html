@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>沪深300股债利差 · 红利低波定投信号工具</title>
+<title>沪深300股债利差 · 红利低波交易信号工具</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -79,8 +79,8 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 <body>
 <div class="container">
 <header>
-  <h1>沪深300股债利差 · 红利低波定投信号</h1>
-  <div class="subtitle">股债利差 = 沪深300盈利收益率(E/P) − 10年期国债收益率 | 含分红+逆回购 | 数据截至 <span id="updateDate">2026-07-13</span></div>
+  <h1>沪深300股债利差 · 红利低波交易信号</h1>
+  <div class="subtitle">股债利差 = 沪深300盈利收益率(E/P) − 10年期国债收益率 | 低吸高抛·含分红+逆回购 | 数据截至 <span id="updateDate">2026-07-13</span></div>
 </header>
 
 <!-- Current Gauge -->
@@ -140,7 +140,7 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('spread')">股债利差走势</div>
-  <div class="tab" onclick="switchTab('signal')">定投信号</div>
+  <div class="tab" onclick="switchTab('signal')">交易信号</div>
   <div class="tab" onclick="switchTab('backtest')">策略回测</div>
 </div>
 
@@ -148,7 +148,7 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
   <div class="chart-box"><h3>股债利差历史走势 (月度, 2014-2026)</h3><canvas id="chartSpread"></canvas></div>
 </div>
 <div class="tab-content" id="tab-signal">
-  <div class="chart-box"><h3>定投信号 & 仓位变化</h3><canvas id="chartSignal"></canvas></div>
+  <div class="chart-box"><h3>交易信号 & 仓位变化</h3><canvas id="chartSignal"></canvas></div>
 </div>
 <div class="tab-content" id="tab-backtest">
   <div class="chart-box"><h3>策略净值回测：含分红 + 逆回购 + 动态仓位</h3><canvas id="chartBacktest"></canvas></div>
