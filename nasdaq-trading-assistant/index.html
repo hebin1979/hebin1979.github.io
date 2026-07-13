@@ -32,145 +32,138 @@ header .meta{font-size:12px;opacity:.8}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7}
 th{background:#f8fafc;color:#475569;font-weight:600}
-td:nth-child(2){font-weight:700}
 .rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.rule{border-left:4px solid #d97706;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.6}
+.rule{border-left:4px solid #16a34a;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.6}
+.rule-bull{border-left-color:#16a34a}
+.rule-bear{border-left-color:#dc2626}
 .r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;
  border-radius:4px;padding:1px 8px;margin-bottom:6px}
-.trade-card{margin-top:16px;border:2px solid #d97706;border-radius:12px;padding:16px;background:#fcfdfe}
-.tc-title{font-size:14px;font-weight:700;margin-bottom:12px;color:#0f172a}
-.tc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.tc-grid>div{display:flex;flex-direction:column;gap:2px}
-.tc-grid span{font-size:11px;color:#64748b}
-.tc-grid b{font-size:16px;color:#0f172a}
-.tc-note{font-size:12px;color:#64748b;margin-top:12px;line-height:1.6}
+.now-card{border:2px solid #ea580c;border-radius:12px;padding:16px;background:#fbfdff;margin-bottom:14px}
+.now-card .nc-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.now-card .nc-zone{font-size:20px;font-weight:800;color:#ea580c}
+.now-card .nc-desc{font-size:12px;color:#64748b;margin-top:6px}
 .status{font-size:12px;color:#64748b}
 .status li{margin:2px 0}
 footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 </style></head><body><div class="wrap">
 <header>
-  <h1>📉 纳指交易助手</h1>
-  <div class="meta">数据时间：2026-07-13 手动刷新 | VIX/10Y盘前7/13 HY OAS 7/9 QQQ 7/10收盘 ｜ 标的：纳指100(QQQ ETF) ｜ 策略：卖出 1 年远期(LEAPS) 价外 Put 以折扣价建仓</div>
-  <div class="signal">中性·观望　综合评分 52/100</div>
-  <div class="advice">当前波动偏低/估值偏高，权利金不厚。建议等待 VIX 升至 20+ 或 QQQ 出现 5-10% 回撤再动手。</div>
+  <h1>📈 纳指交易助手</h1>
+  <div class="meta">数据时间：2026-07-13 手动刷新 | VIX/10Y盘前7/13 HY OAS 7/9 QQQ 7/10收盘 ｜ 标的：纳指100(QQQ ETF) ｜ 框架：7 指标加权打分 + 买卖价位区间 + 时间窗口（直接买入现货 ETF）</div>
+  <div class="signal">中性 · 观望　综合评分 52/100</div>
+  <div class="advice">估值偏高、波动率低、权益吸引力一般。可极少量定投，主仓等待 5-10% 回撤或恐慌放大。</div>
 </header>
 
 <div class="comp-wrap">
   <div class="comp-gauge"><div class="gauge">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 105.4 20.2" fill="none" stroke="#d97706" stroke-width="14" stroke-linecap="round"/>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 104.6 20.1" fill="none" stroke="#d97706" stroke-width="14" stroke-linecap="round"/>
         <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#d97706">52</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">综合评分</div>
-      <div class="g-sub">中性·观望</div>
+      <div class="g-sub">中性 · 观望</div>
     </div></div>
   <div style="flex:1">
-    <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合卖 Put）</h2>
+    <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/加仓纳指）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
       <div class="gauge">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 41.8 45.1" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">24</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 39.4 47.8" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">23</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
-      <div class="g-label">VIX环境</div>
+      <div class="g-label">估值</div>
       <div class="g-sub"></div>
     </div><div class="gauge">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 36.0 52.0" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">20</text>
-        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
-      </svg>
-      <div class="g-label">ERP</div>
-      <div class="g-sub"></div>
-    </div><div class="gauge">
-      <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 147.0 35.3" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">70</text>
-        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
-      </svg>
-      <div class="g-label">期限结构</div>
-      <div class="g-sub"></div>
-    </div><div class="gauge">
-      <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 176.1 75.3" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">90</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 172.2 65.6" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">86</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">趋势</div>
       <div class="g-sub"></div>
     </div><div class="gauge">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 147.0 35.3" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">70</text>
-        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
-      </svg>
-      <div class="g-label">信用利差</div>
-      <div class="g-sub"></div>
-    </div><div class="gauge">
-      <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 124.7 23.9" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">60</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 119.9 22.5" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">58</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">RSI</div>
       <div class="g-sub"></div>
     </div><div class="gauge">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 100.0 20.0" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">50</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 37.4 50.2" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">21</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
-      <div class="g-label">估值</div>
+      <div class="g-label">ERP</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 68.8 26.3" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">37</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">VIX</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 170.6 62.3" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">84</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">信用利差</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 156.3 43.2" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#2563eb">75</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">期限结构</div>
       <div class="g-sub"></div>
     </div>
     </div>
   </div>
 </div>
 
-<div class="section"><h2>① 七维指标明细</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">波动率环境 (VIX)</span><span class="c-score" style="color:#2563eb">24</span></div><div class="c-val">VIX 16.2 · 分位 13%</div><div class="bar"><div class="bar-fill" style="width:24%;background:#2563eb"></div></div><div class="c-note">权利金丰厚程度：水平+1年分位</div></div><div class="card"><div class="c-head"><span class="c-name">股票风险溢价 (ERP)</span><span class="c-score" style="color:#7c3aed">20</span></div><div class="c-val">ERP -1.6%  (盈利收益率3.0% − 10Y 4.6%)</div><div class="bar"><div class="bar-fill" style="width:20%;background:#7c3aed"></div></div><div class="c-note">股票相对债券的估值吸引力</div></div><div class="card"><div class="c-head"><span class="c-name">VIX 期限结构</span><span class="c-score" style="color:#0891b2">70</span></div><div class="c-val">斜率 1.08 (VIX3M/VIX)</div><div class="bar"><div class="bar-fill" style="width:70%;background:#0891b2"></div></div><div class="c-note">Contango 健康 / Backwardation 恐慌</div></div><div class="card"><div class="c-head"><span class="c-name">QQQ 趋势 (200MA)</span><span class="c-score" style="color:#16a34a">90</span></div><div class="c-val">价格/MA200 = 1.12×</div><div class="bar"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div><div class="c-note">不逆势卖 Put</div></div><div class="card"><div class="c-head"><span class="c-name">高收益信用利差</span><span class="c-score" style="color:#ea580c">70</span></div><div class="c-val">HY OAS 270 bps</div><div class="bar"><div class="bar-fill" style="width:70%;background:#ea580c"></div></div><div class="c-note">系统性信用风险温度</div></div><div class="card"><div class="c-head"><span class="c-name">QQQ 动量 RSI(14)</span><span class="c-score" style="color:#db2777">60</span></div><div class="c-val">RSI = 52</div><div class="bar"><div class="bar-fill" style="width:60%;background:#db2777"></div></div><div class="c-note">超卖=更好的卖 Put 时点</div></div><div class="card"><div class="c-head"><span class="c-name">QQQ 估值分位</span><span class="c-score" style="color:#ca8a04">50</span></div><div class="c-val">距52周高点 97%</div><div class="bar"><div class="bar-fill" style="width:50%;background:#ca8a04"></div></div><div class="c-note">缓冲垫厚度</div></div></div></div>
-
-<div class="section"><h2>② 推荐卖出的一年期(LEAPS) Put 候选</h2>
-  <table><thead><tr>
-    <th>评级</th><th>行权价</th><th>价外%</th><th>权利金(买价)</th>
-    <th>权利金/行权价</th><th>年化收益</th><th>隐含波动率</th><th>Put Delta</th><th>合约评分</th>
-  </tr></thead><tbody><tr><td><b style='color:#16a34a'>推荐</b></td><td>$680</td><td>6.3%</td><td>$22.10</td><td>3.2%</td><td>3.2%</td><td>22%</td><td>0.28</td><td><b>62</b></td></tr><tr><td><b style='color:#64748b'>备选2</b></td><td>$650</td><td>10.4%</td><td>$16.50</td><td>2.5%</td><td>2.5%</td><td>23%</td><td>0.22</td><td><b>61</b></td></tr><tr><td><b style='color:#64748b'>备选3</b></td><td>$620</td><td>14.5%</td><td>$12.30</td><td>2.0%</td><td>2.0%</td><td>24%</td><td>0.17</td><td><b>50</b></td></tr><tr><td><b style='color:#64748b'>观察</b></td><td>$590</td><td>18.7%</td><td>$9.10</td><td>1.5%</td><td>1.5%</td><td>24%</td><td>0.12</td><td><b>42</b></td></tr><tr><td><b style='color:#64748b'>观察</b></td><td>$560</td><td>22.8%</td><td>$6.80</td><td>1.2%</td><td>1.2%</td><td>24%</td><td>0.09</td><td><b>36</b></td></tr></tbody></table>
-  <p style="font-size:12px;color:#64748b;margin-top:10px">
-  说明：年化收益 = 权利金 ÷ 行权价（现金担保，按 1 年计）；Put Delta 表示到期接货概率近似。
-  推荐首选综合"环境+权利金+Delta甜区"最高的合约。</p>
-  <div class="trade-card">
-          <div class="tc-title">🎯 首选交易卡（以「中性·观望」环境为例）</div>
-          <div class="tc-grid">
-            <div><span>卖出 Put 行权价</span><b>$680</b></div>
-            <div><span>到期天数</span><b>~365 天 (LEAPS)</b></div>
-            <div><span>收到权利金/股</span><b>$22.10</b></div>
-            <div><span>每合约最大收益</span><b style="color:#16a34a">$2,210</b></div>
-            <div><span>现金担保/合约</span><b>$68,000</b></div>
-            <div><span>盈亏平衡价</span><b style="color:#dc2626">$657.90</b></div>
-            <div><span>价外幅度</span><b>6.3%</b></div>
-            <div><span>Put Delta (接货概率≈)</span><b>0.28</b></div>
-            <div><span>隐含波动率</span><b>22%</b></div>
-          </div>
-          <div class="tc-note">盈亏平衡 = 行权价 − 权利金；到期价 ≥ 行权价则权利金全收，
-          到期价 &lt; 盈亏平衡价才开始亏损。现金担保卖出 Put 本质是"以折扣价建仓 QQQ"。</div>
-        </div>
+<div class="now-card">
+  <div class="nc-title">📍 当前纳指 QQQ $726 所处区间</div>
+  <div class="nc-zone">分批止盈区</div>
+  <div class="nc-desc">接近历史高位，开始分批减仓锁定利润</div>
 </div>
 
-<div class="section"><h2>③ 获利了结 / 滚动 / 风控规则（以首选合约为例）</h2>
-  <div class="rules"><div class="rule"><span class="r-kind">核心规则</span><b>获利了结 (50% 最大收益)</b><br>当该 Put 市值跌至 ≤ $11.05（权利金的 50%）时平仓获利，释放资金。</div><div class="rule"><span class="r-kind">辅助规则</span><b>波动率回落 (Vol Crush)</b><br>若 VIX 较建仓时下跌 >30%，波动率溢价已兑现，可提前了结。</div><div class="rule"><span class="r-kind">风控</span><b>滚动 (Roll) 触发</b><br>若 QQQ 跌破行权价、Put Delta 升至 >0.40（当前 Δ≈0.28），说明接货风险上升，应向下/向后滚动或准备现金接货。</div><div class="rule"><span class="r-kind">收尾</span><b>到期处理</b><br>若临近到期(≤30天)仍为价外，让其到期归零或平仓；若价内则履约接货或滚动。</div></div>
+<div class="section"><h2>① 七维指标明细</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">估值分位 (价格 vs 52周)</span><span class="c-score" style="color:#b45309">23</span></div><div class="c-val">纳指位于年内 88% 分位</div><div class="bar"><div class="bar-fill" style="width:23%;background:#b45309"></div></div><div class="c-note">越接近年内低位越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">趋势 (价格/200MA)</span><span class="c-score" style="color:#16a34a">86</span></div><div class="c-val">比值 1.09×</div><div class="bar"><div class="bar-fill" style="width:86%;background:#16a34a"></div></div><div class="c-note">站上均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">58</span></div><div class="c-val">RSI = 55</div><div class="bar"><div class="bar-fill" style="width:58%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div><div class="card"><div class="c-head"><span class="c-name">股票风险溢价 (ERP)</span><span class="c-score" style="color:#7c3aed">21</span></div><div class="c-val">ERP -1.6% (盈利率3.0%−10Y 4.6%)</div><div class="bar"><div class="bar-fill" style="width:21%;background:#7c3aed"></div></div><div class="c-note">股票相对债券的吸引力</div></div><div class="card"><div class="c-head"><span class="c-name">波动率环境 (VIX)</span><span class="c-score" style="color:#2563eb">37</span></div><div class="c-val">VIX 16.2 (分位13%)</div><div class="bar"><div class="bar-fill" style="width:37%;background:#2563eb"></div></div><div class="c-note">恐慌高位常是长线买点</div></div><div class="card"><div class="c-head"><span class="c-name">高收益信用利差</span><span class="c-score" style="color:#ea580c">84</span></div><div class="c-val">HY OAS 270 bps</div><div class="bar"><div class="bar-fill" style="width:84%;background:#ea580c"></div></div><div class="c-note">越低=风险偏好越健康</div></div><div class="card"><div class="c-head"><span class="c-name">VIX 期限结构</span><span class="c-score" style="color:#0891b2">75</span></div><div class="c-val">斜率 1.08 (VIX3M/VIX)</div><div class="bar"><div class="bar-fill" style="width:75%;background:#0891b2"></div></div><div class="c-note">Contango 健康 / Back 恐慌</div></div></div></div>
+
+<div class="section"><h2>② 买入 / 卖出价位区间（随实时数据动态计算）</h2>
+  <table><thead><tr>
+    <th>区间</th><th>下沿</th><th>上沿</th><th>策略含义</th><th>状态</th>
+  </tr></thead><tbody><tr><td><b style='color:#16a34a'>强力买入区</b></td><td>$561</td><td>$612</td><td style='text-align:left;font-size:12px;color:#475569'>接近/跌破 52 周低位，长期价值凸显，可重仓分批</td><td></td></tr><tr><td><b style='color:#65a30d'>分批建仓区</b></td><td>$612</td><td>$692</td><td style='text-align:left;font-size:12px;color:#475569'>围绕 200 日线上下，逢低累积的主战场</td><td></td></tr><tr><td><b style='color:#d97706'>持有观望区</b></td><td>$692</td><td>$674</td><td style='text-align:left;font-size:12px;color:#475569'>估值合理偏高，持有不追高、不加仓</td><td></td></tr><tr><td><b style='color:#ea580c'>分批止盈区</b></td><td>$674</td><td>$734</td><td style='text-align:left;font-size:12px;color:#475569'>接近历史高位，开始分批减仓锁定利润</td><td>◀ 当前</td></tr><tr><td><b style='color:#dc2626'>强力减仓区</b></td><td>$734</td><td>$764</td><td style='text-align:left;font-size:12px;color:#475569'>刷新/逼近历史高位且超买，仅留底仓</td><td></td></tr></tbody></table>
+  <p style="font-size:12px;color:#64748b;margin-top:10px">
+  区间基于 52 周高低($552–$749) 与 200 日线($665) 动态生成；
+  绿区越跌越买，红区越涨越卖。纳指长期向上，减仓区宜"分批减/留底仓"，不必清仓。建议分批操作。</p>
+</div>
+
+<div class="section"><h2>③ 时间窗口与触发条件</h2>
+  <div class="rules">
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>恐慌抄底</b><br>VIX 飙升破 25-30（现 16.2）时分批买入，买在恐惧</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>回撤到位</b><br>纳指回撤至 200 日线($665) 或较高点 -10% 附近</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>动量超卖</b><br>RSI 跌破 35（现 55）出现均值回归机会</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>信用healthy</b><br>HY OAS 维持 300bps 下方（现 270）风险偏好稳</div></div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>逼近前高</b><br>纳指升至 $734+ 且 RSI>70 超买</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>低波高估</b><br>VIX<13 且 估值分位>85%（现分位 88%）追高风险</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>趋势破位</b><br>纳指跌破 200 日线($665) 且 RSI<40 转弱防守</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>信用走阔</b><br>HY OAS 升破 500bps（现 270）系统性风险上升</div></div>
+  </div>
+  <p style="font-size:12px;color:#64748b;margin-top:12px">
+  核心逻辑：低估值+高恐慌+高 ERP 时"买在恐惧"；逼近前高+超买+低波动时"分批止盈"。
+  纳指宜长线持有、定投为主，择时仅用于加减仓，避免频繁全进全出。</p>
 </div>
 
 <div class="section"><h2>④ 数据来源与新鲜度</h2>
-  <ul class="status"><li>as_of: 快照/离线</li><li>vix: 快照/离线</li><li>vix_52w_high: 快照/离线</li><li>vix_52w_low: 快照/离线</li><li>vix_1y_pct: 快照/离线</li><li>qqq: 快照/离线</li><li>qqq_52w_high: 快照/离线</li><li>qqq_52w_low: 快照/离线</li><li>qqq_200ma: 快照/离线</li><li>qqq_rsi: 快照/离线</li><li>qqq_trailing_eps: 快照/离线</li><li>qqq_div_yield: 快照/离线</li><li>vix3m: 快照/离线</li><li>vix6m: 快照/离线</li><li>tnx: 快照/离线</li><li>hy_oas: 快照/离线</li><li>options: 快照/离线</li><li>options_live: 快照/离线</li></ul>
+  <ul class="status"><li>as_of: 快照/离线</li><li>vix: 快照/离线</li><li>vix_52w_high: 快照/离线</li><li>vix_52w_low: 快照/离线</li><li>vix_1y_pct: 快照/离线</li><li>qqq: 快照/离线</li><li>qqq_52w_high: 快照/离线</li><li>qqq_52w_low: 快照/离线</li><li>qqq_200ma: 快照/离线</li><li>qqq_rsi: 快照/离线</li><li>qqq_trailing_eps: 快照/离线</li><li>vix3m: 快照/离线</li><li>vix6m: 快照/离线</li><li>tnx: 快照/离线</li><li>hy_oas: 快照/离线</li></ul>
   <p style="font-size:12px;color:#94a3b8;margin-top:8px">
-  数据源：Yahoo Finance (VIX/QQQ/期限结构/10Y/期权链) + FRED (HY OAS)。
+  数据源：Yahoo Finance (VIX/QQQ/期限结构/10Y) + FRED (HY OAS)。
   若标注"回退-快照"表示实时抓取失败，使用内置快照，请以实时数据为准。</p>
 </div>
 
 <footer>
   纳指交易助手 · 仅供研究参考，非投资建议<br>
-  生成于 2026-07-13 17:52 ·
+  生成于 2026-07-13 18:22 ·
   <a href="https://hebin1979.github.io/" style="color:#2563eb">返回工具箱首页</a> ·
   <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#2563eb">反馈/建议</a>
 </footer>
