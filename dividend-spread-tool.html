@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>沪深300股债利差 · 红利低波交易信号工具</title>
+<title>红利交易助手 · 多指标打分 + 买卖建议</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -23,23 +23,80 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 header { text-align: center; padding: 30px 0 10px; }
 header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
 header .subtitle { color: var(--sub); font-size: 0.9rem; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; margin: 16px 0; }
-.card { background: var(--card); border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.card h3 { font-size: 0.82rem; color: var(--sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-.gauge-card { background: var(--card); border-radius: 14px; padding: 28px 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; }
-.signal-badge { display: inline-block; padding: 8px 22px; border-radius: 20px; font-weight: 700; font-size: 1.05rem; margin-top: 10px; }
+.signal{display:inline-block;margin-top:14px;padding:8px 22px;border-radius:20px;font-weight:700;font-size:1.05rem;}
 .signal-buy { background: #d4edda; color: var(--green); }
 .signal-sell { background: #f8d7da; color: var(--red); }
-.signal-wait { background: #fff3cd; color: #856404; }
 .signal-hold { background: #cce5ff; color: #004085; }
-.spread-value { font-size: 3.2rem; font-weight: 800; margin: 10px 0; }
-.spread-value.red { color: var(--red); }
-.spread-value.orange { color: var(--orange); }
-.spread-value.gray { color: var(--sub); }
+.advice{margin:12px auto 0;max-width:760px;font-size:0.9rem;line-height:1.7;color:#334155;background:#fff;border-radius:12px;padding:12px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:left;}
+
+/* Composite + dashboard */
+.comp-wrap{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;}
+.comp-gauge{flex:0 0 220px;text-align:center}
+.comp-gauge .g-label{font-size:14px;font-weight:600;margin-top:4px}
+.comp-gauge .g-sub{font-size:12px;margin-top:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.cards.dash{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));flex:1;min-width:280px}
+.gauge-box{text-align:center}
+.gauge-box svg{width:100%;max-width:150px}
+.g-label{font-size:13px;font-weight:600;margin-top:2px}
+.g-sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.ind-toggle{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;font-size:0.82rem;color:#475569}
+.toggle-item{cursor:pointer;user-select:none}
+.toggle-item input{margin-right:4px;vertical-align:middle}
+
+.card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#fff}
+.c-head{display:flex;justify-content:space-between;align-items:baseline}
+.c-name{font-size:13px;font-weight:600}
+.c-score{font-size:22px;font-weight:800}
+.c-val{font-size:12px;color:#475569;margin:6px 0}
+.bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.c-note{font-size:11px;color:#94a3b8;margin-top:6px}
+
+.section{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.section h2{font-size:16px;margin-bottom:14px;color:#1e293b}
+
+.now-card{border:2px solid #16a34a;border-radius:12px;padding:16px;background:#fbfdff;margin-bottom:18px}
+.now-card .nc-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.now-card .nc-zone{font-size:20px;font-weight:800;color:#16a34a}
+.now-card .nc-desc{font-size:12px;color:#64748b;margin-top:6px}
+
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rule{border-left:4px solid #16a34a;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.6}
+.rule-bull{border-left-color:#16a34a}
+.rule-bear{border-left-color:#dc2626}
+.r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;border-radius:4px;padding:1px 8px;margin-bottom:6px}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; margin: 16px 0; }
+.card h3 { font-size: 0.82rem; color: var(--sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .data-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 .data-row:last-child { border-bottom: none; }
 .data-row .label { color: var(--sub); }
 .data-row .value { font-weight: 600; }
+
+.gauge-card { background: var(--card); border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; margin-bottom:16px; }
+.spread-value { font-size: 3.2rem; font-weight: 800; margin: 10px 0; }
+.spread-value.red { color: var(--red); }
+.spread-value.orange { color: var(--orange); }
+.spread-value.gray { color: var(--sub); }
+
+.note { border-radius: 10px; padding: 14px 18px; font-size: 0.85rem; margin: 12px 0; }
+.note-buy { background: #d4edda; color: #155724; }
+.note-sell { background: #f8d7da; color: #721c24; }
+.note-hold { background: #cce5ff; color: #004085; }
+.note-wait { background: #fff3cd; color: #856404; }
+.slider-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.slider-item { font-size: 0.8rem; color: var(--sub); }
+.slider-item input { width: 100px; vertical-align: middle; margin: 0 4px; }
+.slider-item strong { color: var(--text); }
+.rule-card { background: #f0f4ff; border-radius: 12px; padding: 14px 18px; margin: 10px 0; font-size: 0.85rem; line-height: 1.8; }
+.rule-card strong { color: var(--blue); }
+
+.tabs { display: flex; gap: 0; margin: 16px 0 0; }
+.tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-bottom: 2px solid var(--border); font-size: 0.88rem; font-weight: 500; color: var(--sub); transition: .2s; }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 .chart-box { background: var(--card); border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin: 14px 0; }
 .chart-box h3 { font-size: 0.93rem; margin-bottom: 10px; }
 .chart-box canvas { max-height: 360px; }
@@ -50,65 +107,99 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 .metric .msub { font-size: 0.75rem; color: var(--sub); margin-top: 2px; }
 .red { color: var(--red); }
 .green { color: var(--green); }
-.note { border-radius: 10px; padding: 14px 18px; font-size: 0.85rem; margin: 12px 0; }
-.note-buy { background: #d4edda; color: #155724; }
-.note-sell { background: #f8d7da; color: #721c24; }
-.note-hold { background: #cce5ff; color: #004085; }
-.note-wait { background: #fff3cd; color: #856404; }
-.tabs { display: flex; gap: 0; margin: 16px 0 0; }
-.tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-bottom: 2px solid var(--border); font-size: 0.88rem; font-weight: 500; color: var(--sub); transition: .2s; }
-.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.slider-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
-.slider-item { font-size: 0.8rem; color: var(--sub); }
-.slider-item input { width: 100px; vertical-align: middle; margin: 0 4px; }
-.slider-item strong { color: var(--text); }
-.rule-card { background: #f0f4ff; border-radius: 12px; padding: 14px 18px; margin: 10px 0; font-size: 0.85rem; line-height: 1.8; }
-.rule-card strong { color: var(--blue); }
 @media (max-width: 600px) {
   .container { padding: 12px; }
   header h1 { font-size: 1.3rem; }
   .spread-value { font-size: 2.4rem; }
   .grid { grid-template-columns: 1fr; }
   .metrics { grid-template-columns: 1fr 1fr; }
+  .cards { grid-template-columns: 1fr 1fr; }
   .slider-group { flex-direction: column; align-items: center; }
+  .rules { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-  <h1>沪深300股债利差 · 红利低波交易信号</h1>
-  <div class="subtitle">股债利差 = 沪深300盈利收益率(E/P) − 10年期国债收益率 | 低吸高抛·含分红+逆回购 | 数据截至 <span id="updateDate">2026-07-13</span></div>
+  <h1>📊 红利交易助手</h1>
+  <div class="subtitle">数据截至 <span id="updateDate">2026-07-13</span> ｜ 标的：红利低波 H30269（沪深300红利低波）｜ 框架：7 指标加权打分 + 买卖建议区间 + 触发条件</div>
+  <div class="signal" id="signalBadge">--</div>
+  <div class="advice" id="adviceText">--</div>
 </header>
 
-<!-- Current Gauge -->
-<div class="gauge-card" id="gaugeCard">
-  <h3 style="color:var(--sub);font-size:0.82rem;">当前股债利差</h3>
+<!-- 综合评分 + 指标仪表盘 -->
+<div class="comp-wrap">
+  <div class="comp-gauge">
+    <div id="compGauge"></div>
+    <div class="g-label">综合吸引力评分</div>
+    <div class="g-sub" id="compLabel"></div>
+  </div>
+  <div style="flex:1;min-width:280px">
+    <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
+    <div class="ind-toggle" id="indToggle"></div>
+    <div class="cards dash" id="dashGauges"></div>
+  </div>
+</div>
+
+<!-- 当前所处区间 -->
+<div class="now-card" id="nowCard">
+  <div class="nc-title" id="nowPrice">--</div>
+  <div class="nc-zone" id="nowZone">--</div>
+  <div class="nc-desc" id="nowDesc">--</div>
+</div>
+
+<!-- ① 多维指标明细 -->
+<div class="section"><h2>① 多维指标明细</h2><div class="cards" id="detailCards"></div></div>
+
+<!-- ② 买入 / 卖出建议区间 -->
+<div class="section"><h2>② 买入 / 卖出建议区间（基于股债利差）</h2>
+  <div id="buySellTable"></div>
+  <p style="font-size:12px;color:#64748b;margin-top:10px">
+  区间由股债利差相对阈值动态生成；绿区利差越高（股票越便宜）越买，红区利差越低（估值越贵）越卖。红利低波宜长期持有、分红再投，择时仅用于加减仓。</p>
+</div>
+
+<!-- ③ 时间窗口与触发条件 -->
+<div class="section"><h2>③ 时间窗口与触发条件</h2>
+  <div class="rules">
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div>
+      <div class="rule rule-bull"><span class="r-kind">买入</span><b>利差触顶</b><br>股债利差回升至买入阈值 ≥ <span id="tBuy">6.0</span>%（现 <span id="tSpread">--</span>）全仓</div>
+      <div class="rule rule-bull"><span class="r-kind">买入</span><b>估值回落</b><br>沪深300 PE分位回落至 &lt;30%，更便宜</div>
+      <div class="rule rule-bull"><span class="r-kind">买入</span><b>技术买点</b><br>红利低波回撤至 MA12 下方，分批累积</div>
+      <div class="rule rule-bull"><span class="r-kind">买入</span><b>利率新低</b><br>10Y国债收益率再破 1.5%，利差走阔</div>
+    </div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div>
+      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>利差触底</b><br>股债利差跌破卖出阈值 &lt; <span id="tSell">4.0</span>%，减仓50%</div>
+      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>估值偏贵</b><br>沪深300 PE分位 &gt;70%，吸引力下降</div>
+      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>利率上行</b><br>债券收益率走高、利差持续收窄</div>
+      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>风格拥挤</b><br>红利拥挤度升高、市场情绪过热</div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 策略阈值与数据 -->
+<div class="gauge-card" id="ctrlCard">
+  <h3 style="color:var(--sub);font-size:0.82rem;">当前股债利差（阈值可调）</h3>
   <div class="spread-value" id="spreadValue">--</div>
   <div style="font-size:0.9rem;color:var(--sub);margin-bottom:4px;">
     沪深300 PE(TTM): <strong id="peVal">--</strong> | 10Y国债: <strong id="bondVal">--</strong>
   </div>
-  <div id="signalBadge"></div>
-  <div style="font-size:0.8rem;color:var(--sub);margin-top:4px;" id="currentPosition"></div>
+  <div id="currentPosition" style="font-size:0.85rem;color:var(--sub);margin:4px 0;"></div>
   <div class="slider-group">
     <span class="slider-item">买入阈值: <strong id="buyLabel">6.0%</strong> <input type="range" id="buySlider" min="3" max="8" step="0.1" value="6.0" oninput="updateBuyThreshold(this.value)"></span>
     <span class="slider-item">卖出阈值: <strong id="sellLabel">4.0%</strong> <input type="range" id="sellSlider" min="1" max="6" step="0.1" value="4.0" oninput="updateSellThreshold(this.value)"></span>
   </div>
 </div>
 
-<!-- Strategy rules -->
 <div class="rule-card">
   <strong>策略规则：</strong>
-  ① 利差 ≥ <span id="ruleBuy">6.0%</span> → 全仓买入红利低波 | 
-  ② 利差 &lt; <span id="ruleSell">4.0%</span> → 卖出50% | 
-  ③ 期间 → 持仓不变 | 
-  ④ 现金 → 逆回购年化1.5% | 
+  ① 利差 ≥ <span id="ruleBuy">6.0%</span> → 全仓买入红利低波 |
+  ② 利差 &lt; <span id="ruleSell">4.0%</span> → 卖出50% |
+  ③ 期间 → 持仓不变 |
+  ④ 现金 → 逆回购年化1.5% |
   ⑤ 持股 → 按指数涨跌 + 季分红~1%
 </div>
 
-<!-- Data cards -->
 <div class="grid">
   <div class="card">
     <h3>沪深300</h3>
@@ -134,10 +225,7 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
   </div>
 </div>
 
-<div class="note" id="thresholdNote">
-  <strong>当前信号：</strong><span id="noteText">--</span>
-</div>
-
+<!-- ⑤ 策略回测 -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('spread')">股债利差走势</div>
   <div class="tab" onclick="switchTab('signal')">交易信号</div>
@@ -159,13 +247,12 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 </div>
 
 <div style="text-align:center;padding:20px;color:var(--sub);font-size:0.72rem;">
-  数据来源：中证指数、中国债券信息网、理杏仁 | 回测含约1%/季分红及逆回购1.5%收益 | 仅供研究参考，不构成投资建议
+  数据来源：中证指数、中国债券信息网、理杏仁 | 回测含约1%/季分红及逆回购1.5%收益 | 多指标打分参考纳指/黄金交易助手框架 | 仅供研究参考，不构成投资建议
 </div>
 </div>
 
 <script>
 // ==================== EMBEDDED MONTHLY DATA 2014-01 to 2026-07 ====================
-// date, csi300_close, csi300_pe, bond10y, h30269_close (红利低波价格指数)
 const rawData = [
 ['2014-01',2160,8.35,4.50,1480],['2014-02',2178,8.31,4.42,1495],
 ['2014-03',2146,8.21,4.45,1510],['2014-04',2158,8.11,4.38,1525],
@@ -250,6 +337,7 @@ const REPO_ANNUAL = 1.5;      // 逆回购年化 (%)
 const REPO_MONTHLY = REPO_ANNUAL / 1200;  // 月化
 const DIV_QUARTERLY = 1.0;    // 每季分红 (%)
 const DIV_MONTHLY = DIV_QUARTERLY / 300;  // 月化 (~0.333%)
+const DIV_YIELD = 4.52;       // 红利低波股息率 (%)
 
 // ==================== PREPARE DATA ====================
 const data = rawData.map(r => ({
@@ -266,9 +354,159 @@ const latest = data[data.length - 1];
 let buyThreshold = 6.0;
 let sellThreshold = 4.0;
 
-// ==================== UPDATE UI ====================
-function updateUI() {
+// ==================== INDICATOR DEFINITIONS ====================
+// 分数越高 = 越适合买入/累积红利低波
+const INDICATORS = [
+  { key:'spread',   name:'股债利差',       color:'#dc2626' },
+  { key:'pePct',    name:'估值分位',       color:'#2563eb' },
+  { key:'div',      name:'股息率',         color:'#16a34a' },
+  { key:'trend',    name:'趋势(价/MA12)',  color:'#7c3aed' },
+  { key:'rsi',      name:'动量 RSI(14)',   color:'#db2777' },
+  { key:'rate',     name:'利率环境',       color:'#0891b2' },
+  { key:'spreadPct',name:'利差分位',       color:'#ea580c' }
+];
+const selected = {};
+INDICATORS.forEach(k => selected[k.key] = true);
+let IND = {};        // computed indicator values
+let indMeta = {};    // extra meta
+
+// ==================== HELPERS ====================
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+function pctOf(sortedArr, v){ return sortedArr.filter(x => x <= v).length / sortedArr.length * 100; }
+function calcRSI(closes, n){
+  n = n || 14;
+  let gain = 0, loss = 0;
+  for (let i = 1; i <= n; i++){
+    const ch = closes[closes.length - i] - closes[closes.length - i - 1];
+    gain += Math.max(0, ch); loss += Math.max(0, -ch);
+  }
+  const ag = gain / n, al = loss / n;
+  return 100 - 100 / (1 + ag / (al || 1e-9));
+}
+function polar(cx, cy, r, deg){ const a = deg * Math.PI / 180; return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; }
+function gaugeSVG(score, color){
+  const f = clamp(score, 0, 100) / 100;
+  const [x, y] = polar(100, 100, 80, 180 - 180 * f);
+  return `<svg viewBox="0 0 200 120" width="100%" height="120">
+    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>
+    <path d="M 20 100 A 80 80 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"/>
+    <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="${color}">${Math.round(score)}</text>
+    <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+  </svg>`;
+}
+function compositeBand(c){
+  if (c >= 75) return { t:'强烈买入', col:'#16a34a' };
+  if (c >= 45) return { t:'中性偏多', col:'#d97706' };
+  return { t:'谨慎减仓', col:'#dc2626' };
+}
+
+// ==================== COMPUTE INDICATORS ====================
+function computeIndicators(){
+  const pes = data.map(d => d.pe).slice().sort((a,b)=>a-b);
+  const bonds = data.map(d => d.bond10y).slice().sort((a,b)=>a-b);
+  const spreads = data.map(d => d.spread).slice().sort((a,b)=>a-b);
+  const pePct = pctOf(pes, latest.pe);
+  const bondPct = pctOf(bonds, latest.bond10y);
+  const spreadPct = pctOf(spreads, latest.spread);
+  const tail = data.slice(-12).map(d => d.h30269);
+  const ma12 = tail.reduce((a,b)=>a+b,0) / tail.length;
+  const trend = latest.h30269 / ma12;
+  const rsi = calcRSI(data.map(d => d.h30269), 14);
   const s = latest.spread;
+  indMeta = { pePct, bondPct, spreadPct, ma12, trend, rsi };
+  IND = {
+    spread:   { name:'股债利差', color:'#dc2626', score: clamp((s - 1) / (8 - 1) * 100, 0, 100), value:`利差 ${s.toFixed(2)}%`, note:'越高=股票相对债券越便宜，越适合买入' },
+    pePct:    { name:'估值分位', color:'#2563eb', score: 100 - pePct, value:`PE分位 ${pePct.toFixed(0)}%`, note:'PE越低越便宜，越低越适合买入' },
+    div:      { name:'股息率', color:'#16a34a', score: clamp(DIV_YIELD / 6 * 100, 0, 100), value:`股息率 ${DIV_YIELD.toFixed(2)}%`, note:'股息率越高，现金流吸引力越强' },
+    trend:    { name:'趋势(价/MA12)', color:'#7c3aed', score: clamp((trend - 0.85) / (1.15 - 0.85) * 100, 0, 100), value:`价/MA12 = ${trend.toFixed(2)}×`, note:'站上中期均线顺势，破位防守' },
+    rsi:      { name:'动量 RSI(14)', color:'#db2777', score: rsi, value:`RSI = ${rsi.toFixed(0)}`, note:'超卖(低)常是更好买点' },
+    rate:     { name:'利率环境', color:'#0891b2', score: 100 - bondPct, value:`10Y国债 ${latest.bond10y.toFixed(2)}% (分位${bondPct.toFixed(0)}%)`, note:'债券收益率越低，股票相对越有吸引力' },
+    spreadPct:{ name:'利差分位', color:'#ea580c', score: spreadPct, value:`利差分位 ${spreadPct.toFixed(0)}%`, note:'利差处历史越高，当前配置价值越突出' }
+  };
+}
+
+// ==================== RENDER: SIGNAL / DASHBOARD / DETAILS / TABLE ====================
+function renderSignal(){
+  const s = latest.spread;
+  let badge, advice, cls;
+  if (s >= buyThreshold){
+    badge = '✅ 触发买入！建议全仓红利低波';
+    cls = 'signal-buy';
+    advice = `当前股债利差 ${s.toFixed(2)}% ≥ 买入阈值 ${buyThreshold.toFixed(1)}%，股票相对债券吸引力高，建议全仓买入红利低波（512890、560150等），现金仅留逆回购机动。`;
+  } else if (s < sellThreshold){
+    badge = '🔻 触发卖出！建议减仓50%';
+    cls = 'signal-sell';
+    advice = `当前股债利差 ${s.toFixed(2)}% < 卖出阈值 ${sellThreshold.toFixed(1)}%，估值偏贵、吸引力下降，建议卖出50%持仓转逆回购（年化${REPO_ANNUAL}%），保留底仓。`;
+  } else {
+    badge = '📌 持有区间 — 维持仓位';
+    cls = 'signal-hold';
+    advice = `当前股债利差 ${s.toFixed(2)}% 在 [${sellThreshold.toFixed(1)}%, ${buyThreshold.toFixed(1)}%) 区间，维持现有仓位不变，持股享受分红+逆回购。`;
+  }
+  const el = document.getElementById('signalBadge');
+  el.className = 'signal ' + cls;
+  el.textContent = badge;
+  document.getElementById('adviceText').textContent = advice;
+}
+
+function renderDashboard(){
+  const sel = INDICATORS.filter(k => selected[k.key]);
+  document.getElementById('dashGauges').innerHTML = sel.map(k => {
+    const d = IND[k.key];
+    return `<div class="gauge-box"><div class="g-label">${d.name}</div>${gaugeSVG(d.score, d.color)}<div class="g-sub">${d.value}</div></div>`;
+  }).join('');
+  const comp = sel.reduce((a,k)=>a + IND[k.key].score, 0) / Math.max(1, sel.length);
+  const b = compositeBand(comp);
+  document.getElementById('compGauge').innerHTML = gaugeSVG(comp, b.col);
+  const cs = document.getElementById('compScore');
+  document.getElementById('compLabel').textContent = b.t + ' · ' + Math.round(comp);
+  document.getElementById('compLabel').style.color = b.col;
+}
+
+function renderDetails(){
+  const sel = INDICATORS.filter(k => selected[k.key]);
+  document.getElementById('detailCards').innerHTML = sel.map(k => {
+    const d = IND[k.key];
+    const col = d.color;
+    return `<div class="card"><div class="c-head"><span class="c-name">${d.name}</span><span class="c-score" style="color:${col}">${Math.round(d.score)}</span></div><div class="c-val">${d.value}</div><div class="bar"><div class="bar-fill" style="width:${d.score}%;background:${col}"></div></div><div class="c-note">${d.note}</div></div>`;
+  }).join('');
+}
+
+function renderNowCard(){
+  const s = latest.spread;
+  let zone, desc, col;
+  if (s >= buyThreshold){ zone = '全仓买入区'; col = '#16a34a'; desc = '股债利差高于买入阈值，股票相对债券吸引力高，建议全仓配置红利低波。'; }
+  else if (s < sellThreshold){ zone = '减仓防守区'; col = '#dc2626'; desc = '股债利差跌破卖出阈值，建议减仓50%转逆回购，保留底仓。'; }
+  else { zone = '持有观望区'; col = '#d97706'; desc = '利差处于中间区间，维持仓位、持股收息即可。'; }
+  const nc = document.getElementById('nowCard');
+  nc.style.borderColor = col;
+  document.getElementById('nowPrice').textContent = `红利低波 H30269 ${latest.h30269.toFixed(0)} ｜ 股债利差 ${s.toFixed(2)}%`;
+  const nz = document.getElementById('nowZone');
+  nz.textContent = zone; nz.style.color = col;
+  document.getElementById('nowDesc').textContent = desc;
+}
+
+function renderBuySell(){
+  const s = latest.spread;
+  const bt = buyThreshold, st = sellThreshold;
+  const zones = [
+    { name:'强力买入区', col:'#16a34a', lo: bt + 0.5, hi: Infinity, range:`≥ ${(bt + 0.5).toFixed(1)}%`, act:'全仓买入红利低波，现金仅留逆回购机动', pos:'100%' },
+    { name:'分批建仓区', col:'#65a30d', lo: bt, hi: bt + 0.5, range:`${bt.toFixed(1)}% – ${(bt + 0.5).toFixed(1)}%`, act:'加仓至 80-100%，逢低累积的主战场', pos:'80-100%' },
+    { name:'持有观望区', col:'#d97706', lo: st, hi: bt, range:`${st.toFixed(1)}% – ${bt.toFixed(1)}%`, act:'维持现有仓位，持股享受分红', pos:'维持' },
+    { name:'分批止盈区', col:'#ea580c', lo: st - 1.0, hi: st, range:`${(st - 1.0).toFixed(1)}% – ${st.toFixed(1)}%`, act:'卖出50%转逆回购，锁定部分利润', pos:'减至50%' },
+    { name:'强力减仓区', col:'#dc2626', lo: -Infinity, hi: st - 1.0, range:`< ${(st - 1.0).toFixed(1)}%`, act:'大幅减仓至20-30%，现金为主', pos:'20-30%' }
+  ];
+  let cur = null;
+  for (const z of zones){ if (s >= z.lo && s < z.hi){ cur = z; break; } }
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">区间</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">股债利差</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">建议操作</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">建议仓位</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">状态</th></tr></thead><tbody>';
+  for (const z of zones){
+    html += `<tr><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7"><b style="color:${z.col}">${z.name}</b></td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z.range}</td><td style="padding:10px 8px;text-align:left;font-size:12px;color:#475569;border-bottom:1px solid #eef2f7">${z.act}</td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z.pos}</td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z === cur ? '◀ 当前' : ''}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('buySellTable').innerHTML = html;
+}
+
+// ==================== UPDATE (data cards + sliders + position) ====================
+function updateUI(){
   document.getElementById('csi300Price').textContent = latest.csi300.toFixed(0);
   document.getElementById('csi300PE').textContent = latest.pe.toFixed(2);
   document.getElementById('csi300EY').textContent = latest.ey.toFixed(2) + '%';
@@ -276,156 +514,123 @@ function updateUI() {
   document.getElementById('divLowPrice').textContent = latest.h30269.toFixed(0);
   document.getElementById('peVal').textContent = latest.pe.toFixed(2);
   document.getElementById('bondVal').textContent = latest.bond10y.toFixed(2) + '%';
-  
+
   const sv = document.getElementById('spreadValue');
-  sv.textContent = s.toFixed(2) + '%';
-  sv.className = 'spread-value ' + (s >= buyThreshold ? 'red' : s >= sellThreshold ? 'orange' : 'gray');
-  
-  // Percentiles
-  const pes = data.map(d => d.pe).sort((a,b) => a-b);
-  document.getElementById('csi300Pct').textContent = (pes.filter(p => p <= latest.pe).length / pes.length * 100).toFixed(0) + '%';
-  const bonds = data.map(d => d.bond10y).sort((a,b) => a-b);
-  document.getElementById('bondPct').textContent = (bonds.filter(b => b <= latest.bond10y).length / bonds.length * 100).toFixed(0) + '%';
-  
-  // Signal & current optimal position
-  const badge = document.getElementById('signalBadge');
-  const note = document.getElementById('thresholdNote');
-  const noteTxt = document.getElementById('noteText');
-  const posEl = document.getElementById('currentPosition');
-  let noteClass, posText;
-  
-  if (s >= buyThreshold) {
-    badge.innerHTML = '<span class="signal-badge signal-buy">✅ 触发买入！建议全仓红利低波</span>';
-    noteTxt.textContent = `股债利差 ${s.toFixed(2)}% ≥ 买入阈值 ${buyThreshold}%，全仓买入红利低波（512890、560150等）`;
-    noteClass = 'note-buy';
-    posText = '建议仓位: <strong style="color:#198754">100%（全仓）</strong>';
-  } else if (s < sellThreshold) {
-    badge.innerHTML = '<span class="signal-badge signal-sell">🔻 触发卖出！利差过低，卖出50%</span>';
-    noteTxt.textContent = `股债利差 ${s.toFixed(2)}% < 卖出阈值 ${sellThreshold}%，卖出50%持仓转逆回购（年化${REPO_ANNUAL}%）`;
-    noteClass = 'note-sell';
-    posText = '建议仓位: <strong style="color:#dc3545">减半（卖出50%）</strong>';
-  } else {
-    const gap = (buyThreshold - s).toFixed(2);
-    badge.innerHTML = '<span class="signal-badge signal-hold">📌 持有区间 — 维持当前仓位</span>';
-    noteTxt.textContent = `股债利差 ${s.toFixed(2)}% 在 [${sellThreshold}%, ${buyThreshold}%) 区间，维持现有仓位不变，持股享受分红`;
-    noteClass = 'note-hold';
-    posText = '建议仓位: <strong style="color:#004085">维持不变</strong>';
-  }
-  note.className = 'note ' + noteClass;
-  posEl.innerHTML = posText;
-  
+  sv.textContent = latest.spread.toFixed(2) + '%';
+  sv.className = 'spread-value ' + (latest.spread >= buyThreshold ? 'red' : latest.spread >= sellThreshold ? 'orange' : 'gray');
+
+  document.getElementById('csi300Pct').textContent = indMeta.pePct.toFixed(0) + '%';
+  document.getElementById('bondPct').textContent = indMeta.bondPct.toFixed(0) + '%';
+
   document.getElementById('buyLabel').textContent = buyThreshold.toFixed(1) + '%';
   document.getElementById('sellLabel').textContent = sellThreshold.toFixed(1) + '%';
   document.getElementById('ruleBuy').textContent = buyThreshold.toFixed(1) + '%';
   document.getElementById('ruleSell').textContent = sellThreshold.toFixed(1) + '%';
+  document.getElementById('tBuy').textContent = buyThreshold.toFixed(1);
+  document.getElementById('tSell').textContent = sellThreshold.toFixed(1);
+  document.getElementById('tSpread').textContent = latest.spread.toFixed(2) + '%';
+
+  let posText;
+  if (latest.spread >= buyThreshold) posText = '建议仓位: <strong style="color:#198754">100%（全仓）</strong>';
+  else if (latest.spread < sellThreshold) posText = '建议仓位: <strong style="color:#dc3545">减半（卖出50%）</strong>';
+  else posText = '建议仓位: <strong style="color:#004085">维持不变</strong>';
+  document.getElementById('currentPosition').innerHTML = posText;
 }
 
-function updateBuyThreshold(val) {
+// Master update
+function updateAll(){
+  computeIndicators();
+  renderSignal();
+  renderDashboard();
+  renderDetails();
+  renderNowCard();
+  renderBuySell();
+  updateUI();
+  updateCharts();
+}
+
+// ==================== INDICATOR TOGGLE ====================
+function buildToggle(){
+  document.getElementById('indToggle').innerHTML = INDICATORS.map(k =>
+    `<label class="toggle-item"><input type="checkbox" ${selected[k.key] ? 'checked' : ''} onchange="toggleInd('${k.key}',this.checked)"> ${k.name}</label>`
+  ).join('');
+}
+function toggleInd(key, val){
+  selected[key] = val;
+  renderDashboard();
+  renderDetails();
+}
+
+// ==================== THRESHOLD SLIDERS ====================
+function updateBuyThreshold(val){
   buyThreshold = parseFloat(val);
-  if (buyThreshold <= sellThreshold) {
+  if (buyThreshold <= sellThreshold){
     sellThreshold = buyThreshold - 0.5;
-    if (sellThreshold < 1) { sellThreshold = 1; buyThreshold = 1.5; }
+    if (sellThreshold < 1){ sellThreshold = 1; buyThreshold = 1.5; }
     document.getElementById('sellSlider').value = sellThreshold;
   }
-  updateUI();
-  updateCharts();
+  updateAll();
 }
-
-function updateSellThreshold(val) {
+function updateSellThreshold(val){
   sellThreshold = parseFloat(val);
-  if (sellThreshold >= buyThreshold) {
+  if (sellThreshold >= buyThreshold){
     buyThreshold = sellThreshold + 0.5;
-    if (buyThreshold > 8) { buyThreshold = 8; sellThreshold = 7.5; }
+    if (buyThreshold > 8){ buyThreshold = 8; sellThreshold = 7.5; }
     document.getElementById('buySlider').value = buyThreshold;
   }
-  updateUI();
-  updateCharts();
+  updateAll();
 }
 
 // ==================== BACKTEST ENGINE ====================
-function runBacktest() {
-  const stratEq = [1];   // strategy NAV
-  const bhEq = [1];       // buy-and-hold NAV (含分红)
-  const positions = [0];  // position %
-  const cashOnly = [1];   // pure reverse repo baseline
-  
+function runBacktest(){
+  const stratEq = [1], bhEq = [1], positions = [0], cashOnly = [1];
   let nav = 1, position = 0, bhNav = 1, cashNav = 1;
   let prevH = data[0].h30269;
-  
-  for (let i = 1; i < data.length; i++) {
+  for (let i = 1; i < data.length; i++){
     const d = data[i];
     const s = d.spread;
-    
-    // Determine target position
     let targetPos = position;
-    if (s >= buyThreshold) {
-      targetPos = 1.0;
-    } else if (s < sellThreshold) {
-      targetPos = position * 0.5;
-    }
-    // else: maintain current position
-    
-    // Price return (index level change)
+    if (s >= buyThreshold) targetPos = 1.0;
+    else if (s < sellThreshold) targetPos = position * 0.5;
     const priceRet = d.h30269 / prevH - 1;
-    
-    // Stock return = price return + monthly dividend (~0.333%)
     const stockMonthlyRet = priceRet + DIV_MONTHLY;
-    
-    // Apply returns based on position
     const stockPart = targetPos * (1 + stockMonthlyRet);
     const cashPart = (1 - targetPos) * (1 + REPO_MONTHLY);
     nav *= (stockPart + cashPart);
-    
-    // Buy-and-hold: always 100% in stock
     bhNav *= (1 + stockMonthlyRet);
-    
-    // Pure cash
     cashNav *= (1 + REPO_MONTHLY);
-    
-    stratEq.push(nav);
-    bhEq.push(bhNav);
-    positions.push(targetPos * 100);
-    cashOnly.push(cashNav);
-    position = targetPos;
-    prevH = d.h30269;
+    stratEq.push(nav); bhEq.push(bhNav); positions.push(targetPos * 100); cashOnly.push(cashNav);
+    position = targetPos; prevH = d.h30269;
   }
-  
   return { stratEq, bhEq, positions, cashOnly };
 }
 
 // ==================== CHARTS ====================
 let chartSpread, chartSignal, chartBacktest, chartPosition, chartYearly, chartDrawdown;
-
 const darkBlue = '#0d6efd', redColor = '#dc3545', greenColor = '#198754';
 const orangeColor = '#fd7e14', grayColor = '#adb5bd', purple = '#6f42c1';
 
-function initCharts() {
+function initCharts(){
   const dates = data.map(d => d.date);
   const spreads = data.map(d => d.spread);
   const bondYields = data.map(d => d.bond10y);
   const earningsYields = data.map(d => d.ey);
   const h30269Prices = data.map(d => d.h30269);
-  
-  // Chart 1: Spread
+
   const buyLine = Array(dates.length).fill(buyThreshold);
   const sellLine = Array(dates.length).fill(sellThreshold);
-  
+
   const ctx1 = document.getElementById('chartSpread').getContext('2d');
   chartSpread = new Chart(ctx1, {
     type: 'line',
     data: {
       labels: dates,
       datasets: [
-        { label: '股债利差 (%)', data: spreads, borderColor: redColor,
-          backgroundColor: 'rgba(220,53,69,0.08)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-        { label: `买入阈值 (${buyThreshold}%)`, data: buyLine, borderColor: greenColor,
-          borderDash: [6,4], borderWidth: 2, pointRadius: 0, fill: false },
-        { label: `卖出阈值 (${sellThreshold}%)`, data: sellLine, borderColor: grayColor,
-          borderDash: [3,3], borderWidth: 1.8, pointRadius: 0, fill: false },
-        { label: '盈利收益率 E/P (%)', data: earningsYields, borderColor: darkBlue,
-          borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true },
-        { label: '10Y国债收益率 (%)', data: bondYields, borderColor: '#adb5bd',
-          borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true }
+        { label: '股债利差 (%)', data: spreads, borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.08)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+        { label: `买入阈值 (${buyThreshold}%)`, data: buyLine, borderColor: greenColor, borderDash: [6,4], borderWidth: 2, pointRadius: 0, fill: false },
+        { label: `卖出阈值 (${sellThreshold}%)`, data: sellLine, borderColor: grayColor, borderDash: [3,3], borderWidth: 1.8, pointRadius: 0, fill: false },
+        { label: '盈利收益率 E/P (%)', data: earningsYields, borderColor: darkBlue, borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true },
+        { label: '10Y国债收益率 (%)', data: bondYields, borderColor: '#adb5bd', borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true }
       ]
     },
     options: {
@@ -434,29 +639,22 @@ function initCharts() {
       scales: { x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } }, y: { title: { display: true, text: '%' } } }
     }
   });
-  
-  // Chart 2: Signal & Position
+
   const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...h30269Prices) * 1.05 : null);
   const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...h30269Prices) * 1.05 : null);
-  
+
   const ctx2 = document.getElementById('chartSignal').getContext('2d');
   chartSignal = new Chart(ctx2, {
     type: 'line',
     data: {
       labels: dates,
       datasets: [
-        { label: '红利低波 H30269', data: h30269Prices, borderColor: darkBlue,
-          backgroundColor: 'rgba(13,110,253,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
-        { label: '买入区间', data: buyZone, backgroundColor: 'rgba(25,135,84,0.18)',
-          borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
-        { label: '卖出区间', data: sellZone, backgroundColor: 'rgba(220,53,69,0.15)',
-          borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
-        { label: '股债利差 (%)', data: spreads, borderColor: redColor,
-          borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
-        { label: `买入 ${buyThreshold}%`, data: buyLine, borderColor: greenColor,
-          borderDash: [5,3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'y1' },
-        { label: `卖出 ${sellThreshold}%`, data: sellLine, borderColor: grayColor,
-          borderDash: [3,3], borderWidth: 1.2, pointRadius: 0, yAxisID: 'y1' }
+        { label: '红利低波 H30269', data: h30269Prices, borderColor: darkBlue, backgroundColor: 'rgba(13,110,253,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
+        { label: '买入区间', data: buyZone, backgroundColor: 'rgba(25,135,84,0.18)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
+        { label: '卖出区间', data: sellZone, backgroundColor: 'rgba(220,53,69,0.15)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
+        { label: '股债利差 (%)', data: spreads, borderColor: redColor, borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
+        { label: `买入 ${buyThreshold}%`, data: buyLine, borderColor: greenColor, borderDash: [5,3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'y1' },
+        { label: `卖出 ${sellThreshold}%`, data: sellLine, borderColor: grayColor, borderDash: [3,3], borderWidth: 1.2, pointRadius: 0, yAxisID: 'y1' }
       ]
     },
     options: {
@@ -469,24 +667,19 @@ function initCharts() {
       }
     }
   });
-  
-  // Run backtest
+
   const bt = runBacktest();
   const { stratEq, bhEq, positions, cashOnly } = bt;
-  
-  // Chart 3: Backtest NAV
+
   const ctx3 = document.getElementById('chartBacktest').getContext('2d');
   chartBacktest = new Chart(ctx3, {
     type: 'line',
     data: {
       labels: dates,
       datasets: [
-        { label: '股利差策略（含分红+逆回购）', data: stratEq, borderColor: redColor,
-          backgroundColor: 'rgba(220,53,69,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5 },
-        { label: '买入持有 红利低波（含分红）', data: bhEq, borderColor: darkBlue,
-          borderWidth: 2, pointRadius: 0, tension: 0.3, borderDash: [4,3] },
-        { label: '纯逆回购 1.5%', data: cashOnly, borderColor: grayColor,
-          borderWidth: 1, pointRadius: 0, borderDash: [2,2] }
+        { label: '股利差策略（含分红+逆回购）', data: stratEq, borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5 },
+        { label: '买入持有 红利低波（含分红）', data: bhEq, borderColor: darkBlue, borderWidth: 2, pointRadius: 0, tension: 0.3, borderDash: [4,3] },
+        { label: '纯逆回购 1.5%', data: cashOnly, borderColor: grayColor, borderWidth: 1, pointRadius: 0, borderDash: [2,2] }
       ]
     },
     options: {
@@ -495,16 +688,14 @@ function initCharts() {
       scales: { x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } }, y: { title: { display: true, text: '净值 (起始=1)' } } }
     }
   });
-  
-  // Chart 4: Position history
+
   const ctxPos = document.getElementById('chartPosition').getContext('2d');
   chartPosition = new Chart(ctxPos, {
     type: 'line',
     data: {
       labels: dates,
       datasets: [
-        { label: '仓位 (%)', data: positions, borderColor: purple,
-          backgroundColor: 'rgba(111,66,193,0.12)', fill: true, tension: 0.2, pointRadius: 0, borderWidth: 2 }
+        { label: '仓位 (%)', data: positions, borderColor: purple, backgroundColor: 'rgba(111,66,193,0.12)', fill: true, tension: 0.2, pointRadius: 0, borderWidth: 2 }
       ]
     },
     options: {
@@ -516,21 +707,16 @@ function initCharts() {
       }
     }
   });
-  
-  // Metrics
-  function maxDrawdown(series) {
-    let peak = series[0], maxDD = 0;
-    for (let v of series) { if (v > peak) peak = v; const dd = (peak - v) / peak; if (dd > maxDD) maxDD = dd; }
-    return maxDD * 100;
-  }
-  function calcSharpe(series) {
+
+  function maxDrawdown(series){ let peak = series[0], maxDD = 0; for (let v of series){ if (v > peak) peak = v; const dd = (peak - v) / peak; if (dd > maxDD) maxDD = dd; } return maxDD * 100; }
+  function calcSharpe(series){
     const rets = [];
     for (let i = 1; i < series.length; i++) rets.push(series[i] / series[i-1] - 1);
     const mean = rets.reduce((a,b) => a+b, 0) / rets.length;
     const std = Math.sqrt(rets.reduce((s,r) => s + Math.pow(r - mean, 2), 0) / rets.length);
     return std > 0 ? mean / std * Math.sqrt(12) : 0;
   }
-  
+
   const finalS = stratEq[stratEq.length-1], finalB = bhEq[bhEq.length-1], finalC = cashOnly[cashOnly.length-1];
   const yrs = (data.length - 1) / 12;
   const sAnn = (Math.pow(finalS, 1/yrs) - 1) * 100;
@@ -539,22 +725,14 @@ function initCharts() {
   const sSh = calcSharpe(stratEq), bSh = calcSharpe(bhEq);
   const avgPos = positions.reduce((a,b) => a+b, 0) / positions.length;
   const buyMonths = positions.filter(p => p >= 90).length;
-  const sellMonths = positions.filter(p => p <= 10 && positions[positions.indexOf(p)-1] > 10).length;
-  
   updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, buyMonths);
-  
-  // Yearly chart
+
   const yearly = {};
-  data.forEach((d,i) => {
-    const yr = d.date.substring(0,4);
-    if (!yearly[yr]) yearly[yr] = { s: stratEq[i], b: bhEq[i] };
-    yearly[yr].s = stratEq[i]; yearly[yr].b = bhEq[i];
-  });
+  data.forEach((d,i) => { const yr = d.date.substring(0,4); if (!yearly[yr]) yearly[yr] = { s: stratEq[i], b: bhEq[i] }; yearly[yr].s = stratEq[i]; yearly[yr].b = bhEq[i]; });
   const yl = Object.keys(yearly);
-  let sp = 1, bp = 1;
-  const sy = [], by = [];
-  yl.forEach(y => { const yr = yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp=yr.s; bp=yr.b; });
-  
+  let sp = 1, bp = 1; const sy = [], by = [];
+  yl.forEach(y => { const yr = yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp = yr.s; bp = yr.b; });
+
   const ctx4 = document.getElementById('chartYearly').getContext('2d');
   chartYearly = new Chart(ctx4, {
     type: 'bar',
@@ -564,9 +742,8 @@ function initCharts() {
     ]},
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } }, scales: { y: { title: { display: true, text: '%' } } } }
   });
-  
-  // Drawdown chart
-  function ddSeries(eq) { let peak = eq[0]; return eq.map(v => { if(v>peak) peak=v; return -(peak-v)/peak*100; }); }
+
+  function ddSeries(eq){ let peak = eq[0]; return eq.map(v => { if (v > peak) peak = v; return -(peak - v) / peak * 100; }); }
   const ctx5 = document.getElementById('chartDrawdown').getContext('2d');
   chartDrawdown = new Chart(ctx5, {
     type: 'line',
@@ -578,7 +755,7 @@ function initCharts() {
   });
 }
 
-function updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, buyMonths) {
+function updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, buyMonths){
   document.getElementById('backtestMetrics').innerHTML = `
     <div class="metric"><div class="mlabel">策略年化收益</div><div class="mval red">${sAnn.toFixed(2)}%</div><div class="msub">vs BH: ${bAnn.toFixed(2)}%</div></div>
     <div class="metric"><div class="mlabel">策略累计收益</div><div class="mval red">${((finalS-1)*100).toFixed(1)}%</div><div class="msub">vs BH: ${((finalB-1)*100).toFixed(1)}%</div></div>
@@ -589,21 +766,19 @@ function updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, b
   `;
 }
 
-function updateCharts() {
+function updateCharts(){
   const dates = data.map(d => d.date);
   const spreads = data.map(d => d.spread);
   const h30269Prices = data.map(d => d.h30269);
   const buyLine = Array(dates.length).fill(buyThreshold);
   const sellLine = Array(dates.length).fill(sellThreshold);
-  
-  // Update spread chart
+
   chartSpread.data.datasets[1].data = buyLine;
   chartSpread.data.datasets[1].label = `买入阈值 (${buyThreshold}%)`;
   chartSpread.data.datasets[2].data = sellLine;
   chartSpread.data.datasets[2].label = `卖出阈值 (${sellThreshold}%)`;
   chartSpread.update();
-  
-  // Update signal chart
+
   const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...h30269Prices) * 1.05 : null);
   const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...h30269Prices) * 1.05 : null);
   chartSignal.data.datasets[1].data = buyZone;
@@ -613,19 +788,18 @@ function updateCharts() {
   chartSignal.data.datasets[5].data = sellLine;
   chartSignal.data.datasets[5].label = `卖出 ${sellThreshold}%`;
   chartSignal.update();
-  
-  // Re-run backtest
+
   const bt = runBacktest();
   const { stratEq, bhEq, positions, cashOnly } = bt;
-  
+
   chartBacktest.data.datasets[0].data = stratEq;
   chartBacktest.data.datasets[1].data = bhEq;
   chartBacktest.data.datasets[2].data = cashOnly;
   chartBacktest.update();
-  
+
   chartPosition.data.datasets[0].data = positions;
   chartPosition.update();
-  
+
   const finalS = stratEq[stratEq.length-1], finalB = bhEq[bhEq.length-1];
   const yrs = (data.length-1)/12;
   updateMetrics(finalS, finalB,
@@ -634,40 +808,33 @@ function updateCharts() {
     calcSharpe(stratEq), calcSharpe(bhEq),
     positions.reduce((a,b)=>a+b,0)/positions.length,
     positions.filter(p=>p>=90).length);
-  
-  // Yearly
+
   const yearly = {};
-  data.forEach((d,i) => { const yr = d.date.substring(0,4); if(!yearly[yr]) yearly[yr]={s:stratEq[i],b:bhEq[i]}; yearly[yr].s=stratEq[i]; yearly[yr].b=bhEq[i]; });
+  data.forEach((d,i) => { const yr = d.date.substring(0,4); if (!yearly[yr]) yearly[yr] = { s: stratEq[i], b: bhEq[i] }; yearly[yr].s = stratEq[i]; yearly[yr].b = bhEq[i]; });
   const yl = Object.keys(yearly);
-  let sp=1, bp=1;
-  const sy=[], by=[];
-  yl.forEach(y=>{const yr=yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp=yr.s; bp=yr.b;});
+  let sp = 1, bp = 1; const sy = [], by = [];
+  yl.forEach(y => { const yr = yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp = yr.s; bp = yr.b; });
   chartYearly.data.datasets[0].data = sy;
   chartYearly.data.datasets[1].data = by;
   chartYearly.data.labels = yl;
   chartYearly.update();
-  
-  // Drawdown
-  function dd(eq){let p=eq[0];return eq.map(v=>{if(v>p)p=v;return -(p-v)/p*100;});}
+
+  function dd(eq){ let p = eq[0]; return eq.map(v => { if (v > p) p = v; return -(p - v) / p * 100; }); }
   chartDrawdown.data.datasets[0].data = dd(stratEq);
   chartDrawdown.data.datasets[1].data = dd(bhEq);
   chartDrawdown.update();
 }
 
-function maxDrawdown(series) {
-  let peak = series[0], maxDD = 0;
-  for (let v of series) { if (v > peak) peak = v; const dd = (peak-v)/peak; if (dd>maxDD) maxDD=dd; }
-  return maxDD*100;
-}
-function calcSharpe(series) {
+function maxDrawdown(series){ let peak = series[0], maxDD = 0; for (let v of series){ if (v > peak) peak = v; const dd = (peak - v) / peak; if (dd > maxDD) maxDD = dd; } return maxDD * 100; }
+function calcSharpe(series){
   const rets = [];
-  for (let i=1;i<series.length;i++) rets.push(series[i]/series[i-1]-1);
+  for (let i = 1; i < series.length; i++) rets.push(series[i]/series[i-1]-1);
   const mean = rets.reduce((a,b)=>a+b,0)/rets.length;
   const std = Math.sqrt(rets.reduce((s,r)=>s+Math.pow(r-mean,2),0)/rets.length);
-  return std>0 ? mean/std*Math.sqrt(12) : 0;
+  return std > 0 ? mean/std*Math.sqrt(12) : 0;
 }
 
-function switchTab(name) {
+function switchTab(name){
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.querySelector(`.tab[onclick*="${name}"]`).classList.add('active');
@@ -682,7 +849,14 @@ function switchTab(name) {
   }, 100);
 }
 
-// Init
+// ==================== INIT ====================
+buildToggle();
+computeIndicators();
+renderSignal();
+renderDashboard();
+renderDetails();
+renderNowCard();
+renderBuySell();
 updateUI();
 initCharts();
 </script>

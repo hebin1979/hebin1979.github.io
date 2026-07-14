@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=2.0,user-scalable=yes">
-<title>股票智能预判</title>
+<title>腾讯交易助手</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1a1a2e;line-height:1.5;-webkit-text-size-adjust:100%}
@@ -170,18 +170,9 @@ button{font-family:inherit;cursor:pointer}
 <body>
 
 <div class="header">
-  <h1>📊 股票智能预判</h1>
-  <div class="stock-input-group">
-    <input type="text" id="stockInput" placeholder="代码: 00700 / sh600519 / AAPL" value="00700">
-    <button onclick="analyzeStock()">🔍 分析</button>
-  </div>
+  <h1>📊 腾讯交易助手</h1>
   <div class="stock-input-group" style="width:100%">
-    <span class="examples">试试:
-      <b onclick="quick('00700')">00700 腾讯</b>
-      <b onclick="quick('sh600519')">sh600519 茅台</b>
-      <b onclick="quick('sz000858')">sz000858 五粮液</b>
-      <b onclick="quick('AAPL')">AAPL 苹果</b>
-    </span>
+    <span class="examples">标的：<b style="color:rgba(255,255,255,.85)">00700 腾讯控股（港股）</b> · 实时技术分析 + 多维度 AI 评分，自动判断买入/卖出/持有</span>
   </div>
 </div>
 
@@ -721,10 +712,8 @@ function panelAnly(d){
 //  SECTION 6: RENDER
 // =============================================================
 async function analyzeStock(){
-  var input=document.getElementById('stockInput').value.trim();
-  if(!input) return;
-  var info=parseStockCode(input);
-  if(!info){document.getElementById('main').innerHTML='<div class="status-msg">股票代码格式无法识别</div>';return;}
+  // 固定分析腾讯控股 00700.HK（港股）
+  var info={secid:'116.00700', raw:'00700', market:'港股'};
 
   var mg=document.getElementById('main');
   mg.innerHTML='<div class="status-msg">正在获取 '+info.raw+' ('+info.market+') 实时数据...</div>';
@@ -758,10 +747,9 @@ async function analyzeStock(){
 
   setTimeout(function(){var cv=document.getElementById('klineChart');if(cv)renderChart(cv,d);},200);
   document.getElementById('updateTime').textContent=new Date().toLocaleString('zh-CN');
-  document.getElementById('stockInput').value=info.raw;
 }
 
-function quick(code){document.getElementById('stockInput').value=code;analyzeStock();}
+function quick(code){analyzeStock();}
 
 // =============================================================
 //  SECTION 7: CHART RENDER
