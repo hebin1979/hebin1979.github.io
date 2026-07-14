@@ -67,30 +67,7 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 .rule-bear{border-left-color:#dc2626}
 .r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;border-radius:4px;padding:1px 8px;margin-bottom:6px}
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; margin: 16px 0; }
-.card h3 { font-size: 0.82rem; color: var(--sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-.data-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-.data-row:last-child { border-bottom: none; }
-.data-row .label { color: var(--sub); }
-.data-row .value { font-weight: 600; }
 
-.gauge-card { background: var(--card); border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; margin-bottom:16px; }
-.spread-value { font-size: 3.2rem; font-weight: 800; margin: 10px 0; }
-.spread-value.red { color: var(--red); }
-.spread-value.orange { color: var(--orange); }
-.spread-value.gray { color: var(--sub); }
-
-.note { border-radius: 10px; padding: 14px 18px; font-size: 0.85rem; margin: 12px 0; }
-.note-buy { background: #d4edda; color: #155724; }
-.note-sell { background: #f8d7da; color: #721c24; }
-.note-hold { background: #cce5ff; color: #004085; }
-.note-wait { background: #fff3cd; color: #856404; }
-.slider-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
-.slider-item { font-size: 0.8rem; color: var(--sub); }
-.slider-item input { width: 100px; vertical-align: middle; margin: 0 4px; }
-.slider-item strong { color: var(--text); }
-.rule-card { background: #f0f4ff; border-radius: 12px; padding: 14px 18px; margin: 10px 0; font-size: 0.85rem; line-height: 1.8; }
-.rule-card strong { color: var(--blue); }
 
 .tabs { display: flex; gap: 0; margin: 16px 0 0; }
 .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-bottom: 2px solid var(--border); font-size: 0.88rem; font-weight: 500; color: var(--sub); transition: .2s; }
@@ -177,53 +154,6 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
   </div>
 </div>
 
-<!-- ④ 策略阈值与数据 -->
-<div class="gauge-card" id="ctrlCard">
-  <h3 style="color:var(--sub);font-size:0.82rem;">当前股债利差（阈值可调）</h3>
-  <div class="spread-value" id="spreadValue">--</div>
-  <div style="font-size:0.9rem;color:var(--sub);margin-bottom:4px;">
-    沪深300 PE(TTM): <strong id="peVal">--</strong> | 10Y国债: <strong id="bondVal">--</strong>
-  </div>
-  <div id="currentPosition" style="font-size:0.85rem;color:var(--sub);margin:4px 0;"></div>
-  <div class="slider-group">
-    <span class="slider-item">买入阈值: <strong id="buyLabel">6.0%</strong> <input type="range" id="buySlider" min="3" max="8" step="0.1" value="6.0" oninput="updateBuyThreshold(this.value)"></span>
-    <span class="slider-item">卖出阈值: <strong id="sellLabel">4.0%</strong> <input type="range" id="sellSlider" min="1" max="6" step="0.1" value="4.0" oninput="updateSellThreshold(this.value)"></span>
-  </div>
-</div>
-
-<div class="rule-card">
-  <strong>策略规则：</strong>
-  ① 利差 ≥ <span id="ruleBuy">6.0%</span> → 全仓买入红利低波 |
-  ② 利差 &lt; <span id="ruleSell">4.0%</span> → 卖出50% |
-  ③ 期间 → 持仓不变 |
-  ④ 现金 → 逆回购年化1.5% |
-  ⑤ 持股 → 按指数涨跌 + 季分红~1%
-</div>
-
-<div class="grid">
-  <div class="card">
-    <h3>沪深300</h3>
-    <div class="data-row"><span class="label">最新点位</span><span class="value" id="csi300Price">--</span></div>
-    <div class="data-row"><span class="label">PE(TTM)</span><span class="value" id="csi300PE">--</span></div>
-    <div class="data-row"><span class="label">PE分位(样本)</span><span class="value" id="csi300Pct">--</span></div>
-    <div class="data-row"><span class="label">盈利收益率(E/P)</span><span class="value" id="csi300EY">--</span></div>
-    <div class="data-row"><span class="label">股息率</span><span class="value">2.68%</span></div>
-  </div>
-  <div class="card">
-    <h3>债券 & 现金</h3>
-    <div class="data-row"><span class="label">10年期国债</span><span class="value" id="bond10Y">--</span></div>
-    <div class="data-row"><span class="label">逆回购年化</span><span class="value">1.50%</span></div>
-    <div class="data-row"><span class="label">债券分位(样本)</span><span class="value" id="bondPct">--</span></div>
-    <div class="data-row"><span class="label">LPR 5年期</span><span class="value">3.50%</span></div>
-  </div>
-  <div class="card">
-    <h3>红利低波 H30269</h3>
-    <div class="data-row"><span class="label">最新点位</span><span class="value" id="divLowPrice">--</span></div>
-    <div class="data-row"><span class="label">PE(TTM)</span><span class="value">7.99</span></div>
-    <div class="data-row"><span class="label">股息率/季分红</span><span class="value">4.52% / ~1%</span></div>
-    <div class="data-row"><span class="label">发布以来全收益年化</span><span class="value green">+11.57%</span></div>
-  </div>
-</div>
 
 <!-- ⑤ 策略回测 -->
 <div class="tabs">
@@ -505,36 +435,11 @@ function renderBuySell(){
   document.getElementById('buySellTable').innerHTML = html;
 }
 
-// ==================== UPDATE (data cards + sliders + position) ====================
+// ==================== UPDATE (trigger rules dynamic values) ====================
 function updateUI(){
-  document.getElementById('csi300Price').textContent = latest.csi300.toFixed(0);
-  document.getElementById('csi300PE').textContent = latest.pe.toFixed(2);
-  document.getElementById('csi300EY').textContent = latest.ey.toFixed(2) + '%';
-  document.getElementById('bond10Y').textContent = latest.bond10y.toFixed(2) + '%';
-  document.getElementById('divLowPrice').textContent = latest.h30269.toFixed(0);
-  document.getElementById('peVal').textContent = latest.pe.toFixed(2);
-  document.getElementById('bondVal').textContent = latest.bond10y.toFixed(2) + '%';
-
-  const sv = document.getElementById('spreadValue');
-  sv.textContent = latest.spread.toFixed(2) + '%';
-  sv.className = 'spread-value ' + (latest.spread >= buyThreshold ? 'red' : latest.spread >= sellThreshold ? 'orange' : 'gray');
-
-  document.getElementById('csi300Pct').textContent = indMeta.pePct.toFixed(0) + '%';
-  document.getElementById('bondPct').textContent = indMeta.bondPct.toFixed(0) + '%';
-
-  document.getElementById('buyLabel').textContent = buyThreshold.toFixed(1) + '%';
-  document.getElementById('sellLabel').textContent = sellThreshold.toFixed(1) + '%';
-  document.getElementById('ruleBuy').textContent = buyThreshold.toFixed(1) + '%';
-  document.getElementById('ruleSell').textContent = sellThreshold.toFixed(1) + '%';
   document.getElementById('tBuy').textContent = buyThreshold.toFixed(1);
   document.getElementById('tSell').textContent = sellThreshold.toFixed(1);
   document.getElementById('tSpread').textContent = latest.spread.toFixed(2) + '%';
-
-  let posText;
-  if (latest.spread >= buyThreshold) posText = '建议仓位: <strong style="color:#198754">100%（全仓）</strong>';
-  else if (latest.spread < sellThreshold) posText = '建议仓位: <strong style="color:#dc3545">减半（卖出50%）</strong>';
-  else posText = '建议仓位: <strong style="color:#004085">维持不变</strong>';
-  document.getElementById('currentPosition').innerHTML = posText;
 }
 
 // Master update
@@ -561,25 +466,7 @@ function toggleInd(key, val){
   renderDetails();
 }
 
-// ==================== THRESHOLD SLIDERS ====================
-function updateBuyThreshold(val){
-  buyThreshold = parseFloat(val);
-  if (buyThreshold <= sellThreshold){
-    sellThreshold = buyThreshold - 0.5;
-    if (sellThreshold < 1){ sellThreshold = 1; buyThreshold = 1.5; }
-    document.getElementById('sellSlider').value = sellThreshold;
-  }
-  updateAll();
-}
-function updateSellThreshold(val){
-  sellThreshold = parseFloat(val);
-  if (sellThreshold >= buyThreshold){
-    buyThreshold = sellThreshold + 0.5;
-    if (buyThreshold > 8){ buyThreshold = 8; sellThreshold = 7.5; }
-    document.getElementById('buySlider').value = buyThreshold;
-  }
-  updateAll();
-}
+// ==================== THRESHOLD (internal, no UI sliders) ====================
 
 // ==================== BACKTEST ENGINE ====================
 function runBacktest(){
