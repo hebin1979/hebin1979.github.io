@@ -210,27 +210,38 @@ function fmtNum(n,d){if(n==null||isNaN(n))return'--';d=d||2;return Number(n).toF
 function fmtBn(n){if(n==null)return'--';if(n>=1e12)return(n/1e12).toFixed(1)+'万亿';if(n>=1e8)return(n/1e8).toFixed(0)+'亿';if(n>=1e4)return(n/1e4).toFixed(0)+'万';return n.toFixed(0);}
 
 // =============================================================
-//  SECTION 2: API FETCH (Eastmoney public, no auth required)
+//  SECTION 2: API FETCH (Eastmoney public via JSONP, no proxy needed)
 // =============================================================
-var CORS_PROXY='https://corsproxy.io/?url=';
 var API_BASE='https://push2.eastmoney.com/api/qt/stock/get';
 var KL_BASE='https://push2his.eastmoney.com/api/qt/stock/kline/get';
+
+// JSONP：东方财富 push2 接口原生支持 cb= 回调，可绕过 CORS，大陆浏览器直连稳定
+function jsonp(url,timeout){
+  return new Promise(function(resolve,reject){
+    var cb='jp_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
+    var s=document.createElement('script');
+    var t=setTimeout(function(){cleanup();reject(new Error('请求超时'));},timeout||10000);
+    function cleanup(){clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);}
+    window[cb]=function(data){cleanup();resolve(data);};
+    s.onerror=function(){cleanup();reject(new Error('网络请求失败'));};
+    s.src=url+(url.indexOf('?')>=0?'&':'?')+'cb='+cb;
+    document.head.appendChild(s);
+  });
+}
 
 async function fetchQuote(secid){
   var fields='f43,f44,f45,f46,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170';
   var url=API_BASE+'?secid='+secid+'&fields='+fields+'&invt=2';
-  var r=await fetch(CORS_PROXY+encodeURIComponent(url));
-  var j=await r.json();
-  if(!j||!j.data) throw new Error('未获取到数据');
+  var j=await jsonp(url);
+  if(!j||!j.data) throw new Error('未获取到行情数据');
   return j.data;
 }
 
 async function fetchKline(secid,limit){
   limit=limit||120;
   var url=KL_BASE+'?secid='+secid+'&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=101&fqt=0&beg=0&end=20500101&lmt='+limit;
-  var r=await fetch(CORS_PROXY+encodeURIComponent(url));
-  var j=await r.json();
-  if(!j||!j.data||!j.data.klines) throw new Error('未获取到K线');
+  var j=await jsonp(url);
+  if(!j||!j.data||!j.data.klines) throw new Error('未获取到K线数据');
   return j.data.klines.map(function(s){
     var p=s.split(',');
     return {date:p[0],open:+p[1],close:+p[2],high:+p[3],low:+p[4],volume:+(p[5]||0),amount:+(p[6]||0)};
@@ -367,6 +378,8 @@ function buildData(quote,kl,info){
   var priceScale=(info.market==='港股'||info.market==='美股')?1000:100;
   var pct=function(v){return v==null?null:v/100;};
   var num=function(v,sc){if(v==null)return null;return v/(sc||1);};
+  // PE(TTM) f162：多数为原值，个别接口 ×100，做安全归一（"-"或异常→0）
+  var sanePE=function(v){if(v==null||v==='-'||isNaN(v))return 0;var n=+v;if(n>800)n=n/100;return +n.toFixed(2);};
 
   return {
     code:info.raw,secid:info.secid,market:info.market,
@@ -383,7 +396,7 @@ function buildData(quote,kl,info){
     amount:quote.f48||0,
     turnoverRate:pct(quote.f168),
     marketCap:quote.f116||0,
-    peTTM:quote.f162||0,
+    peTTM:sanePE(quote.f162),
     pb:pct(quote.f167),
     ma:maArr,
     macd:{dif:m.dif[lastIdx]||0,dea:m.dea[lastIdx]||0,mval:m.macd[lastIdx]||0},
@@ -763,9 +776,9 @@ function renderChart(cv,d){
   var ma=function(n){var v=0;for(var i=Math.max(0,kl.length-n);i<kl.length;i++)v+=kl[i].close;return v/Math.min(n,kl.length);};
   var ap=cl.slice();var maVals={};
   [5,20,60,120,250].forEach(function(n){var v=MA(kl,n);ap=ap.concat(v.filter(function(x){return x!=null;}));maVals[n]=v;});
-  if(d.boll) ap.push(d.boll.upper,d.boll.middle,d.boll.lower);
-  var ym=Math.min.apply(null,ap)-5*1.01/m*Math.max.apply(null,ap),yx=Math.max.apply(null,ap)*1.02;
-  ym=Math.min.apply(null,ap)*0.97; yx=Math.max.apply(null,ap)*1.03;
+  if(d.boll&&d.boll.upper) ap.push(d.boll.upper,d.boll.middle,d.boll.lower);
+  ap=ap.filter(function(x){return x!=null&&!isNaN(x);});
+  var ym=Math.min.apply(null,ap)*0.97, yx=Math.max.apply(null,ap)*1.03;
   var xs=function(i){return pad.l+(i/Math.max(1,kl.length-1))*pw;};
   var ys=function(v){return pad.t+(1-(v-ym)/(yx-ym))*ph;};
   // Grid

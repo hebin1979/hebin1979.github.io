@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=2.0,user-scalable=yes">
+<title>今日投资简报 · 汇总</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1a1a2e;line-height:1.5;-webkit-text-size-adjust:100%}
+:root{--r:#e74c3c;--g:#27ae60;--o:#f39c12;--b:#3498db;--p:#8e44ad;--t:#1a1a2e;--s:#666;--border:#e0e3e8}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:#fff;padding:16px 16px 14px}
+.header h1{font-size:1.25em;font-weight:800;display:flex;align-items:center;gap:6px}
+.header .meta{font-size:.72em;opacity:.8;margin-top:6px}
+.header .meta b{color:#ffd47a}
+.wrap{max-width:900px;margin:0 auto;padding:12px 12px 40px}
+
+/* Overview strip */
+.mkt-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.mkt-box{background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.04);border-left:4px solid var(--o)}
+.mkt-box.buy{border-left-color:var(--r)}
+.mkt-box.sell{border-left-color:var(--g)}
+.mkt-box .mb-top{display:flex;justify-content:space-between;align-items:baseline}
+.mkt-box .mb-name{font-size:.82em;font-weight:700}
+.mkt-box .mb-sig{font-size:.72em;font-weight:800}
+.mkt-box .mb-key{font-size:.66em;color:var(--s);margin-top:3px}
+
+/* Summary table */
+.section{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-bottom:12px}
+.section h2{font-size:1em;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.76em}
+thead th{background:#f5f7fa;color:var(--s);font-weight:700;padding:8px 6px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+tbody td{padding:9px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.m-name{font-weight:800;color:var(--t);white-space:nowrap}
+.m-name .em{display:block;font-size:.82em;font-weight:400;color:var(--s);margin-top:1px}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.9em;font-weight:800;white-space:nowrap}
+.pill-buy{background:#fde8e8;color:var(--r)}
+.pill-hold{background:#fff4e0;color:var(--o)}
+.pill-sell{background:#e8f8f0;color:var(--g)}
+.m-advice{color:var(--t);line-height:1.5}
+.m-key{color:var(--s);font-size:.92em;white-space:nowrap}
+.up{color:var(--r);font-weight:700}
+.down{color:var(--g);font-weight:700}
+
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:4px}
+.links a{display:flex;align-items:center;gap:6px;background:#f8f9fb;border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-decoration:none;color:var(--t);font-size:.78em;font-weight:600}
+.links a:active{background:#eef1f6}
+.links a .ic{font-size:1.1em}
+
+.tips{font-size:.72em;color:var(--s);line-height:1.7;background:#f8f9fb;border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.footer{text-align:center;padding:16px;color:#999;font-size:.66em}
+.footer a{color:var(--b)}
+
+@media(min-width:720px){
+  .mkt-strip{grid-template-columns:repeat(5,1fr)}
+  tbody td,thead th{padding:11px 10px}
+  table{font-size:.82em}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 今日投资简报</h1>
+  <div class="meta">数据日期：<b id="dataDate">2026-07-14</b> ｜ 港股打新 · 腾讯 · 红利 · 纳指 · 黄金 五模块核心建议汇总</div>
+</div>
+
+<div class="wrap">
+
+  <!-- 概览条 -->
+  <div class="mkt-strip" id="strip"></div>
+
+  <!-- 汇总表 -->
+  <div class="section">
+    <h2>📊 核心建议汇总表</h2>
+    <table>
+      <thead>
+        <tr><th>模块</th><th>信号</th><th>核心建议</th><th>关键数据</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- 快速入口 -->
+  <div class="section">
+    <h2>🔗 打开对应工具</h2>
+    <div class="links">
+      <a href="/hk-ipo-monitor/"><span class="ic">🚀</span>港股打新助手</a>
+      <a href="/tencent-trading-assistant.html"><span class="ic">🔮</span>腾讯交易助手</a>
+      <a href="/dividend-spread-tool.html"><span class="ic">📊</span>红利交易助手</a>
+      <a href="/nasdaq-trading-assistant/"><span class="ic">📈</span>纳指交易助手</a>
+      <a href="/gold-trading-assistant/"><span class="ic">🪙</span>黄金交易助手</a>
+    </div>
+  </div>
+
+  <!-- 说明 -->
+  <div class="section">
+    <div class="tips">
+      <b>📌 简报说明</b><br>
+      · 本简报为人工刷新快照，非实时计算；每次更新会重新采集五模块最新数据后生成。<br>
+      · 信号颜色遵循 A 股习惯：<span class="up">红=偏多/买入</span>、<span class="down">绿=偏空/卖出</span>、<span style="color:var(--o);font-weight:700">橙=中性/观望</span>。<br>
+      · 打新破发风险提示：近期港股新股暗盘/首日破发比例偏高，务必甄别基本面与估值。<br>
+      · 仅供研究参考，不构成投资建议。
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  ⚠️ 仅供学习参考，不构成投资建议 ｜ <a href="/">← 返回投资工具箱</a>
+</div>
+
+<script>
+// =============================================================
+//  今日简报数据（每次刷新时更新此 BRIEFING 对象即可）
+// =============================================================
+var BRIEFING = {
+  date: '2026-07-14',
+  modules: [
+    {
+      key:'ipo', icon:'🚀', name:'港股打新助手', em:'港股新股',
+      sig:'谨慎打新', sigType:'hold',
+      advice:'认购中：<b>天岳先进(02631)</b> 截至 7/19、<b>首钢朗泽(02553)</b> 截至 7/15。近期暗盘分化大，破发比例偏高，优先选基本面扎实、估值合理的标的小额参与。',
+      key1:'认购中 2 只',
+      key2:'近期暗盘：齐云山 +93.75% / 滨化 −21%'
+    },
+    {
+      key:'tencent', icon:'🔮', name:'腾讯交易助手', em:'00700.HK',
+      sig:'中性偏多', sigType:'buy',
+      advice:'PE 处历史低位、机构约 94% 看多。当前 451 港元附近，短线随大盘小幅回落；<b>回调至 440 以下可分批建仓</b>，中期目标看机构均价。',
+      key1:'现价 ~451 HKD',
+      key2:'7/14 收 450.8（近日小幅回落）'
+    },
+    {
+      key:'dividend', icon:'📊', name:'红利交易助手', em:'沪深300股债利差',
+      sig:'中性偏多', sigType:'buy',
+      advice:'综合评分 69，处<b>持有观望区</b>。维持仓位、持股收息为主；<b>利差回升≥6% 加仓</b>，跌破 4% 减仓。',
+      key1:'股债利差 5.29%',
+      key2:'评分 69 · 持有观望区'
+    },
+    {
+      key:'nasdaq', icon:'📈', name:'纳指交易助手', em:'QQQ (纳指100)',
+      sig:'中性 · 观望', sigType:'hold',
+      advice:'估值偏高、波动率低、权益吸引力一般。<b>可极少量定投</b>，主仓等待 5–10% 回撤或恐慌放大再加仓。',
+      key1:'QQQ ~$726',
+      key2:'评分 52 · 观望'
+    },
+    {
+      key:'gold', icon:'🪙', name:'黄金交易助手', em:'金价 XAU',
+      sig:'中性 · 观望', sigType:'hold',
+      advice:'估值不贵，但宏观（强美元/正实际利率）与季节淡季构成压制。<b>可极少量试仓</b>，主仓等待更好时点。',
+      key1:'评分 52',
+      key2:'宏观压制 · 淡季'
+    }
+  ]
+};
+
+function pillClass(t){return t==='buy'?'pill-buy':t==='sell'?'pill-sell':'pill-hold';}
+function boxClass(t){return t==='buy'?'buy':t==='sell'?'sell':'';}
+
+function render(){
+  document.getElementById('dataDate').textContent=BRIEFING.date;
+  // strip
+  var strip=BRIEFING.modules.map(function(m){
+    return '<div class="mkt-box '+boxClass(m.sigType)+'">'+
+      '<div class="mb-top"><span class="mb-name">'+m.icon+' '+m.name.replace('助手','')+'</span></div>'+
+      '<div class="mb-sig '+(m.sigType==='buy'?'up':m.sigType==='sell'?'down':'')+'" style="'+(m.sigType==='hold'?'color:var(--o)':'')+'">'+m.sig+'</div>'+
+      '<div class="mb-key">'+m.key1+'</div></div>';
+  }).join('');
+  document.getElementById('strip').innerHTML=strip;
+  // table
+  var rows=BRIEFING.modules.map(function(m){
+    return '<tr>'+
+      '<td class="m-name">'+m.icon+' '+m.name+'<span class="em">'+m.em+'</span></td>'+
+      '<td><span class="pill '+pillClass(m.sigType)+'">'+m.sig+'</span></td>'+
+      '<td class="m-advice">'+m.advice+'</td>'+
+      '<td class="m-key">'+m.key1+'<br><span style="font-size:.9em">'+m.key2+'</span></td>'+
+      '</tr>';
+  }).join('');
+  document.getElementById('tbody').innerHTML=rows;
+}
+render();
+</script>
+</body>
+</html>

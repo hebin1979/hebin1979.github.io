@@ -21,6 +21,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .hero { text-align: center; padding: 60px 20px 40px; }
 .hero h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
 .hero p { color: var(--sub); font-size: 0.95rem; }
+.briefing-cta { display:inline-flex; align-items:center; gap:8px; margin-top:18px; padding:11px 22px; border-radius:30px; text-decoration:none; font-weight:700; font-size:0.9rem; color:#fff; background:linear-gradient(135deg,#e11d48,#f59e0b); box-shadow:0 6px 20px rgba(225,29,72,0.3); transition:all .25s; }
+.briefing-cta:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(225,29,72,0.4); }
+.briefing-cta .dot { width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 0 0 rgba(255,255,255,.7); animation:pulse 1.8s infinite; }
+@keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)} 70%{box-shadow:0 0 0 8px rgba(255,255,255,0)} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0)} }
 .container { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 18px; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; text-decoration: none; color: inherit; transition: all 0.25s; position: relative; overflow: hidden; }
@@ -55,6 +59,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 <div class="hero">
   <h1>投资工具箱</h1>
   <p>量化 · 信号 · 回测，辅助投资决策</p>
+  <a href="/daily-briefing.html" class="briefing-cta"><span class="dot"></span>📋 今日投资简报 · 五模块汇总</a>
 </div>
 
 <div class="container">
