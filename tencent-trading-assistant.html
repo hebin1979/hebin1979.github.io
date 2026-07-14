@@ -729,7 +729,7 @@ async function analyzeStock(){
   var info={secid:'116.00700', raw:'00700', market:'港股'};
 
   var mg=document.getElementById('main');
-  mg.innerHTML='<div class="status-msg">正在获取 '+info.raw+' ('+info.market+') 实时数据...</div>';
+  mg.innerHTML=''; // data loads silently
 
   var d;
   try{
