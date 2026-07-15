@@ -4,11 +4,11 @@
 黄金交易助手 (Gold Trading Assistant)
 ====================================
 目的：综合多个市场指标，判断"现在是否适合买入/卖出黄金"，并给出
-      合适的买入/卖出价位区间与最佳时间窗口。
+      合适的价位区间与最佳时间窗口。
 
 指标框架（7 个，权重合计 100）—— 分数越高 = 越适合"买入/累积"黄金：
   1. 估值分位 (价格 vs 52周区间)  权重 18  —— 越接近年内低位越便宜
-  2. 趋势 (价格/200MA)            权重 15  —— 不逆强下行趋势
+  2. 趋势 (价格/长期均线)        权重 15  —— 不逆强下行趋势
   3. 动量 RSI(14)                 权重 18  —— 超卖(低) = 更好的买点
   4. 实际利率 (10Y TIPS)          权重 20  —— 黄金核心驱动，实际利率越低越利多
   5. 美元指数 DXY                 权重 15  —— 黄金计价货币，美元越弱越利多
@@ -22,8 +22,9 @@
   35-44 估值偏高·持有为主，考虑部分止盈
   <35   高估过热·建议减仓/卖出
 
-数据来源：Yahoo Finance (黄金/美元指数/VIX/200MA) + FRED (10Y TIPS 实际利率)
-         本机直连 Yahoo/FRED 通常可用；若抓取失败自动回退到快照并标注。
+标的：518850 黄金ETF华夏（A股可直接交易，价格与现货金价高度联动）。
+  —— ETF 自身价格技术面(价格/52周高低/均线/RSI)：东方财富口径(fqt=0 不复权)，经 --manual 刷新；
+  —— 宏观驱动(VIX/DXY/10Y TIPS)：Yahoo Finance / FRED 实时抓取，失败回退快照。
 
 用法：
   python gold_trading_assistant.py                # 拉取实时数据并生成报告
@@ -46,15 +47,19 @@ except ImportError:
     requests = None
 
 # ----------------------------------------------------------------------------
-# 0. 内置快照 (真实数据校准, 截至 2026-07-13, 用于离线/抓取失败回退)
+# 0. 内置快照 (真实数据校准, 截至 2026-07-13)
+#    —— ETF 价格技术面：东方财富 518850 黄金ETF华夏, fqt=0 不复权
+#    —— 宏观驱动：Yahoo/FRED 抓取失败时的回退值
 # ----------------------------------------------------------------------------
 SNAPSHOT = {
-    "as_of": "2026-07-13(快照/离线)",
-    "gold": 4073.0,                 # XAU/USD 现货 (USD/oz)
-    "gold_52w_high": 5627.0,
-    "gold_52w_low": 3314.30,
-    "gold_200ma": 4117.23,
-    "gold_rsi": 42.7,
+    "as_of": "2026-07-13",
+    # —— ETF 自身价格技术面（东财 518850, fqt=0 不复权）——
+    "gold_price": 8.452,            # 518850 现价 (元)
+    "gold_52w_high": 12.087,
+    "gold_52w_low": 7.310,
+    "gold_ma": 9.011,               # 长期均线(约 200 日/月线收盘均值)
+    "gold_rsi": 54.2,
+    # —— 宏观驱动（实时抓取 Yahoo/FRED，失败回退）——
     "dxy": 100.91,                  # 美元指数
     "dxy_52w_high": 101.80,
     "dxy_52w_low": 95.55,
@@ -131,32 +136,22 @@ def _fred_obs(series_id, api_key=None, s=None):
 def fetch_market_data(fred_key=None, offline=False):
     """返回 (data_dict, status_dict)。"""
     status = {}
+    d = {}
+
+    # ---- 黄金ETF 518850 自身价格技术面：始终来自 SNAPSHOT（东财口径, 经 --manual 刷新）----
+    for k in ("gold_price", "gold_52w_high", "gold_52w_low", "gold_ma", "gold_rsi"):
+        d[k] = SNAPSHOT[k]
+        status[k] = "快照/手动"
+
     if offline or requests is None:
-        d = dict(SNAPSHOT)
-        for k in d:
+        for k in ("dxy", "dxy_52w_high", "dxy_52w_low", "tips",
+                  "vix", "vix_52w_high", "vix_52w_low", "vix_1y_pct"):
+            d[k] = SNAPSHOT[k]
             status[k] = "快照/离线"
+        d["as_of"] = datetime.now().strftime("%Y-%m-%d") + "(快照/离线)"
         return d, status
 
     s = _session()
-    d = {}
-    # ---- 黄金 GC=F ----
-    try:
-        g = _yf_chart("GC=F", "1y", "1d", s)
-        if g:
-            m = g["meta"]
-            closes = [c for c in g["indicators"]["quote"][0]["close"] if c is not None]
-            d["gold"] = m["regularMarketPrice"]
-            d["gold_52w_high"] = m.get("fiftyTwoWeekHigh", max(closes))
-            d["gold_52w_low"] = m.get("fiftyTwoWeekLow", min(closes))
-            d["gold_200ma"] = m.get("twoHundredDayAverage", sma(closes, 200))
-            d["gold_rsi"] = rsi(closes, 14)
-            status["gold"] = "实时(Yahoo)"
-        else:
-            raise ValueError("empty")
-    except Exception:
-        for k in ("gold","gold_52w_high","gold_52w_low","gold_200ma","gold_rsi"):
-            d[k] = SNAPSHOT[k]
-        status["gold"] = "回退-快照"
 
     # ---- 美元指数 DX-Y.NYB ----
     try:
@@ -170,7 +165,7 @@ def fetch_market_data(fred_key=None, offline=False):
         else:
             raise ValueError("empty")
     except Exception:
-        for k in ("dxy","dxy_52w_high","dxy_52w_low"):
+        for k in ("dxy", "dxy_52w_high", "dxy_52w_low"):
             d[k] = SNAPSHOT[k]
         status["dxy"] = "回退-快照"
 
@@ -188,7 +183,7 @@ def fetch_market_data(fred_key=None, offline=False):
         else:
             raise ValueError("empty")
     except Exception:
-        for k in ("vix","vix_52w_high","vix_52w_low","vix_1y_pct"):
+        for k in ("vix", "vix_52w_high", "vix_52w_low", "vix_1y_pct"):
             d[k] = SNAPSHOT[k]
         status["vix"] = "回退-快照"
 
@@ -256,7 +251,7 @@ def score_valuation(gold_pct):
     return lerp([(0,95),(20,82),(40,62),(60,42),(80,22),(100,10)], gold_pct)
 
 def score_trend(ratio):
-    """价格/200MA：远离下方=趋势恶化。"""
+    """价格/长期均线：远离下方=趋势恶化。"""
     return lerp([(0.85,20),(0.95,45),(1.0,60),(1.05,75),(1.15,88)], ratio)
 
 def score_rsi(rsi):
@@ -297,8 +292,8 @@ WEIGHTS = {
 }
 
 def analyze(d):
-    gold_pct = pct_of(d["gold"], d["gold_52w_low"], d["gold_52w_high"])
-    trend_ratio = d["gold"] / d["gold_200ma"] if d["gold_200ma"] > 0 else 1.0
+    gold_pct = pct_of(d["gold_price"], d["gold_52w_low"], d["gold_52w_high"])
+    trend_ratio = d["gold_price"] / d["gold_ma"] if d["gold_ma"] > 0 else 1.0
     dxy_pct = pct_of(d["dxy"], d["dxy_52w_low"], d["dxy_52w_high"])
 
     month = datetime.now().month
@@ -344,32 +339,53 @@ def analyze(d):
     return ctx
 
 # ----------------------------------------------------------------------------
-# 5. 买入/卖出价位区间
+# 5. 价位区间参考（中性位置描述，仅标示 ETF 价格相对 52 周区间的位置）
 # ----------------------------------------------------------------------------
 def compute_zones(d):
-    low, high, ma = d["gold_52w_low"], d["gold_52w_high"], d["gold_200ma"]
-    zones = [
-        ("强力买入区", low + (high - low) * 0.06, ma * 0.90,
-         "接近/跌破 52 周低位，长期价值凸显，可重仓", "#16a34a"),
-        ("分批建仓区", max(low * 1.02, ma * 0.95), ma * 1.05,
-         "低于或略高于 200 日线，逢低累积的主战场", "#65a30d"),
-        ("观望持有区", ma * 1.05, high * 0.82,
-         "估值合理偏高，持有不加仓、不追高", "#d97706"),
-        ("分批止盈区", high * 0.82, high * 0.90,
-         "接近历史高位，开始减仓锁定利润", "#ea580c"),
-        ("强力止盈区", high * 0.90, high,
-         "逼近/刷新历史高位，清仓或仅留底仓", "#dc2626"),
+    low, high = d["gold_52w_low"], d["gold_52w_high"]
+    rng = high - low
+    return [
+        ("深度价值区", low, low + rng * 0.15,
+         "价格贴近 52 周低位，安全边际最高", "#16a34a"),
+        ("价值区", low + rng * 0.15, low + rng * 0.40,
+         "价格处于年内偏低位置，具备吸引力", "#65a30d"),
+        ("合理区", low + rng * 0.40, low + rng * 0.65,
+         "价格处于历史中枢，估值合理", "#d97706"),
+        ("偏高区", low + rng * 0.65, low + rng * 0.85,
+         "价格接近年内高位，注意追高风险", "#ea580c"),
+        ("高估区", low + rng * 0.85, high * 1.03,
+         "价格逼近/刷新 52 周高位，性价比下降", "#dc2626"),
     ]
-    return zones
 
 def current_zone(d):
-    p = d["gold"]
-    for name, lo, hi, desc, color in compute_zones(d):
+    p = d["gold_price"]
+    zs = compute_zones(d)
+    for name, lo, hi, desc, color in zs:
         if lo <= p <= hi:
             return name, color, desc
-    if p < compute_zones(d)[0][1]:
-        z = compute_zones(d)[0]; return z[0], z[4], z[3]
-    z = compute_zones(d)[-1]; return z[0], z[4], z[3]
+    if p < zs[0][1]:
+        z = zs[0]; return z[0], z[4], z[3]
+    z = zs[-1]; return z[0], z[4], z[3]
+
+def reconcile_text(d, ctx, zone_name, gold_pct):
+    comp = ctx["composite"]; sig = ctx["signal"]
+    pos = ("处于年内低位、安全边际高" if gold_pct < 20 else
+           "处于年内偏低位置、具备吸引力" if gold_pct < 40 else
+           "处于历史中枢附近" if gold_pct < 65 else
+           "处于年内偏高位置" if gold_pct < 85 else
+           "逼近年内高位、性价比下降")
+    head = []
+    if d["tips"] > 2.0: head.append(f"实际利率偏高(TIPS {d['tips']:.2f}% 压制金价)")
+    if ctx["dxy_pct"] > 70: head.append(f"美元处历史偏强位(分位 {ctx['dxy_pct']:.0f}%)")
+    if d["vix_1y_pct"] > 80: head.append(f"VIX 处历史高位({d['vix_1y_pct']:.0f}%分位,避险)")
+    if ctx["trend_ratio"] < 0.98: head.append(f"价格低于长期均线({d['gold_ma']:.3f})")
+    if gold_pct >= 65 and comp < 55: head.append("技术面偏高而综合信号未转多")
+    if head:
+        return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
+                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：技术面低位提供安全边际，"
+                f"但{'；'.join(head)}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+    return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
+            f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
 
 # ----------------------------------------------------------------------------
 # 6. HTML 报告
@@ -393,53 +409,54 @@ def gauge(value, color, label, sub=""):
     </div>'''
 
 def build_html(d, ctx, status):
-    ind = ctx["indicators"]
-    comp = ctx["composite"]
+    ind = ctx["indicators"]; comp = ctx["composite"]
     cz_name, cz_color, cz_desc = current_zone(d)
+    rec = reconcile_text(d, ctx, cz_name, ctx["gold_pct"])
 
-    cards = []
     def card(name, val, score, color, note):
         return (f'<div class="card"><div class="c-head"><span class="c-name">{name}</span>'
                 f'<span class="c-score" style="color:{color}">{score:.0f}</span></div>'
                 f'<div class="c-val">{val}</div>'
                 f'<div class="bar"><div class="bar-fill" style="width:{score:.0f}%;background:{color}"></div></div>'
                 f'<div class="c-note">{note}</div></div>')
-    cards.append(card("估值分位 (价格 vs 52周)", f"金价位于年内 {ctx['gold_pct']:.0f}% 分位",
-                      ind["valuation"], "#b45309", "越接近年内低位越便宜"))
-    cards.append(card("趋势 (价格/200MA)", f"比值 {ctx['trend_ratio']:.2f}×",
-                      ind["trend"], "#16a34a", "不逆强下行趋势"))
-    cards.append(card("动量 RSI(14)", f"RSI = {d['gold_rsi']:.0f}",
-                      ind["rsi"], "#db2777", "超卖(低)=更好买点"))
-    cards.append(card("实际利率 (10Y TIPS)", f"实际收益率 {d['tips']:.2f}%",
-                      ind["real_yield"], "#7c3aed", "黄金核心驱动：越低越利多"))
-    cards.append(card("美元指数 DXY", f"DXY {d['dxy']:.1f} (分位{ctx['dxy_pct']:.0f}%)",
-                      ind["dxy"], "#0891b2", "美元越强越压制金价"))
-    cards.append(card("避险情绪 VIX", f"VIX {d['vix']:.1f} (分位{d['vix_1y_pct']:.0f}%)",
-                      ind["vix"], "#dc2626", "避险需求支撑金价"))
-    cards.append(card("季节因子", f"{MONTH_CN[ctx['month']]} 评分 {ind['season']:.0f}",
-                      ind["season"], "#ca8a04", SEASON_NOTE[ctx['month']]))
+    cards = [
+        card("估值分位 (价格 vs 52周)", f"金价位于年内 {ctx['gold_pct']:.0f}% 分位",
+             ind["valuation"], "#b45309", "越接近年内低位越便宜"),
+        card("趋势 (价格/长期均线)", f"比值 {ctx['trend_ratio']:.2f}×",
+             ind["trend"], "#16a34a", "不逆强下行趋势"),
+        card("动量 RSI(14)", f"RSI = {d['gold_rsi']:.0f}",
+             ind["rsi"], "#db2777", "超卖(低)=更好买点"),
+        card("实际利率 (10Y TIPS)", f"实际收益率 {d['tips']:.2f}%",
+             ind["real_yield"], "#7c3aed", "黄金核心驱动：越低越利多"),
+        card("美元指数 DXY", f"DXY {d['dxy']:.1f} (分位{ctx['dxy_pct']:.0f}%)",
+             ind["dxy"], "#0891b2", "美元越强越压制金价"),
+        card("避险情绪 VIX", f"VIX {d['vix']:.1f} (分位{d['vix_1y_pct']:.0f}%)",
+             ind["vix"], "#dc2626", "避险需求支撑金价"),
+        card("季节因子", f"{MONTH_CN[ctx['month']]} 评分 {ind['season']:.0f}",
+             ind["season"], "#ca8a04", SEASON_NOTE[ctx['month']]),
+    ]
 
-    # 价位区间表
+    # 价位区间表（中性位置描述）
     zone_rows = ""
     for name, lo, hi, desc, color in compute_zones(d):
         mark = "◀ 当前" if name == cz_name else ""
         zone_rows += (f"<tr><td><b style='color:{color}'>{name}</b></td>"
-                      f"<td>${lo:,.0f}</td><td>${hi:,.0f}</td>"
+                      f"<td>{lo:.3f}</td><td>{hi:.3f}</td>"
                       f"<td style='text-align:left;font-size:12px;color:#475569'>{desc}</td>"
                       f"<td>{mark}</td></tr>")
 
     # 时间窗口 / 触发条件
-    bull = [("美元转弱", f"DXY 跌破 98（现 {d['dxy']:.1f}）"),
-            ("实际利率回落", f"10Y TIPS 降至 1.5% 以下（现 {d['tips']:.2f}%）"),
-            ("避险升温", f"VIX 升至 25+ 地缘/衰退担忧（现 {d['vix']:.1f}）"),
-            ("旺季窗口", "9-11 月(印度婚季/排灯节) 与 12-1 月(春节前中国需求)")]
-    bear = [("逼近前高", f"金价升至 ${d['gold_52w_high']*0.90:,.0f}+ 且 RSI>65"),
-            ("美元转强", "DXY 突破 102（现 {:.1f}）".format(d['dxy'])),
-            ("实际利率上行", "10Y TIPS 升破 3.0%（现 {:.2f}%）".format(d['tips'])),
-            ("动能转空", "金价跌破 200 日线({:,.0f}) 且 RSI<35".format(d['gold_200ma']))]
+    bull = [("美元转弱", f"DXY 跌破 98（现 {d['dxy']:.1f}）时分批买入，美元走弱利多金价"),
+            ("实际利率回落", f"10Y TIPS 降至 1.5% 以下（现 {d['tips']:.2f}%）黄金持有成本下降"),
+            ("避险升温", f"VIX 升至 25+（现 {d['vix']:.1f}）地缘/衰退担忧推动避险买盘"),
+            ("回撤到位", f"金价回撤至长期均线({d['gold_ma']:.3f}) 或较高点 -10% 附近")]
+    bear = [("逼近前高", f"金价升至 {d['gold_52w_high']*0.90:.3f}+ 且 RSI>65 超买分批止盈"),
+            ("美元转强", f"DXY 突破 102（现 {d['dxy']:.1f}）压制金价"),
+            ("实际利率上行", f"10Y TIPS 升破 3.0%（现 {d['tips']:.2f}%）持有成本上升"),
+            ("动能转空", f"金价跌破长期均线({d['gold_ma']:.3f}) 且 RSI<35 转弱防守")]
 
-    bull_html = "".join(f'<div class="rule rule-bull"><span class="r-kind">转多</span><b>{t}</b><br>{v}</div>' for t, v in bull)
-    bear_html = "".join(f'<div class="rule rule-bear"><span class="r-kind">止盈</span><b>{t}</b><br>{v}</div>' for t, v in bear)
+    bull_html = "".join(f'<div class="rule rule-bull"><span class="r-kind">加仓信号</span><b>{t}</b><br>{v}</div>' for t, v in bull)
+    bear_html = "".join(f'<div class="rule rule-bear"><span class="r-kind">止盈信号</span><b>{t}</b><br>{v}</div>' for t, v in bear)
 
     st_lines = "".join(f"<li>{k}: {v}</li>" for k, v in status.items())
 
@@ -450,23 +467,26 @@ def build_html(d, ctx, status):
 
     html_doc = f'''<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>黄金交易助手 · 报告</title>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
- background:#f8fafc;color:#0f172a;padding:24px}}
+ background:#f1f5f9;color:#0f172a;padding:24px}}
 .wrap{{max-width:1080px;margin:0 auto}}
 header{{background:linear-gradient(135deg,#78350f,#b45309);color:#fff;border-radius:16px;
  padding:24px 28px;margin-bottom:20px}}
 header h1{{font-size:22px;margin-bottom:6px}}
-header .meta{{font-size:12px;opacity:.85}}
+header .meta{{font-size:12px;opacity:.8}}
 .signal{{display:inline-block;margin-top:12px;padding:8px 18px;border-radius:10px;
  background:{ctx['color']};color:#fff;font-size:18px;font-weight:700}}
-.advice{{margin-top:12px;font-size:14px;line-height:1.6;opacity:.96}}
+.advice{{margin-top:12px;font-size:14px;line-height:1.6;opacity:.95}}
 .comp-wrap{{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;
- padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
+ padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);flex-wrap:wrap}}
 .comp-gauge{{flex:0 0 220px}}
+.gauge .g-label{{text-align:center;font-size:13px;font-weight:600;margin-top:2px}}
+.gauge .g-sub{{text-align:center;font-size:11px;color:#94a3b8}}
 .section{{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;
  box-shadow:0 1px 3px rgba(0,0,0,.08)}}
 .section h2{{font-size:16px;margin-bottom:14px;color:#1e293b}}
@@ -488,17 +508,27 @@ th{{background:#f8fafc;color:#475569;font-weight:600}}
 .rule-bear{{border-left-color:#dc2626}}
 .r-kind{{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;
  border-radius:4px;padding:1px 8px;margin-bottom:6px}}
-.now-card{{border:2px solid {cz_color};border-radius:12px;padding:16px;background:#fffdf7;margin-bottom:14px}}
-.now-card .nc-title{{font-size:14px;font-weight:700;margin-bottom:8px}}
-.now-card .nc-zone{{font-size:20px;font-weight:800;color:{cz_color}}}
-.now-card .nc-desc{{font-size:12px;color:#64748b;margin-top:6px}}
+.recon{{display:flex;gap:20px;align-items:stretch;background:linear-gradient(135deg,#fff7ed,#f8fafc);
+ border:2px solid {cz_color};border-radius:14px;padding:18px;margin-bottom:20px;flex-wrap:wrap}}
+.recon .r-col{{flex:1;min-width:200px}}
+.recon .r-label{{font-size:12px;color:#64748b;margin-bottom:4px}}
+.recon .r-val{{font-size:18px;font-weight:800}}
+.recon .r-zone{{color:{cz_color}}}
+.recon .r-text{{flex:2 1 100%;font-size:13px;line-height:1.7;color:#334155;margin-top:14px;
+ border-top:1px dashed #fcd9b6;padding-top:12px}}
 .status{{font-size:12px;color:#64748b}}
-.status li{{margin:2px 0}}
+.status li{{margin:2px 0;list-style-position:inside}}
 footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
+@media (max-width:600px){{
+  body{{padding:12px}}
+  .cards{{grid-template-columns:1fr 1fr}}
+  .rules{{grid-template-columns:1fr}}
+  .comp-gauge{{flex:1 1 100%}}
+}}
 </style></head><body><div class="wrap">
 <header>
   <h1>🪙 黄金交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：现货黄金 XAU/USD ｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口</div>
+  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：518850 黄金ETF华夏（A股可直接交易，与现货金价高度联动）｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
 </header>
@@ -515,39 +545,54 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   </div>
 </div>
 
-<div class="now-card">
-  <div class="nc-title">📍 当前金价 ${d['gold']:,.0f} 所处区间</div>
-  <div class="nc-zone">{cz_name}</div>
-  <div class="nc-desc">{cz_desc}</div>
+<div class="recon">
+  <div class="r-col">
+    <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
+    <div class="r-val r-zone">{cz_name}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 {d['gold_price']:.3f} ｜ 52 周区间分位 {ctx['gold_pct']:.0f}%</div>
+  </div>
+  <div class="r-col">
+    <div class="r-label">🎯 综合信号（全页唯一结论）</div>
+    <div class="r-val" style="color:{ctx['color']}">{ctx['signal']}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 {comp:.0f}/100</div>
+  </div>
+  <div class="r-text">{rec}</div>
 </div>
 
 <div class="section"><h2>① 七维指标明细</h2><div class="cards">{''.join(cards)}</div></div>
 
-<div class="section"><h2>② 买入 / 卖出价位区间（随实时数据动态计算）</h2>
+<div class="section"><h2>② 价位区间参考（仅标示价格相对 52 周区间的位置，安全边际参考）</h2>
   <table><thead><tr>
-    <th>区间</th><th>下沿</th><th>上沿</th><th>策略含义</th><th>状态</th>
+    <th>价位区间</th><th>下沿</th><th>上沿</th><th>位置描述</th><th>状态</th>
   </tr></thead><tbody>{zone_rows}</tbody></table>
   <p style="font-size:12px;color:#64748b;margin-top:10px">
-  区间基于 52 周高低({d['gold_52w_low']:,.0f}–{d['gold_52w_high']:,.0f}) 与 200 日线({d['gold_200ma']:,.0f}) 动态生成；
-  绿区越跌越买，红区越涨越卖。建议采用分批而非一次性操作。</p>
+  区间基于 518850 的 52 周高低({d['gold_52w_low']:.3f}–{d['gold_52w_high']:.3f}) 按百分比切分，颜色仅表示"低=绿 / 高=红"。
+  此表为<b>安全边际参考</b>，不单独下买卖命令；具体买入/卖出操作一律以上方「综合信号」为准。
+  黄金长期保值属性强，减仓区宜"分批减/留底仓"，不必清仓。建议分批操作。</p>
 </div>
 
-<div class="section"><h2>③ 时间窗口与触发条件</h2>
-  <div class="now-card" style="border-color:#ca8a04;background:#fffdf5">
-    <div class="nc-title">🗓️ 季节窗口</div>
-    <div class="nc-desc">{season_win}</div>
+<div class="section"><h2>③ 时间窗口与触发条件（何时加仓 / 何时止盈）</h2>
+  <div class="recon" style="border-color:#ca8a04;background:linear-gradient(135deg,#fffbeb,#f8fafc);margin-bottom:14px">
+    <div class="r-col" style="flex:2 1 100%">
+      <div class="r-label">🗓️ 季节窗口</div>
+      <div class="r-text" style="border-top:none;padding-top:0;margin-top:6px">{season_win}</div>
+    </div>
   </div>
   <div class="rules">
-    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">转多 / 加仓触发条件</div>{bull_html}</div>
-    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div>{bear_html}</div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">加仓信号</div>{bull_html}</div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈信号</div>{bear_html}</div>
   </div>
+  <p style="font-size:12px;color:#64748b;margin-top:12px">
+  核心逻辑：低估值+弱美元+低实际利率+避险升温时"买在恐惧"；逼近前高+超买+强美元时"分批止盈"。
+  黄金宜作为长期保值配置、定投为主，择时仅用于加减仓，避免频繁全进全出。</p>
 </div>
 
 <div class="section"><h2>④ 数据来源与新鲜度</h2>
   <ul class="status">{st_lines}</ul>
   <p style="font-size:12px;color:#94a3b8;margin-top:8px">
-  数据源：Yahoo Finance (黄金 GC=F / 美元指数 DX-Y.NYB / VIX) + FRED (10Y TIPS 实际利率 DFII10)。
-  若标注"回退-快照"表示实时抓取失败，使用内置快照，请以实时数据为准。</p>
+  ETF 价格/52周/均线/RSI：东方财富(518850, 不复权)，经 --manual 刷新；
+  宏观驱动：Yahoo Finance (美元指数 DXY / VIX) + FRED (10Y TIPS 实际利率 DFII10)，实时抓取失败回退快照。
+  若标注"回退-快照"表示实时抓取失败，请以实时数据为准。</p>
 </div>
 
 <footer>
@@ -566,7 +611,7 @@ def main():
     ap = argparse.ArgumentParser(description="黄金交易助手 (Gold Trading Assistant)")
     ap.add_argument("--offline", action="store_true", help="强制使用内置快照")
     ap.add_argument("--fred-key", default=None, help="FRED API Key")
-    ap.add_argument("--manual", default=None, help="手动覆盖JSON(覆盖SNAPSHOT字段)")
+    ap.add_argument("--manual", default=None, help="手动覆盖JSON(覆盖SNAPSHOT字段, 含 gold_*)")
     ap.add_argument("--out", default=None, help="HTML 输出路径")
     args = ap.parse_args()
 
@@ -585,15 +630,14 @@ def main():
     d, status = fetch_market_data(fred_key=args.fred_key, offline=offline)
 
     ctx = analyze(d)
+    cz_name, _, _ = current_zone(d)
 
-    print(f"\n  数据时间    : {d.get('as_of','')}")
-    print(f"  金价        : ${d['gold']:,.0f}  (52周 {d['gold_52w_low']:,.0f}-{d['gold_52w_high']:,.0f})")
-    print(f"  200MA       : ${d['gold_200ma']:,.0f}  → 价格/MA = {ctx['trend_ratio']:.2f}×")
-    print(f"  RSI(14)     : {d['gold_rsi']:.1f}")
-    print(f"  DXY         : {d['dxy']:.1f}  (分位 {ctx['dxy_pct']:.0f}%)")
-    print(f"  10Y TIPS    : {d['tips']:.2f}%   VIX {d['vix']:.1f} (分位 {d['vix_1y_pct']:.0f}%)")
-    month_cn = MONTH_CN[ctx['month']]
-    print(f"  金价年内分位 : {ctx['gold_pct']:.0f}%   季节({month_cn})评分 {ctx['season_score']}")
+    print(f"\n  数据时间      : {d.get('as_of','')}")
+    print(f"  518850 现价   : {d['gold_price']:.3f}  (52周 {d['gold_52w_low']:.3f}-{d['gold_52w_high']:.3f}, 分位 {ctx['gold_pct']:.0f}%)")
+    print(f"  长期均线      : {d['gold_ma']:.3f}  → 价格/MA = {ctx['trend_ratio']:.2f}×   RSI {d['gold_rsi']:.0f}")
+    print(f"  DXY           : {d['dxy']:.1f}  (分位 {ctx['dxy_pct']:.0f}%)")
+    print(f"  10Y TIPS      : {d['tips']:.2f}%   VIX {d['vix']:.1f} (分位 {d['vix_1y_pct']:.0f}%)")
+    print(f"  当前区间      : {cz_name}")
     print("-" * 60)
     print("  指标评分(0-100, 越高越适合买入):")
     names = {"valuation":"估值分位","trend":"趋势","rsi":"RSI动量","real_yield":"实际利率",
@@ -601,9 +645,9 @@ def main():
     for k in WEIGHTS:
         print(f"    {names[k]:<10} {ctx['indicators'][k]:5.1f}   (权重{WEIGHTS[k]})")
     print("-" * 60)
-    print(f"  ★ 综合评分  : {ctx['composite']:.1f} / 100")
-    print(f"  ★ 行动信号  : {ctx['signal']}")
-    print(f"  ★ 建议      : {ctx['advice']}")
+    print(f"  ★ 综合评分    : {ctx['composite']:.1f} / 100")
+    print(f"  ★ 行动信号    : {ctx['signal']}")
+    print(f"  ★ 建议        : {ctx['advice']}")
     print("=" * 60)
 
     out = args.out or os.path.join(os.path.dirname(os.path.abspath(__file__)),
