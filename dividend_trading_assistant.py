@@ -288,13 +288,13 @@ def build_html(d, ctx):
                       f"<td style='text-align:left;font-size:12px;color:#475569'>{desc}</td>"
                       f"<td>{mark}</td></tr>")
 
-    bull = [("利差走阔", f"股债利差回升至 6.0%+（现 {ctx['spread']:.2f}%）全仓"),
-            ("利率新低", f"10Y 国债破 1.5%（现 {d['bond10y']:.2f}%）利差走阔"),
+    bull = [("利差极端便宜", f"股债利差升至历史前25%便宜区（分位≥75%，现 {ctx['spread_pct']:.0f}%）→ 重仓分批"),
+            ("利率新低", f"10Y 国债跌破 1.5%（现 {d['bond10y']:.2f}%）→ 利差被动走阔"),
             ("估值回落", f"沪深300 PE 分位回落至 <30%（现 {ctx['pe_pct']:.0f}%）"),
-            ("技术买点", f"563020 回撤至 MA12({d['etf_ma']:.3f}) 下方或 RSI<35（现 {d['etf_rsi']:.0f}）")]
-    bear = [("利差收窄", f"股债利差跌破 4.0%（现 {ctx['spread']:.2f}%）减仓50%"),
-            ("利率上行", f"10Y 国债升破 2.2%（现 {d['bond10y']:.2f}%）利差承压"),
-            ("估值偏贵", f"沪深300 PE 分位 >70%（现 {ctx['pe_pct']:.0f}%）吸引力下降"),
+            ("技术买点", f"563020 跌破 MA12({d['etf_ma']:.3f}) 或 RSI<35（现 RSI {d['etf_rsi']:.0f}）")]
+    bear = [("利差极端昂贵", f"股债利差跌至历史后25%便宜区（分位≤25% 或 绝对值<3.5%，现 {ctx['spread_pct']:.0f}% / {ctx['spread']:.2f}%）→ 降至底仓"),
+            ("利率上行", f"10Y 国债升破 2.5%（现 {d['bond10y']:.2f}%）→ 利差承压"),
+            ("估值偏贵", f"沪深300 PE 分位 >70%（现 {ctx['pe_pct']:.0f}%）→ 吸引力下降"),
             ("风格拥挤", f"563020 逼近 52 周高({d['etf_52w_high']:.3f}) 且 RSI>70 超买")]
 
     bull_html = "".join(f'<div class="rule rule-bull"><span class="r-kind">买入</span><b>{t}</b><br>{v}</div>' for t, v in bull)
@@ -408,6 +408,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   </div>
   <p style="font-size:12px;color:#64748b;margin-top:12px">
   核心逻辑：股债利差走阔(股票相对债券便宜)+估值低位+利率下行时"逢低累积"；利差收窄+估值偏贵时"分批止盈"。
+  触发阈值基于 2014 年以来历史分位<b>自适应</b>设定（非旧版固定 6%/4% 硬阈值），贴合沪深300 股债利差的历史分布与红利低波的收息属性。
   红利低波以收息为本，宜长线持有、分红再投，择时仅用于加减仓。</p>
 </div>
 

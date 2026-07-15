@@ -155,11 +155,12 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 
 <div class="section"><h2>③ 时间窗口与触发条件</h2>
   <div class="rules">
-    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利差走阔</b><br>股债利差回升至 6.0%+（现 5.29%）全仓</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利率新低</b><br>10Y 国债破 1.5%（现 1.73%）利差走阔</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>估值回落</b><br>沪深300 PE 分位回落至 <30%（现 74%）</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>技术买点</b><br>563020 回撤至 MA12(1.186) 下方或 RSI<35（现 70）</div></div>
-    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利差收窄</b><br>股债利差跌破 4.0%（现 5.29%）减仓50%</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利率上行</b><br>10Y 国债升破 2.2%（现 1.73%）利差承压</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>估值偏贵</b><br>沪深300 PE 分位 >70%（现 74%）吸引力下降</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>风格拥挤</b><br>563020 逼近 52 周高(1.283) 且 RSI>70 超买</div></div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利差极端便宜</b><br>股债利差升至历史前25%便宜区（分位≥75%，现 57%）→ 重仓分批</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利率新低</b><br>10Y 国债跌破 1.5%（现 1.73%）→ 利差被动走阔</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>估值回落</b><br>沪深300 PE 分位回落至 <30%（现 74%）</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>技术买点</b><br>563020 跌破 MA12(1.186) 或 RSI<35（现 RSI 70）</div></div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利差极端昂贵</b><br>股债利差跌至历史后25%便宜区（分位≤25% 或 绝对值<3.5%，现 57% / 5.29%）→ 降至底仓</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利率上行</b><br>10Y 国债升破 2.5%（现 1.73%）→ 利差承压</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>估值偏贵</b><br>沪深300 PE 分位 >70%（现 74%）→ 吸引力下降</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>风格拥挤</b><br>563020 逼近 52 周高(1.283) 且 RSI>70 超买</div></div>
   </div>
   <p style="font-size:12px;color:#64748b;margin-top:12px">
   核心逻辑：股债利差走阔(股票相对债券便宜)+估值低位+利率下行时"逢低累积"；利差收窄+估值偏贵时"分批止盈"。
+  触发阈值基于 2014 年以来历史分位<b>自适应</b>设定（非旧版固定 6%/4% 硬阈值），贴合沪深300 股债利差的历史分布与红利低波的收息属性。
   红利低波以收息为本，宜长线持有、分红再投，择时仅用于加减仓。</p>
 </div>
 
@@ -172,7 +173,7 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 
 <footer>
   红利交易助手 · 仅供研究参考，非投资建议<br>
-  生成于 2026-07-15 18:39 ·
+  生成于 2026-07-15 18:43 ·
   <a href="https://hebin1979.github.io/" style="color:#b91c1c">返回工具箱首页</a> ·
   <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#b91c1c">反馈/建议</a>
 </footer>
