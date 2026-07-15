@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>港股新股监测系统 V2.0</title>
+    <style>
+        :root {
+            --primary-color: #e94560;
+            --secondary-color: #0f3460;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #666666;
+            --border-radius: 12px;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #1a1a2e 100%);
+            color: white;
+            padding: 24px 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ipo-stock {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stock-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stock-code {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .stock-rating {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stock-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .info-item {
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .pros, .cons {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .pros {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .cons {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .pros h4, .cons h4 {
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .pros ul, .cons ul {
+            margin-left: 16px;
+        }
+
+        .analysis {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
+            color: #004085;
+        }
+
+        .recommendation {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 10px;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        @media (max-width: 768px) {
+            .stock-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            
+            /* 表格横向滚动优化 */
+            .table-scroll {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -10px;
+                padding: 0 10px;
+            }
+            
+            .table-scroll table {
+                min-width: 700px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 港股新股监测系统 V2.0</h1>
+            <div class="subtitle">基于AI的智能新股分析与预警平台</div>
+        </div>
+
+        <div id="loading" class="loading">
+            <p>⏳ 正在加载新股数据...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- 动态通知区域 -->
+        <div id="notification" class="card" style="display: none;"></div>
+
+        <div id="content" style="display: none;">
+            <!-- 正在招股 -->
+            <div class="card">
+                <div class="card-title">🔥 正在招股新股</div>
+                <div id="currently-subscribing"></div>
+            </div>
+
+            <!-- 即将上市 -->
+            <div class="card">
+                <div class="card-title">🚀 即将上市</div>
+                <div id="listing-tomorrow"></div>
+            </div>
+
+            <!-- 已上市新股 -->
+            <div class="card">
+                <div class="card-title">📈 2026年已上市新股</div>
+                <div id="listed-ipos"></div>
+            </div>
+        </div>
+
+        <div class="card" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+            <p style="color: #856404; font-size: 14px;">
+                ⚠️ <strong>投资风险提示：</strong>本系统提供的数据仅供参考，不构成投资建议。新股投资存在破发、流动性不足等风险，请投资者谨慎决策，盈亏自负。
+            </p>
+        </div>
+
+        <div class="card" style="text-align: center; font-size: 12px; color: var(--text-secondary);">
+            <p>数据来源：富途牛牛、etnet经济通、东方财富等公开信息</p>
+            <p id="last-update">最后更新：--</p>
+        </div>
+    </div>
+
+    <script>
+        // 测试JavaScript是否执行
+        console.log('JavaScript开始执行...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM已加载');
+            // 显示测试消息
+            document.getElementById('loading').innerHTML = '⏳ JavaScript已执行，正在加载新股数据...';
+        });
+        
+        // 加载JSON数据
+        async function loadData() {
+            try {
+                console.log('开始加载数据...');
+                // 添加超时处理
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+                
+                const response = await fetch('hk_ipo_data_2026.json?v=' + new Date().getTime(), {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                console.log('响应状态:', response.status);
+                if (!response.ok) {
+                    throw new Error('无法加载数据文件 (状态: ' + response.status + ')');
+                }
+                const data = await response.json();
+                console.log('数据加载成功:', data);
+                return data;
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                // 显示详细错误信息
+                const errorDiv = document.getElementById('error');
+                errorDiv.style.display = 'block';
+                
+                if (error.name === 'AbortError') {
+                    errorDiv.innerHTML = '❌ 加载数据超时（10秒）。请检查网络连接或<a href="hk_ipo_data_2026.json" target="_blank">直接查看数据文件</a>。';
+                } else {
+                    errorDiv.innerHTML = '❌ 加载数据失败：' + error.message + '<br>请<a href="javascript:location.reload()">重新加载</a>或检查浏览器控制台。';
+                }
+                throw error;
+            }
+        }
+
+        // 渲染正在招股的新股
+        function renderCurrentlySubscribing(stocks) {
+            const container = document.getElementById('currently-subscribing');
+            
+            if (!stocks || stocks.length === 0) {
+                container.innerHTML = '<p style="color: #666;">暂无招股中的新股</p>';
+                return;
+            }
+
+            container.innerHTML = stocks.map(stock => `
+                <div class="ipo-stock">
+                    <div class="stock-header">
+                        <div>
+                            <div class="stock-name">${stock.name} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
+                            <div class="stock-code">${stock.code}.HK</div>
+                        </div>
+                        ${stock.rating ? `<div class="stock-rating">${stock.rating}分</div>` : ''}
+                    </div>
+                    <div class="stock-info">
+                        <div class="info-item">
+                            <div class="info-label">招股期</div>
+                            <div class="info-value">${stock.subscription_start} 至 ${stock.subscription_end}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">上市日期</div>
+                            <div class="info-value">${stock.listing_date}</div>
+                        </div>
+                        ${stock.price_range ? `
+                        <div class="info-item">
+                            <div class="info-label">招股价</div>
+                            <div class="info-value">${stock.price_range}</div>
+                        </div>` : ''}
+                        ${stock.entry_fee ? `
+                        <div class="info-item">
+                            <div class="info-label">入场费</div>
+                            <div class="info-value">HK$${stock.entry_fee}</div>
+                        </div>` : ''}
+                        ${stock.oversubscription ? `
+                        <div class="info-item">
+                            <div class="info-label">超额认购</div>
+                            <div class="info-value">${stock.oversubscription}</div>
+                        </div>` : ''}
+                    </div>
+                    ${stock.pros && stock.pros.length > 0 ? `
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ 优势</h4>
+                            <ul>${stock.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+                        </div>
+                        ${stock.cons && stock.cons.length > 0 ? `
+                        <div class="cons">
+                            <h4>⚠️ 风险</h4>
+                            <ul>${stock.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+                        </div>` : ''}
+                    </div>` : ''}
+                    ${stock.analysis ? `<div class="analysis">💡 ${stock.analysis}</div>` : ''}
+                    ${stock.recommendation ? `<div class="recommendation">📝 建议：${stock.recommendation}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 渲染即将上市的新股
+        function renderListingTomorrow(stocks) {
+            const container = document.getElementById('listing-tomorrow');
+            
+            if (!stocks || stocks.length === 0) {
+                container.innerHTML = '<p style="color: #666;">暂无即将上市的新股</p>';
+                return;
+            }
+
+            container.innerHTML = stocks.map(stock => `
+                <div class="ipo-stock">
+                    <div class="stock-header">
+                        <div>
+                            <div class="stock-name">${stock.name} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
+                            <div class="stock-code">${stock.code}.HK</div>
+                        </div>
+                        ${stock.rating ? `<div class="stock-rating">${stock.rating}分</div>` : ''}
+                    </div>
+                    <div class="stock-info">
+                        <div class="info-item">
+                            <div class="info-label">上市日期</div>
+                            <div class="info-value">${stock.listing_date}</div>
+                        </div>
+                        ${stock.pricing ? `
+                        <div class="info-item">
+                            <div class="info-label">定价</div>
+                            <div class="info-value">${stock.pricing}</div>
+                        </div>` : ''}
+                        ${stock.entry_fee ? `
+                        <div class="info-item">
+                            <div class="info-label">入场费</div>
+                            <div class="info-value">HK$${stock.entry_fee}</div>
+                        </div>` : ''}
+                        ${stock.oversubscription ? `
+                        <div class="info-item">
+                            <div class="info-label">超额认购</div>
+                            <div class="info-value">${stock.oversubscription}</div>
+                        </div>` : ''}
+                    </div>
+                    ${stock.analysis ? `<div class="analysis">💡 ${stock.analysis}</div>` : ''}
+                    ${stock.recommendation ? `<div class="recommendation">📝 建议：${stock.recommendation}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 渲染已上市新股表格
+        function renderListedIPOs(stocks) {
+            const container = document.getElementById('listed-ipos');
+            
+            if (!stocks || stocks.length === 0) {
+                container.innerHTML = '<p style="color: #666;">暂无已上市新股数据</p>';
+                return;
+            }
+
+            const tableHTML = `
+                <div class="table-scroll">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                            <th style="padding: 8px; text-align: left;">代码</th>
+                            <th style="padding: 8px; text-align: left;">名称</th>
+                            <th style="padding: 8px; text-align: left;">上市日期</th>
+                            <th style="padding: 8px; text-align: right;">IPO价</th>
+                            <th style="padding: 8px; text-align: right;">暗盘收盘价</th>
+                            <th style="padding: 8px; text-align: right;">暗盘涨跌幅</th>
+                            <th style="padding: 8px; text-align: right;">首日涨跌幅</th>
+                            <th style="padding: 8px; text-align: right;">累计涨幅</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${stocks.map(stock => `
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 8px;">${stock.code}</td>
+                                <td style="padding: 8px;">${stock.name}</td>
+                                <td style="padding: 8px;">${stock.listing_date}</td>
+                                <td style="padding: 8px; text-align: right;">${stock.ipo_price || '--'}</td>
+                                <td style="padding: 8px; text-align: right;">${stock.dark_pool_price || '--'}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.dark_pool_pct > 0 ? '#e94560' : stock.dark_pool_pct < 0 ? '#28a745' : '#666'};">${stock.dark_pool_pct !== null && stock.dark_pool_pct !== undefined ? stock.dark_pool_pct + '%' : '--'}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.first_day_pct > 0 ? '#e94560' : stock.first_day_pct < 0 ? '#28a745' : '#666'};">${stock.first_day_pct !== null && stock.first_day_pct !== undefined ? stock.first_day_pct + '%' : '--'}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.cumulative_pct > 0 ? '#e94560' : stock.cumulative_pct < 0 ? '#28a745' : '#666'};">${stock.cumulative_pct !== null && stock.cumulative_pct !== undefined ? stock.cumulative_pct + '%' : '--'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        // 渲染动态通知
+        function renderNotification(data) {
+            const container = document.getElementById('notification');
+            let notifications = [];
+
+            // 1. 检查今日上市的新股
+            const today = new Date();
+            const todayStr = (today.getMonth() + 1) + '/' + today.getDate();
+            
+            if (data.listed_ipos_2026 && data.listed_ipos_2026.length > 0) {
+                data.listed_ipos_2026.forEach(stock => {
+                    if (stock.listing_date === todayStr) {
+                        const pct = stock.first_day_pct || 0;
+                        notifications.push(`🎉 ${stock.name}(${stock.code})今日上市，首日涨幅${pct > 0 ? '+' : ''}${pct}%`);
+                    }
+                });
+            }
+
+            // 2. 检查正在招股的新股
+            if (data.currently_subscribing && data.currently_subscribing.length > 0) {
+                data.currently_subscribing.forEach(stock => {
+                    if (stock.subscription_end === '今日') {
+                        notifications.push(`📢 ${stock.name}(${stock.code})正在招股中，今日是截止日期！`);
+                    } else if (stock.subscription_end) {
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        const tomorrowStr = (tomorrow.getMonth() + 1) + '/' + tomorrow.getDate();
+                        if (stock.subscription_end === tomorrowStr) {
+                            notifications.push(`📢 ${stock.name}(${stock.code})正在招股中，明日（${stock.subscription_end}）截止！`);
+                        }
+                    }
+                });
+            }
+
+            // 3. 检查即将上市的新股
+            if (data.listing_tomorrow && data.listing_tomorrow.length > 0) {
+                data.listing_tomorrow.forEach(stock => {
+                    notifications.push(`🚀 ${stock.name}(${stock.code})将于${stock.listing_date}上市`);
+                });
+            }
+
+            // 如果有通知，显示通知区域
+            if (notifications.length > 0) {
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 4px solid #ffc107; padding: 12px 16px; border-radius: 8px;">
+                        ${notifications.map(n => `<p style="font-size: 14px; color: #856404; margin-bottom: 4px;">${n}</p>`).join('')}
+                    </div>
+                `;
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // 初始化
+        async function init() {
+            try {
+                const data = await loadData();
+                
+                // 隐藏加载提示
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+                // 渲染数据
+                renderNotification(data);
+                renderCurrentlySubscribing(data.currently_subscribing);
+                renderListingTomorrow(data.listing_tomorrow);
+                renderListedIPOs(data.listed_ipos_2026);
+                
+                // 更新最后更新时间
+                if (data.metadata && data.metadata.last_update) {
+                    document.getElementById('last-update').textContent = '最后更新：' + data.metadata.last_update;
+                }
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '❌ 加载数据失败：' + error.message;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
