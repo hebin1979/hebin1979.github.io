@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=2.0,user-scalable=yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>腾讯交易助手</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -12,6 +15,8 @@ button{font-family:inherit;cursor:pointer}
 
 .header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:#fff;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
 .header h1{font-size:1.05em;font-weight:700;width:100%}
+.datastamp{font-size:.72em;color:rgba(255,255,255,.75);font-weight:400}
+.datastamp.warn{color:#ffd479;font-weight:600}
 .stock-input-group{display:flex;gap:6px;align-items:center;width:100%}
 .stock-input-group input{padding:9px 12px;border:2px solid rgba(255,255,255,.2);border-radius:7px;background:rgba(255,255,255,.1);color:#fff;font-size:14px;flex:1;min-width:0;outline:none}
 .stock-input-group input:focus{border-color:var(--b)}
@@ -171,6 +176,7 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="header">
   <h1>📊 腾讯交易助手</h1>
+  <div id="dataStamp" class="datastamp"></div>
   <div class="stock-input-group" style="width:100%">
     <span class="examples">标的：<b style="color:rgba(255,255,255,.85)">00700 腾讯控股（港股）</b> · 实时技术分析 + 多维度 AI 评分，自动判断买入/卖出/持有</span>
   </div>
@@ -273,6 +279,7 @@ async function fetchGtimgQuote(secid){
     f167:rng(numOr(p[45]),0,50),
     f168:numOr(p[39])
   };
+  window.__gtimgDt=p[30]||'';
 }
 // 东财 K线（带重试）
 async function fetchEastmoneyKline(secid,limit,retries){
@@ -796,6 +803,8 @@ async function analyzeStock(){
     var quote=await fetchQuote(info.secid);
     var kl=await fetchKline(info.secid,120);
     d=buildData(quote,kl,info);
+    var _stamp=document.getElementById('dataStamp');
+    if(_stamp){ _stamp.textContent='实时行情'+(window.__gtimgDt?(' · '+window.__gtimgDt):'（东财）'); _stamp.className='datastamp'; }
     // Augment with fundamentals (cannot fetch from public API, use defaults)
     d.fundamentals={eps:+(d.price/15).toFixed(2),bvps:+(d.price/d.pb).toFixed(2),roe:15,profitGrowth:10,revenueGrowth:8,profitMargin:d.peTTM>0?Math.min(40,100/d.peTTM*5):20,opMargin:25,debtRatio:50,currentRatio:1.5,fcf:d.marketCap*0.03,dividendYield:1.5,peHistory:{low5y:Math.max(8,d.peTTM*0.6),high5y:d.peTTM*2,median5y:d.peTTM*1.2}};
     d.newsSentiment=d.isDemo?d.newsSentiment:{positive:60,neutral:25,negative:15,heatScore:60};
@@ -809,6 +818,8 @@ async function analyzeStock(){
     if(d.kline&&!d.kline.length) d.kline=genDemoKline();
     if(!d.kline) d.kline=genDemoKline();
     mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败, 已切换到内置演示数据: '+err.message+'</div>';
+    var _stamp2=document.getElementById('dataStamp');
+    if(_stamp2){ _stamp2.textContent='⚠️ 演示数据（实时接口失败）'; _stamp2.className='datastamp warn'; }
   }
 
   var parts=[panelReco(d),panelScore(d),panelFund(d),panelChart(),panelIndi(d),panelMA(d),panelMACDRSI(d),panelKDJBoll(d),panelSent(d),panelAnly(d)];
