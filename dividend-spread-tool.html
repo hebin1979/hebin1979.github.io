@@ -100,7 +100,7 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 <div class="container">
 <header>
   <h1>📊 红利交易助手</h1>
-  <div class="subtitle">数据截至 <span id="updateDate">2026-07-15</span> ｜ 标的：红利低波 H30269（沪深300红利低波）｜ 框架：7 指标加权打分 + 买卖建议区间 + 触发条件</div>
+  <div class="subtitle">数据截至 <span id="updateDate">2026-07-15</span> ｜ 标的：563020 易方达中证红利低波动ETF（中证红利低波动）｜ 框架：7 指标加权打分 + 买卖建议区间 + 触发条件</div>
   <div class="signal" id="signalBadge">--</div>
   <div class="advice" id="adviceText">--</div>
 </header>
@@ -242,24 +242,24 @@ const rawData = [
 ['2023-03',4050,12.60,2.86,3650],['2023-04',4029,12.50,2.78,3680],
 ['2023-05',3798,11.85,2.72,3580],['2023-06',3842,11.90,2.68,3600],
 ['2023-07',3912,12.10,2.64,3650],['2023-08',3765,11.60,2.58,3580],
-['2023-09',3689,11.37,2.68,3520],['2023-10',3572,11.40,2.72,3450],
-['2023-11',3496,11.30,2.68,3420],['2023-12',3431,11.20,2.58,3400],
-['2024-01',3215,10.80,2.45,3350],['2024-02',3516,11.60,2.38,3480],
-['2024-03',3537,11.50,2.30,3550],['2024-04',3604,12.00,2.28,3650],
-['2024-05',3579,11.80,2.22,3680],['2024-06',3461,11.50,2.20,3620],
-['2024-07',3442,11.60,2.15,3650],['2024-08',3328,11.22,2.18,3580],
-['2024-09',4017,13.50,2.08,3850],['2024-10',3891,13.20,2.15,3880],
-['2024-11',3917,13.30,2.05,3920],['2024-12',3935,13.50,1.78,3950],
-['2025-01',3817,13.20,1.65,3920],['2025-02',3890,13.40,1.68,3980],
-['2025-03',3887,13.50,1.82,4020],['2025-04',3784,13.10,1.62,3950],
-['2025-05',3864,13.40,1.65,4000],['2025-06',3924,13.60,1.68,4050],
-['2025-07',3882,13.50,1.70,4080],['2025-08',3915,13.60,1.72,4120],
-['2025-09',3950,13.80,1.70,4180],['2025-10',4010,14.00,1.72,4250],
-['2025-11',4050,14.20,1.70,4320],['2025-12',4081,14.31,1.68,4400],
-['2026-01',4050,14.20,1.70,4450],['2026-02',4120,14.50,1.72,4520],
-['2026-03',4180,14.60,1.82,4600],['2026-04',4250,14.70,1.75,4680],
-['2026-05',4380,14.55,1.72,4800],['2026-06',4480,14.40,1.74,4900],
-['2026-07',4810,14.24,1.73,4970]
+['2023-09',3689,11.37,2.68,1.000],['2023-10',3572,11.40,2.72,1.000],
+['2023-11',3496,11.30,2.68,1.000],['2023-12',3431,11.20,2.58,1.000],
+['2024-01',3215,10.80,2.45,1.040],['2024-02',3516,11.60,2.38,1.090],
+['2024-03',3537,11.50,2.30,1.098],['2024-04',3604,12.00,2.28,1.133],
+['2024-05',3579,11.80,2.22,1.182],['2024-06',3461,11.50,2.20,1.150],
+['2024-07',3442,11.60,2.15,1.117],['2024-08',3328,11.22,2.18,1.093],
+['2024-09',4017,13.50,2.08,1.215],['2024-10',3891,13.20,2.15,1.159],
+['2024-11',3917,13.30,2.05,1.183],['2024-12',3935,13.50,1.78,1.219],
+['2025-01',3817,13.20,1.65,1.192],['2025-02',3890,13.40,1.68,1.178],
+['2025-03',3887,13.50,1.82,1.209],['2025-04',3784,13.10,1.62,1.206],
+['2025-05',3864,13.40,1.65,1.260],['2025-06',3924,13.60,1.68,1.288],
+['2025-07',3882,13.50,1.70,1.282],['2025-08',3915,13.60,1.72,1.298],
+['2025-09',3950,13.80,1.70,1.244],['2025-10',4010,14.00,1.72,1.293],
+['2025-11',4050,14.20,1.70,1.310],['2025-12',4081,14.31,1.68,1.277],
+['2026-01',4050,14.20,1.70,1.276],['2026-02',4120,14.50,1.72,1.280],
+['2026-03',4180,14.60,1.82,1.305],['2026-04',4250,14.70,1.75,1.292],
+['2026-05',4380,14.55,1.72,1.272],['2026-06',4480,14.40,1.74,1.170],
+['2026-07',4810,14.24,1.73,1.253]
 ];
 
 // ==================== CONFIG ====================
@@ -275,7 +275,7 @@ const data = rawData.map(r => ({
   csi300: r[1],
   pe: r[2],
   bond10y: r[3],
-  h30269: r[4],
+  divEtf: r[4],
   ey: 100 / r[2],
   spread: 100 / r[2] - r[3]
 }));
@@ -338,10 +338,10 @@ function computeIndicators(){
   const pePct = pctOf(pes, latest.pe);
   const bondPct = pctOf(bonds, latest.bond10y);
   const spreadPct = pctOf(spreads, latest.spread);
-  const tail = data.slice(-12).map(d => d.h30269);
+  const tail = data.slice(-12).map(d => d.divEtf);
   const ma12 = tail.reduce((a,b)=>a+b,0) / tail.length;
-  const trend = latest.h30269 / ma12;
-  const rsi = calcRSI(data.map(d => d.h30269), 14);
+  const trend = latest.divEtf / ma12;
+  const rsi = calcRSI(data.map(d => d.divEtf), 14);
   const s = latest.spread;
   indMeta = { pePct, bondPct, spreadPct, ma12, trend, rsi };
   IND = {
@@ -362,7 +362,7 @@ function renderSignal(){
   if (s >= buyThreshold){
     badge = '✅ 触发买入！建议全仓红利低波';
     cls = 'signal-buy';
-    advice = `当前股债利差 ${s.toFixed(2)}% ≥ 买入阈值 ${buyThreshold.toFixed(1)}%，股票相对债券吸引力高，建议全仓买入红利低波（512890、560150等），现金仅留逆回购机动。`;
+    advice = `当前股债利差 ${s.toFixed(2)}% ≥ 买入阈值 ${buyThreshold.toFixed(1)}%，股票相对债券吸引力高，建议全仓买入红利低波（563020），现金仅留逆回购机动。`;
   } else if (s < sellThreshold){
     badge = '🔻 触发卖出！建议减仓50%';
     cls = 'signal-sell';
@@ -409,7 +409,7 @@ function renderNowCard(){
   else { zone = '持有观望区'; col = '#d97706'; desc = '利差处于中间区间，维持仓位、持股收息即可。'; }
   const nc = document.getElementById('nowCard');
   nc.style.borderColor = col;
-  document.getElementById('nowPrice').textContent = `红利低波 H30269 ${latest.h30269.toFixed(0)} ｜ 股债利差 ${s.toFixed(2)}%`;
+  document.getElementById('nowPrice').textContent = `563020 ${latest.divEtf.toFixed(3)} ｜ 股债利差 ${s.toFixed(2)}%`;
   const nz = document.getElementById('nowZone');
   nz.textContent = zone; nz.style.color = col;
   document.getElementById('nowDesc').textContent = desc;
@@ -472,14 +472,14 @@ function toggleInd(key, val){
 function runBacktest(){
   const stratEq = [1], bhEq = [1], positions = [0], cashOnly = [1];
   let nav = 1, position = 0, bhNav = 1, cashNav = 1;
-  let prevH = data[0].h30269;
+  let prevH = data[0].divEtf;
   for (let i = 1; i < data.length; i++){
     const d = data[i];
     const s = d.spread;
     let targetPos = position;
     if (s >= buyThreshold) targetPos = 1.0;
     else if (s < sellThreshold) targetPos = position * 0.5;
-    const priceRet = d.h30269 / prevH - 1;
+    const priceRet = d.divEtf / prevH - 1;
     const stockMonthlyRet = priceRet + DIV_MONTHLY;
     const stockPart = targetPos * (1 + stockMonthlyRet);
     const cashPart = (1 - targetPos) * (1 + REPO_MONTHLY);
@@ -487,7 +487,7 @@ function runBacktest(){
     bhNav *= (1 + stockMonthlyRet);
     cashNav *= (1 + REPO_MONTHLY);
     stratEq.push(nav); bhEq.push(bhNav); positions.push(targetPos * 100); cashOnly.push(cashNav);
-    position = targetPos; prevH = d.h30269;
+    position = targetPos; prevH = d.divEtf;
   }
   return { stratEq, bhEq, positions, cashOnly };
 }
@@ -502,7 +502,7 @@ function initCharts(){
   const spreads = data.map(d => d.spread);
   const bondYields = data.map(d => d.bond10y);
   const earningsYields = data.map(d => d.ey);
-  const h30269Prices = data.map(d => d.h30269);
+  const divEtfPrices = data.map(d => d.divEtf);
 
   const buyLine = Array(dates.length).fill(buyThreshold);
   const sellLine = Array(dates.length).fill(sellThreshold);
@@ -527,8 +527,8 @@ function initCharts(){
     }
   });
 
-  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...h30269Prices) * 1.05 : null);
-  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...h30269Prices) * 1.05 : null);
+  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
+  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
 
   const ctx2 = document.getElementById('chartSignal').getContext('2d');
   chartSignal = new Chart(ctx2, {
@@ -536,7 +536,7 @@ function initCharts(){
     data: {
       labels: dates,
       datasets: [
-        { label: '红利低波 H30269', data: h30269Prices, borderColor: darkBlue, backgroundColor: 'rgba(13,110,253,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
+        { label: '563020', data: divEtfPrices, borderColor: darkBlue, backgroundColor: 'rgba(13,110,253,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
         { label: '买入区间', data: buyZone, backgroundColor: 'rgba(25,135,84,0.18)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
         { label: '卖出区间', data: sellZone, backgroundColor: 'rgba(220,53,69,0.15)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
         { label: '股债利差 (%)', data: spreads, borderColor: redColor, borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
@@ -549,7 +549,7 @@ function initCharts(){
       plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } },
-        y: { type: 'linear', position: 'left', title: { display: true, text: '红利低波 点位' } },
+        y: { type: 'linear', position: 'left', title: { display: true, text: '563020 价格' } },
         y1: { type: 'linear', position: 'right', title: { display: true, text: '利差 %' }, grid: { drawOnChartArea: false } }
       }
     }
@@ -565,7 +565,7 @@ function initCharts(){
       labels: dates,
       datasets: [
         { label: '股利差策略（含分红+逆回购）', data: stratEq, borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5 },
-        { label: '买入持有 红利低波（含分红）', data: bhEq, borderColor: darkBlue, borderWidth: 2, pointRadius: 0, tension: 0.3, borderDash: [4,3] },
+        { label: '买入持有 563020（含分红）', data: bhEq, borderColor: darkBlue, borderWidth: 2, pointRadius: 0, tension: 0.3, borderDash: [4,3] },
         { label: '纯逆回购 1.5%', data: cashOnly, borderColor: grayColor, borderWidth: 1, pointRadius: 0, borderDash: [2,2] }
       ]
     },
@@ -656,7 +656,7 @@ function updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, b
 function updateCharts(){
   const dates = data.map(d => d.date);
   const spreads = data.map(d => d.spread);
-  const h30269Prices = data.map(d => d.h30269);
+  const divEtfPrices = data.map(d => d.divEtf);
   const buyLine = Array(dates.length).fill(buyThreshold);
   const sellLine = Array(dates.length).fill(sellThreshold);
 
@@ -666,8 +666,8 @@ function updateCharts(){
   chartSpread.data.datasets[2].label = `卖出阈值 (${sellThreshold}%)`;
   chartSpread.update();
 
-  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...h30269Prices) * 1.05 : null);
-  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...h30269Prices) * 1.05 : null);
+  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
+  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
   chartSignal.data.datasets[1].data = buyZone;
   chartSignal.data.datasets[2].data = sellZone;
   chartSignal.data.datasets[4].data = buyLine;
