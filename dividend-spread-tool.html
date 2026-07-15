@@ -1,50 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>红利交易助手 · 多指标打分 + 买卖建议</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>红利交易助手 · 报告</title>
 <style>
-:root {
-  --bg: #f8f9fa;
-  --card: #fff;
-  --text: #1a1a2e;
-  --sub: #6c757d;
-  --red: #dc3545;
-  --green: #198754;
-  --blue: #0d6efd;
-  --orange: #fd7e14;
-  --border: #e9ecef;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height:1.6; }
-.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-header { text-align: center; padding: 30px 0 10px; }
-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-header .subtitle { color: var(--sub); font-size: 0.9rem; }
-.signal{display:inline-block;margin-top:14px;padding:8px 22px;border-radius:20px;font-weight:700;font-size:1.05rem;}
-.signal-buy { background: #d4edda; color: var(--green); }
-.signal-sell { background: #f8d7da; color: var(--red); }
-.signal-hold { background: #cce5ff; color: #004085; }
-.advice{margin:12px auto 0;max-width:760px;font-size:0.9rem;line-height:1.7;color:#334155;background:#fff;border-radius:12px;padding:12px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:left;}
-
-/* Composite + dashboard */
-.comp-wrap{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;}
-.comp-gauge{flex:0 0 220px;text-align:center}
-.comp-gauge .g-label{font-size:14px;font-weight:600;margin-top:4px}
-.comp-gauge .g-sub{font-size:12px;margin-top:2px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+ background:#f8fafc;color:#0f172a;padding:24px}
+.wrap{max-width:1080px;margin:0 auto}
+header{background:linear-gradient(135deg,#7f1d1d,#b91c1c);color:#fff;border-radius:16px;
+ padding:24px 28px;margin-bottom:20px}
+header h1{font-size:22px;margin-bottom:6px}
+header .meta{font-size:12px;opacity:.85}
+.signal{display:inline-block;margin-top:12px;padding:8px 18px;border-radius:10px;
+ background:#65a30d;color:#fff;font-size:18px;font-weight:700}
+.advice{margin-top:12px;font-size:14px;line-height:1.6;opacity:.96}
+.comp-wrap{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;
+ padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);flex-wrap:wrap}
+.comp-gauge{flex:0 0 220px}
+.gauge .g-label{text-align:center;font-size:13px;font-weight:600;margin-top:2px}
+.gauge .g-sub{text-align:center;font-size:11px;color:#94a3b8}
+.section{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;
+ box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.section h2{font-size:16px;margin-bottom:14px;color:#1e293b}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.cards.dash{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));flex:1;min-width:280px}
-.gauge-box{text-align:center}
-.gauge-box svg{width:100%;max-width:150px}
-.g-label{font-size:13px;font-weight:600;margin-top:2px}
-.g-sub{font-size:11px;color:#94a3b8;margin-top:2px}
-.ind-toggle{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;font-size:0.82rem;color:#475569}
-.toggle-item{cursor:pointer;user-select:none}
-.toggle-item input{margin-right:4px;vertical-align:middle}
-
-.card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#fff}
+.card{border:1px solid #e2e8f0;border-radius:12px;padding:14px}
 .c-head{display:flex;justify-content:space-between;align-items:baseline}
 .c-name{font-size:13px;font-weight:600}
 .c-score{font-size:22px;font-weight:800}
@@ -52,700 +32,148 @@ header .subtitle { color: var(--sub); font-size: 0.9rem; }
 .bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
 .bar-fill{height:100%;border-radius:4px}
 .c-note{font-size:11px;color:#94a3b8;margin-top:6px}
-
-.section{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.section h2{font-size:16px;margin-bottom:14px;color:#1e293b}
-
-.now-card{border:2px solid #16a34a;border-radius:12px;padding:16px;background:#fbfdff;margin-bottom:18px}
-.now-card .nc-title{font-size:14px;font-weight:700;margin-bottom:8px}
-.now-card .nc-zone{font-size:20px;font-weight:800;color:#16a34a}
-.now-card .nc-desc{font-size:12px;color:#64748b;margin-top:6px}
-
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7}
+th{background:#f8fafc;color:#475569;font-weight:600}
 .rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .rule{border-left:4px solid #16a34a;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.6}
 .rule-bull{border-left-color:#16a34a}
 .rule-bear{border-left-color:#dc2626}
-.r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;border-radius:4px;padding:1px 8px;margin-bottom:6px}
-
-
-
-.tabs { display: flex; gap: 0; margin: 16px 0 0; }
-.tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-bottom: 2px solid var(--border); font-size: 0.88rem; font-weight: 500; color: var(--sub); transition: .2s; }
-.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.chart-box { background: var(--card); border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin: 14px 0; }
-.chart-box h3 { font-size: 0.93rem; margin-bottom: 10px; }
-.chart-box canvas { max-height: 360px; }
-.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 10px; margin: 14px 0; }
-.metric { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; }
-.metric .mlabel { font-size: 0.78rem; color: var(--sub); margin-bottom: 3px; }
-.metric .mval { font-size: 1.3rem; font-weight: 700; }
-.metric .msub { font-size: 0.75rem; color: var(--sub); margin-top: 2px; }
-.red { color: var(--red); }
-.green { color: var(--green); }
-@media (max-width: 600px) {
-  .container { padding: 12px; }
-  header h1 { font-size: 1.3rem; }
-  .spread-value { font-size: 2.4rem; }
-  .grid { grid-template-columns: 1fr; }
-  .metrics { grid-template-columns: 1fr 1fr; }
-  .cards { grid-template-columns: 1fr 1fr; }
-  .slider-group { flex-direction: column; align-items: center; }
-  .rules { grid-template-columns: 1fr; }
+.r-kind{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;
+ border-radius:4px;padding:1px 8px;margin-bottom:6px}
+.now-card{border:2px solid #65a30d;border-radius:12px;padding:16px;background:#fffdf7;margin-bottom:14px}
+.now-card .nc-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.now-card .nc-zone{font-size:20px;font-weight:800;color:#65a30d}
+.now-card .nc-desc{font-size:12px;color:#64748b;margin-top:6px}
+.status{font-size:12px;color:#64748b}
+.status li{margin:2px 0;list-style-position:inside}
+footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
+@media (max-width:600px){
+  body{padding:12px}
+  .cards{grid-template-columns:1fr 1fr}
+  .rules{grid-template-columns:1fr}
+  .comp-gauge{flex:1 1 100%}
 }
-</style>
-</head>
-<body>
-<div class="container">
+</style></head><body><div class="wrap">
 <header>
   <h1>📊 红利交易助手</h1>
-  <div class="subtitle">数据截至 <span id="updateDate">2026-07-15</span> ｜ 标的：563020 易方达中证红利低波动ETF（中证红利低波动）｜ 框架：7 指标加权打分 + 买卖建议区间 + 触发条件</div>
-  <div class="signal" id="signalBadge">--</div>
-  <div class="advice" id="adviceText">--</div>
+  <div class="meta">数据时间：2026-07-15 ｜ 标的：563020 易方达中证红利低波动ETF ｜ 框架：7 指标加权打分 + 买卖价位区间 + 时间窗口</div>
+  <div class="signal">条件合适 · 可小仓位建仓　综合评分 61/100</div>
+  <div class="advice">环境偏友好但非极致。建议先小仓位(1/3)建仓，待利差进一步走阔或估值回落再加码。</div>
 </header>
 
-<!-- 综合评分 + 指标仪表盘 -->
 <div class="comp-wrap">
-  <div class="comp-gauge">
-    <div id="compGauge"></div>
-    <div class="g-label">综合吸引力评分</div>
-    <div class="g-sub" id="compLabel"></div>
-  </div>
+  <div class="comp-gauge"><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 126.1 24.4" fill="none" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#65a30d">61</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">综合评分</div>
+      <div class="g-sub">条件合适 · 可小仓位建仓</div>
+    </div></div>
   <div style="flex:1;min-width:280px">
     <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
-    <div class="ind-toggle" id="indToggle"></div>
-    <div class="cards dash" id="dashGauges"></div>
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+      <div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 131.0 26.3" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">63</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">股债利差</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 128.4 25.2" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">62</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">利差分位</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 44.7 42.2" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">26</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">估值</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 148.0 36.0" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">70</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">股息率</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 172.1 65.3" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">86</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">利率</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 116.1 21.6" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">56</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">趋势</div>
+      <div class="g-sub"></div>
+    </div><div class="gauge">
+      <svg viewBox="0 0 200 120" width="100%" height="120">
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 137.4 29.3" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">66</text>
+        <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
+      </svg>
+      <div class="g-label">RSI</div>
+      <div class="g-sub"></div>
+    </div>
+    </div>
   </div>
 </div>
 
-<!-- 当前所处区间 -->
-<div class="now-card" id="nowCard">
-  <div class="nc-title" id="nowPrice">--</div>
-  <div class="nc-zone" id="nowZone">--</div>
-  <div class="nc-desc" id="nowDesc">--</div>
+<div class="now-card">
+  <div class="nc-title">📍 当前 563020 现价 1.253 所处区间 ｜ 股债利差 5.29%</div>
+  <div class="nc-zone">分批建仓区</div>
+  <div class="nc-desc">围绕中期均线上下，逢低累积的主战场</div>
 </div>
 
-<!-- ① 多维指标明细 -->
-<div class="section"><h2>① 多维指标明细</h2><div class="cards" id="detailCards"></div></div>
+<div class="section"><h2>① 七维指标明细</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">股债利差 (E/P−10Y)</span><span class="c-score" style="color:#dc2626">63</span></div><div class="c-val">利差 5.29% (E/P 7.02%−1.73%)</div><div class="bar"><div class="bar-fill" style="width:63%;background:#dc2626"></div></div><div class="c-note">核心：股票相对债券越便宜越买</div></div><div class="card"><div class="c-head"><span class="c-name">利差历史分位</span><span class="c-score" style="color:#ea580c">62</span></div><div class="c-val">分位 57%</div><div class="bar"><div class="bar-fill" style="width:62%;background:#ea580c"></div></div><div class="c-note">利差处历史越高，配置价值越突出</div></div><div class="card"><div class="c-head"><span class="c-name">估值分位 (沪深300 PE)</span><span class="c-score" style="color:#2563eb">26</span></div><div class="c-val">PE 14.24 (分位74%)</div><div class="bar"><div class="bar-fill" style="width:26%;background:#2563eb"></div></div><div class="c-note">PE 越低越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">股息率 (563020)</span><span class="c-score" style="color:#16a34a">70</span></div><div class="c-val">股息率 4.52%</div><div class="bar"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div><div class="c-note">现金流吸引力，越高越香</div></div><div class="card"><div class="c-head"><span class="c-name">利率环境 (10Y国债)</span><span class="c-score" style="color:#0891b2">86</span></div><div class="c-val">10Y 1.73% (分位14%)</div><div class="bar"><div class="bar-fill" style="width:86%;background:#0891b2"></div></div><div class="c-note">利率越低红利相对越香</div></div><div class="card"><div class="c-head"><span class="c-name">趋势 (价格/MA12)</span><span class="c-score" style="color:#7c3aed">56</span></div><div class="c-val">比值 0.99×</div><div class="bar"><div class="bar-fill" style="width:56%;background:#7c3aed"></div></div><div class="c-note">站上中期均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">66</span></div><div class="c-val">RSI = 48</div><div class="bar"><div class="bar-fill" style="width:66%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div></div></div>
 
-<!-- ② 买入 / 卖出建议区间 -->
-<div class="section"><h2>② 买入 / 卖出建议区间（基于股债利差）</h2>
-  <div id="buySellTable"></div>
+<div class="section"><h2>② 买入 / 卖出价位区间（563020 价格，动态计算）</h2>
+  <table><thead><tr>
+    <th>区间</th><th>下沿</th><th>上沿</th><th>策略含义</th><th>状态</th>
+  </tr></thead><tbody><tr><td><b style='color:#16a34a'>强力买入区</b></td><td>1.170</td><td>1.225</td><td style='text-align:left;font-size:12px;color:#475569'>接近/跌破 52 周低位，长期价值凸显，可重仓分批</td><td></td></tr><tr><td><b style='color:#65a30d'>分批建仓区</b></td><td>1.225</td><td>1.301</td><td style='text-align:left;font-size:12px;color:#475569'>围绕中期均线上下，逢低累积的主战场</td><td>◀ 当前</td></tr><tr><td><b style='color:#d97706'>持有观望区</b></td><td>1.301</td><td>1.258</td><td style='text-align:left;font-size:12px;color:#475569'>估值合理偏高，持有收息、不追高不加仓</td><td></td></tr><tr><td><b style='color:#ea580c'>分批止盈区</b></td><td>1.258</td><td>1.303</td><td style='text-align:left;font-size:12px;color:#475569'>接近 52 周高位，开始分批减仓锁定利润</td><td></td></tr><tr><td><b style='color:#dc2626'>强力减仓区</b></td><td>1.303</td><td>1.349</td><td style='text-align:left;font-size:12px;color:#475569'>刷新/逼近 52 周高位，仅留底仓收息</td><td></td></tr></tbody></table>
   <p style="font-size:12px;color:#64748b;margin-top:10px">
-  区间由股债利差相对阈值动态生成；绿区利差越高（股票越便宜）越买，红区利差越低（估值越贵）越卖。红利低波宜长期持有、分红再投，择时仅用于加减仓。</p>
+  区间基于 563020 的 52 周高低(1.170–1.310) 与 MA12(1.263) 动态生成；
+  绿区越跌越买，红区越涨越卖。红利低波宜长期持有、分红再投，择时仅用于加减仓，不必清仓。</p>
 </div>
 
-<!-- ③ 时间窗口与触发条件 -->
 <div class="section"><h2>③ 时间窗口与触发条件</h2>
   <div class="rules">
-    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div>
-      <div class="rule rule-bull"><span class="r-kind">买入</span><b>利差触顶</b><br>股债利差回升至买入阈值 ≥ <span id="tBuy">6.0</span>%（现 <span id="tSpread">--</span>）全仓</div>
-      <div class="rule rule-bull"><span class="r-kind">买入</span><b>估值回落</b><br>沪深300 PE分位回落至 &lt;30%，更便宜</div>
-      <div class="rule rule-bull"><span class="r-kind">买入</span><b>技术买点</b><br>红利低波回撤至 MA12 下方，分批累积</div>
-      <div class="rule rule-bull"><span class="r-kind">买入</span><b>利率新低</b><br>10Y国债收益率再破 1.5%，利差走阔</div>
-    </div>
-    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div>
-      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>利差触底</b><br>股债利差跌破卖出阈值 &lt; <span id="tSell">4.0</span>%，减仓50%</div>
-      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>估值偏贵</b><br>沪深300 PE分位 &gt;70%，吸引力下降</div>
-      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>利率上行</b><br>债券收益率走高、利差持续收窄</div>
-      <div class="rule rule-bear"><span class="r-kind">止盈</span><b>风格拥挤</b><br>红利拥挤度升高、市场情绪过热</div>
-    </div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">买入 / 加仓触发条件</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利差走阔</b><br>股债利差回升至 6.0%+（现 5.29%）全仓</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>利率新低</b><br>10Y 国债破 1.5%（现 1.73%）利差走阔</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>估值回落</b><br>沪深300 PE 分位回落至 <30%（现 74%）</div><div class="rule rule-bull"><span class="r-kind">买入</span><b>技术买点</b><br>563020 回撤至 MA12(1.263) 下方或 RSI<35（现 48）</div></div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈 / 减仓触发条件</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利差收窄</b><br>股债利差跌破 4.0%（现 5.29%）减仓50%</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>利率上行</b><br>10Y 国债升破 2.2%（现 1.73%）利差承压</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>估值偏贵</b><br>沪深300 PE 分位 >70%（现 74%）吸引力下降</div><div class="rule rule-bear"><span class="r-kind">止盈</span><b>风格拥挤</b><br>563020 逼近 52 周高(1.310) 且 RSI>70 超买</div></div>
   </div>
+  <p style="font-size:12px;color:#64748b;margin-top:12px">
+  核心逻辑：股债利差走阔(股票相对债券便宜)+估值低位+利率下行时"逢低累积"；利差收窄+估值偏贵时"分批止盈"。
+  红利低波以收息为本，宜长线持有、分红再投，择时仅用于加减仓。</p>
 </div>
 
-
-<!-- ⑤ 策略回测 -->
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('spread')">股债利差走势</div>
-  <div class="tab" onclick="switchTab('signal')">交易信号</div>
-  <div class="tab" onclick="switchTab('backtest')">策略回测</div>
+<div class="section"><h2>④ 数据来源与新鲜度</h2>
+  <ul class="status"><li>沪深300 PE / 10Y国债: 东财 / 中国债券信息网 (快照)</li><li>563020 价格·MA·RSI: 东财 (快照)</li><li>股息率: 中证指数 (中证红利低波动 930914)</li><li>PE分位 / 利差分位: 基于内嵌历史序列计算</li></ul>
+  <p style="font-size:12px;color:#94a3b8;margin-top:8px">
+  股债利差 = 沪深300 盈利收益率(100/PE) − 10Y 国债收益率；分位基于内嵌 2014 年以来历史序列计算。
+  数值为快照校准，请以实时数据为准。</p>
 </div>
 
-<div class="tab-content active" id="tab-spread">
-  <div class="chart-box"><h3>股债利差历史走势 (月度, 2014-2026)</h3><canvas id="chartSpread"></canvas></div>
-</div>
-<div class="tab-content" id="tab-signal">
-  <div class="chart-box"><h3>交易信号 & 仓位变化</h3><canvas id="chartSignal"></canvas></div>
-</div>
-<div class="tab-content" id="tab-backtest">
-  <div class="chart-box"><h3>策略净值回测：含分红 + 逆回购 + 动态仓位</h3><canvas id="chartBacktest"></canvas></div>
-  <div class="metrics" id="backtestMetrics"></div>
-  <div class="chart-box"><h3>仓位历史</h3><canvas id="chartPosition"></canvas></div>
-  <div class="chart-box"><h3>年度收益对比</h3><canvas id="chartYearly"></canvas></div>
-  <div class="chart-box"><h3>回撤对比</h3><canvas id="chartDrawdown"></canvas></div>
-</div>
-
-<div style="text-align:center;padding:20px;color:var(--sub);font-size:0.72rem;">
-  数据来源：中证指数、中国债券信息网、理杏仁 | 回测含约1%/季分红及逆回购1.5%收益 | 多指标打分参考纳指/黄金交易助手框架 | 仅供研究参考，不构成投资建议
-</div>
-</div>
-
-<script>
-// ==================== EMBEDDED MONTHLY DATA 2014-01 to 2026-07 ====================
-const rawData = [
-['2014-01',2160,8.35,4.50,1480],['2014-02',2178,8.31,4.42,1495],
-['2014-03',2146,8.21,4.45,1510],['2014-04',2158,8.11,4.38,1525],
-['2014-05',2156,7.81,4.28,1540],['2014-06',2165,7.90,4.20,1560],
-['2014-07',2350,8.55,4.25,1620],['2014-08',2338,8.60,4.18,1640],
-['2014-09',2450,8.80,4.10,1660],['2014-10',2508,9.10,3.90,1690],
-['2014-11',2808,10.20,3.65,1780],['2014-12',3533,12.73,3.60,1950],
-['2015-01',3478,12.80,3.50,1990],['2015-02',3572,13.20,3.40,2040],
-['2015-03',4051,14.50,3.55,2150],['2015-04',4741,16.80,3.50,2320],
-['2015-05',4840,17.50,3.35,2400],['2015-06',4473,18.27,3.60,2250],
-['2015-07',3816,16.00,3.50,2050],['2015-08',3366,13.50,3.40,1950],
-['2015-09',3202,12.80,3.30,1920],['2015-10',3534,13.50,3.10,1980],
-['2015-11',3566,13.60,3.05,2010],['2015-12',3731,13.91,2.85,2080],
-['2016-01',2946,10.97,2.85,1980],['2016-02',2877,10.80,2.88,1950],
-['2016-03',3218,11.50,2.85,2020],['2016-04',3156,11.30,2.90,2000],
-['2016-05',3160,11.20,2.98,2010],['2016-06',3154,11.30,2.88,2020],
-['2016-07',3234,11.50,2.80,2060],['2016-08',3327,12.00,2.75,2100],
-['2016-09',3250,11.80,2.74,2080],['2016-10',3336,12.10,2.72,2120],
-['2016-11',3538,12.78,2.88,2180],['2016-12',3310,12.20,3.05,2120],
-['2017-01',3387,12.55,3.25,2150],['2017-02',3453,12.70,3.35,2180],
-['2017-03',3456,12.40,3.30,2200],['2017-04',3439,12.20,3.45,2190],
-['2017-05',3492,12.30,3.60,2230],['2017-06',3666,13.00,3.55,2300],
-['2017-07',3737,13.20,3.60,2350],['2017-08',3822,13.50,3.65,2420],
-['2017-09',3837,13.55,3.62,2430],['2017-10',3994,14.00,3.78,2520],
-['2017-11',4006,14.20,3.90,2580],['2017-12',4030,14.40,3.88,2600],
-['2018-01',4275,15.74,3.95,2750],['2018-02',4024,14.50,3.85,2680],
-['2018-03',3898,13.80,3.78,2620],['2018-04',3756,13.20,3.62,2580],
-['2018-05',3802,13.00,3.60,2600],['2018-06',3510,12.00,3.55,2480],
-['2018-07',3517,11.80,3.48,2500],['2018-08',3334,11.20,3.58,2420],
-['2018-09',3438,11.50,3.62,2480],['2018-10',3153,10.60,3.52,2380],
-['2018-11',3172,10.55,3.40,2400],['2018-12',3010,10.40,3.25,2350],
-['2019-01',3201,10.80,3.12,2450],['2019-02',3669,12.00,3.15,2620],
-['2019-03',3872,12.50,3.10,2750],['2019-04',3913,12.80,3.38,2800],
-['2019-05',3629,11.80,3.28,2720],['2019-06',3825,12.20,3.22,2780],
-['2019-07',3835,12.30,3.18,2800],['2019-08',3799,12.10,3.08,2780],
-['2019-09',3814,12.00,3.12,2820],['2019-10',3886,12.10,3.22,2880],
-['2019-11',3828,11.90,3.20,2850],['2019-12',4096,12.50,3.15,2950],
-['2020-01',4003,12.20,3.00,2900],['2020-02',3940,11.80,2.80,2820],
-['2020-03',3686,11.55,2.62,2680],['2020-04',3912,12.30,2.55,2800],
-['2020-05',3867,12.25,2.65,2780],['2020-06',4163,13.10,2.85,2950],
-['2020-07',4695,14.50,2.95,3250],['2020-08',4805,15.00,3.05,3380],
-['2020-09',4587,14.40,3.12,3280],['2020-10',4695,14.80,3.20,3400],
-['2020-11',4960,15.50,3.28,3580],['2020-12',5211,16.10,3.18,3720],
-['2021-01',5351,16.80,3.18,3820],['2021-02',5336,16.72,3.28,3880],
-['2021-03',5048,15.80,3.22,3750],['2021-04',5123,15.20,3.18,3800],
-['2021-05',5315,15.60,3.10,3920],['2021-06',5224,15.30,3.10,3880],
-['2021-07',4811,14.20,2.88,3680],['2021-08',4805,13.93,2.85,3720],
-['2021-09',4866,14.10,2.88,3750],['2021-10',4908,14.20,2.98,3780],
-['2021-11',4832,13.95,2.88,3750],['2021-12',4940,14.10,2.80,3820],
-['2022-01',4563,13.50,2.75,3700],['2022-02',4582,13.30,2.80,3750],
-['2022-03',4223,12.61,2.82,3580],['2022-04',4016,12.80,2.85,3520],
-['2022-05',4091,12.90,2.78,3580],['2022-06',4485,13.80,2.82,3720],
-['2022-07',4170,12.90,2.76,3680],['2022-08',4078,12.70,2.65,3620],
-['2022-09',3804,11.80,2.72,3500],['2022-10',3508,11.40,2.68,3380],
-['2022-11',3853,12.20,2.85,3550],['2022-12',3871,12.40,2.84,3580],
-['2023-01',4156,13.00,2.92,3720],['2023-02',4069,12.80,2.90,3680],
-['2023-03',4050,12.60,2.86,3650],['2023-04',4029,12.50,2.78,3680],
-['2023-05',3798,11.85,2.72,3580],['2023-06',3842,11.90,2.68,3600],
-['2023-07',3912,12.10,2.64,3650],['2023-08',3765,11.60,2.58,3580],
-['2023-09',3689,11.37,2.68,1.000],['2023-10',3572,11.40,2.72,1.000],
-['2023-11',3496,11.30,2.68,1.000],['2023-12',3431,11.20,2.58,1.000],
-['2024-01',3215,10.80,2.45,1.040],['2024-02',3516,11.60,2.38,1.090],
-['2024-03',3537,11.50,2.30,1.098],['2024-04',3604,12.00,2.28,1.133],
-['2024-05',3579,11.80,2.22,1.182],['2024-06',3461,11.50,2.20,1.150],
-['2024-07',3442,11.60,2.15,1.117],['2024-08',3328,11.22,2.18,1.093],
-['2024-09',4017,13.50,2.08,1.215],['2024-10',3891,13.20,2.15,1.159],
-['2024-11',3917,13.30,2.05,1.183],['2024-12',3935,13.50,1.78,1.219],
-['2025-01',3817,13.20,1.65,1.192],['2025-02',3890,13.40,1.68,1.178],
-['2025-03',3887,13.50,1.82,1.209],['2025-04',3784,13.10,1.62,1.206],
-['2025-05',3864,13.40,1.65,1.260],['2025-06',3924,13.60,1.68,1.288],
-['2025-07',3882,13.50,1.70,1.282],['2025-08',3915,13.60,1.72,1.298],
-['2025-09',3950,13.80,1.70,1.244],['2025-10',4010,14.00,1.72,1.293],
-['2025-11',4050,14.20,1.70,1.310],['2025-12',4081,14.31,1.68,1.277],
-['2026-01',4050,14.20,1.70,1.276],['2026-02',4120,14.50,1.72,1.280],
-['2026-03',4180,14.60,1.82,1.305],['2026-04',4250,14.70,1.75,1.292],
-['2026-05',4380,14.55,1.72,1.272],['2026-06',4480,14.40,1.74,1.170],
-['2026-07',4810,14.24,1.73,1.253]
-];
-
-// ==================== CONFIG ====================
-const REPO_ANNUAL = 1.5;      // 逆回购年化 (%)
-const REPO_MONTHLY = REPO_ANNUAL / 1200;  // 月化
-const DIV_QUARTERLY = 1.0;    // 每季分红 (%)
-const DIV_MONTHLY = DIV_QUARTERLY / 300;  // 月化 (~0.333%)
-const DIV_YIELD = 4.52;       // 红利低波股息率 (%)
-
-// ==================== PREPARE DATA ====================
-const data = rawData.map(r => ({
-  date: r[0],
-  csi300: r[1],
-  pe: r[2],
-  bond10y: r[3],
-  divEtf: r[4],
-  ey: 100 / r[2],
-  spread: 100 / r[2] - r[3]
-}));
-
-const latest = data[data.length - 1];
-let buyThreshold = 6.0;
-let sellThreshold = 4.0;
-
-// ==================== INDICATOR DEFINITIONS ====================
-// 分数越高 = 越适合买入/累积红利低波
-const INDICATORS = [
-  { key:'spread',   name:'股债利差',       color:'#dc2626' },
-  { key:'pePct',    name:'估值分位',       color:'#2563eb' },
-  { key:'div',      name:'股息率',         color:'#16a34a' },
-  { key:'trend',    name:'趋势(价/MA12)',  color:'#7c3aed' },
-  { key:'rsi',      name:'动量 RSI(14)',   color:'#db2777' },
-  { key:'rate',     name:'利率环境',       color:'#0891b2' },
-  { key:'spreadPct',name:'利差分位',       color:'#ea580c' }
-];
-const selected = {};
-INDICATORS.forEach(k => selected[k.key] = true);
-let IND = {};        // computed indicator values
-let indMeta = {};    // extra meta
-
-// ==================== HELPERS ====================
-function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-function pctOf(sortedArr, v){ return sortedArr.filter(x => x <= v).length / sortedArr.length * 100; }
-function calcRSI(closes, n){
-  n = n || 14;
-  let gain = 0, loss = 0;
-  for (let i = 1; i <= n; i++){
-    const ch = closes[closes.length - i] - closes[closes.length - i - 1];
-    gain += Math.max(0, ch); loss += Math.max(0, -ch);
-  }
-  const ag = gain / n, al = loss / n;
-  return 100 - 100 / (1 + ag / (al || 1e-9));
-}
-function polar(cx, cy, r, deg){ const a = deg * Math.PI / 180; return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; }
-function gaugeSVG(score, color){
-  const f = clamp(score, 0, 100) / 100;
-  const [x, y] = polar(100, 100, 80, 180 - 180 * f);
-  return `<svg viewBox="0 0 200 120" width="100%" height="120">
-    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>
-    <path d="M 20 100 A 80 80 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"/>
-    <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="${color}">${Math.round(score)}</text>
-    <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
-  </svg>`;
-}
-function compositeBand(c){
-  if (c >= 75) return { t:'强烈买入', col:'#16a34a' };
-  if (c >= 45) return { t:'中性偏多', col:'#d97706' };
-  return { t:'谨慎减仓', col:'#dc2626' };
-}
-
-// ==================== COMPUTE INDICATORS ====================
-function computeIndicators(){
-  const pes = data.map(d => d.pe).slice().sort((a,b)=>a-b);
-  const bonds = data.map(d => d.bond10y).slice().sort((a,b)=>a-b);
-  const spreads = data.map(d => d.spread).slice().sort((a,b)=>a-b);
-  const pePct = pctOf(pes, latest.pe);
-  const bondPct = pctOf(bonds, latest.bond10y);
-  const spreadPct = pctOf(spreads, latest.spread);
-  const tail = data.slice(-12).map(d => d.divEtf);
-  const ma12 = tail.reduce((a,b)=>a+b,0) / tail.length;
-  const trend = latest.divEtf / ma12;
-  const rsi = calcRSI(data.map(d => d.divEtf), 14);
-  const s = latest.spread;
-  indMeta = { pePct, bondPct, spreadPct, ma12, trend, rsi };
-  IND = {
-    spread:   { name:'股债利差', color:'#dc2626', score: clamp((s - 1) / (8 - 1) * 100, 0, 100), value:`利差 ${s.toFixed(2)}%`, note:'越高=股票相对债券越便宜，越适合买入' },
-    pePct:    { name:'估值分位', color:'#2563eb', score: 100 - pePct, value:`PE分位 ${pePct.toFixed(0)}%`, note:'PE越低越便宜，越低越适合买入' },
-    div:      { name:'股息率', color:'#16a34a', score: clamp(DIV_YIELD / 6 * 100, 0, 100), value:`股息率 ${DIV_YIELD.toFixed(2)}%`, note:'股息率越高，现金流吸引力越强' },
-    trend:    { name:'趋势(价/MA12)', color:'#7c3aed', score: clamp((trend - 0.85) / (1.15 - 0.85) * 100, 0, 100), value:`价/MA12 = ${trend.toFixed(2)}×`, note:'站上中期均线顺势，破位防守' },
-    rsi:      { name:'动量 RSI(14)', color:'#db2777', score: rsi, value:`RSI = ${rsi.toFixed(0)}`, note:'超卖(低)常是更好买点' },
-    rate:     { name:'利率环境', color:'#0891b2', score: 100 - bondPct, value:`10Y国债 ${latest.bond10y.toFixed(2)}% (分位${bondPct.toFixed(0)}%)`, note:'债券收益率越低，股票相对越有吸引力' },
-    spreadPct:{ name:'利差分位', color:'#ea580c', score: spreadPct, value:`利差分位 ${spreadPct.toFixed(0)}%`, note:'利差处历史越高，当前配置价值越突出' }
-  };
-}
-
-// ==================== RENDER: SIGNAL / DASHBOARD / DETAILS / TABLE ====================
-function renderSignal(){
-  const s = latest.spread;
-  let badge, advice, cls;
-  if (s >= buyThreshold){
-    badge = '✅ 触发买入！建议全仓红利低波';
-    cls = 'signal-buy';
-    advice = `当前股债利差 ${s.toFixed(2)}% ≥ 买入阈值 ${buyThreshold.toFixed(1)}%，股票相对债券吸引力高，建议全仓买入红利低波（563020），现金仅留逆回购机动。`;
-  } else if (s < sellThreshold){
-    badge = '🔻 触发卖出！建议减仓50%';
-    cls = 'signal-sell';
-    advice = `当前股债利差 ${s.toFixed(2)}% < 卖出阈值 ${sellThreshold.toFixed(1)}%，估值偏贵、吸引力下降，建议卖出50%持仓转逆回购（年化${REPO_ANNUAL}%），保留底仓。`;
-  } else {
-    badge = '📌 持有区间 — 维持仓位';
-    cls = 'signal-hold';
-    advice = `当前股债利差 ${s.toFixed(2)}% 在 [${sellThreshold.toFixed(1)}%, ${buyThreshold.toFixed(1)}%) 区间，维持现有仓位不变，持股享受分红+逆回购。`;
-  }
-  const el = document.getElementById('signalBadge');
-  el.className = 'signal ' + cls;
-  el.textContent = badge;
-  document.getElementById('adviceText').textContent = advice;
-}
-
-function renderDashboard(){
-  const sel = INDICATORS.filter(k => selected[k.key]);
-  document.getElementById('dashGauges').innerHTML = sel.map(k => {
-    const d = IND[k.key];
-    return `<div class="gauge-box"><div class="g-label">${d.name}</div>${gaugeSVG(d.score, d.color)}<div class="g-sub">${d.value}</div></div>`;
-  }).join('');
-  const comp = sel.reduce((a,k)=>a + IND[k.key].score, 0) / Math.max(1, sel.length);
-  const b = compositeBand(comp);
-  document.getElementById('compGauge').innerHTML = gaugeSVG(comp, b.col);
-  const cs = document.getElementById('compScore');
-  document.getElementById('compLabel').textContent = b.t + ' · ' + Math.round(comp);
-  document.getElementById('compLabel').style.color = b.col;
-}
-
-function renderDetails(){
-  const sel = INDICATORS.filter(k => selected[k.key]);
-  document.getElementById('detailCards').innerHTML = sel.map(k => {
-    const d = IND[k.key];
-    const col = d.color;
-    return `<div class="card"><div class="c-head"><span class="c-name">${d.name}</span><span class="c-score" style="color:${col}">${Math.round(d.score)}</span></div><div class="c-val">${d.value}</div><div class="bar"><div class="bar-fill" style="width:${d.score}%;background:${col}"></div></div><div class="c-note">${d.note}</div></div>`;
-  }).join('');
-}
-
-function renderNowCard(){
-  const s = latest.spread;
-  let zone, desc, col;
-  if (s >= buyThreshold){ zone = '全仓买入区'; col = '#16a34a'; desc = '股债利差高于买入阈值，股票相对债券吸引力高，建议全仓配置红利低波。'; }
-  else if (s < sellThreshold){ zone = '减仓防守区'; col = '#dc2626'; desc = '股债利差跌破卖出阈值，建议减仓50%转逆回购，保留底仓。'; }
-  else { zone = '持有观望区'; col = '#d97706'; desc = '利差处于中间区间，维持仓位、持股收息即可。'; }
-  const nc = document.getElementById('nowCard');
-  nc.style.borderColor = col;
-  document.getElementById('nowPrice').textContent = `563020 ${latest.divEtf.toFixed(3)} ｜ 股债利差 ${s.toFixed(2)}%`;
-  const nz = document.getElementById('nowZone');
-  nz.textContent = zone; nz.style.color = col;
-  document.getElementById('nowDesc').textContent = desc;
-}
-
-function renderBuySell(){
-  const s = latest.spread;
-  const bt = buyThreshold, st = sellThreshold;
-  const zones = [
-    { name:'强力买入区', col:'#16a34a', lo: bt + 0.5, hi: Infinity, range:`≥ ${(bt + 0.5).toFixed(1)}%`, act:'全仓买入红利低波，现金仅留逆回购机动', pos:'100%' },
-    { name:'分批建仓区', col:'#65a30d', lo: bt, hi: bt + 0.5, range:`${bt.toFixed(1)}% – ${(bt + 0.5).toFixed(1)}%`, act:'加仓至 80-100%，逢低累积的主战场', pos:'80-100%' },
-    { name:'持有观望区', col:'#d97706', lo: st, hi: bt, range:`${st.toFixed(1)}% – ${bt.toFixed(1)}%`, act:'维持现有仓位，持股享受分红', pos:'维持' },
-    { name:'分批止盈区', col:'#ea580c', lo: st - 1.0, hi: st, range:`${(st - 1.0).toFixed(1)}% – ${st.toFixed(1)}%`, act:'卖出50%转逆回购，锁定部分利润', pos:'减至50%' },
-    { name:'强力减仓区', col:'#dc2626', lo: -Infinity, hi: st - 1.0, range:`< ${(st - 1.0).toFixed(1)}%`, act:'大幅减仓至20-30%，现金为主', pos:'20-30%' }
-  ];
-  let cur = null;
-  for (const z of zones){ if (s >= z.lo && s < z.hi){ cur = z; break; } }
-  let html = '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">区间</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">股债利差</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">建议操作</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">建议仓位</th><th style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7;background:#f8fafc;color:#475569;font-weight:600">状态</th></tr></thead><tbody>';
-  for (const z of zones){
-    html += `<tr><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7"><b style="color:${z.col}">${z.name}</b></td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z.range}</td><td style="padding:10px 8px;text-align:left;font-size:12px;color:#475569;border-bottom:1px solid #eef2f7">${z.act}</td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z.pos}</td><td style="padding:10px 8px;text-align:center;border-bottom:1px solid #eef2f7">${z === cur ? '◀ 当前' : ''}</td></tr>`;
-  }
-  html += '</tbody></table>';
-  document.getElementById('buySellTable').innerHTML = html;
-}
-
-// ==================== UPDATE (trigger rules dynamic values) ====================
-function updateUI(){
-  document.getElementById('tBuy').textContent = buyThreshold.toFixed(1);
-  document.getElementById('tSell').textContent = sellThreshold.toFixed(1);
-  document.getElementById('tSpread').textContent = latest.spread.toFixed(2) + '%';
-}
-
-// Master update
-function updateAll(){
-  computeIndicators();
-  renderSignal();
-  renderDashboard();
-  renderDetails();
-  renderNowCard();
-  renderBuySell();
-  updateUI();
-  updateCharts();
-}
-
-// ==================== INDICATOR TOGGLE ====================
-function buildToggle(){
-  document.getElementById('indToggle').innerHTML = INDICATORS.map(k =>
-    `<label class="toggle-item"><input type="checkbox" ${selected[k.key] ? 'checked' : ''} onchange="toggleInd('${k.key}',this.checked)"> ${k.name}</label>`
-  ).join('');
-}
-function toggleInd(key, val){
-  selected[key] = val;
-  renderDashboard();
-  renderDetails();
-}
-
-// ==================== THRESHOLD (internal, no UI sliders) ====================
-
-// ==================== BACKTEST ENGINE ====================
-function runBacktest(){
-  const stratEq = [1], bhEq = [1], positions = [0], cashOnly = [1];
-  let nav = 1, position = 0, bhNav = 1, cashNav = 1;
-  let prevH = data[0].divEtf;
-  for (let i = 1; i < data.length; i++){
-    const d = data[i];
-    const s = d.spread;
-    let targetPos = position;
-    if (s >= buyThreshold) targetPos = 1.0;
-    else if (s < sellThreshold) targetPos = position * 0.5;
-    const priceRet = d.divEtf / prevH - 1;
-    const stockMonthlyRet = priceRet + DIV_MONTHLY;
-    const stockPart = targetPos * (1 + stockMonthlyRet);
-    const cashPart = (1 - targetPos) * (1 + REPO_MONTHLY);
-    nav *= (stockPart + cashPart);
-    bhNav *= (1 + stockMonthlyRet);
-    cashNav *= (1 + REPO_MONTHLY);
-    stratEq.push(nav); bhEq.push(bhNav); positions.push(targetPos * 100); cashOnly.push(cashNav);
-    position = targetPos; prevH = d.divEtf;
-  }
-  return { stratEq, bhEq, positions, cashOnly };
-}
-
-// ==================== CHARTS ====================
-let chartSpread, chartSignal, chartBacktest, chartPosition, chartYearly, chartDrawdown;
-const darkBlue = '#0d6efd', redColor = '#dc3545', greenColor = '#198754';
-const orangeColor = '#fd7e14', grayColor = '#adb5bd', purple = '#6f42c1';
-
-function initCharts(){
-  const dates = data.map(d => d.date);
-  const spreads = data.map(d => d.spread);
-  const bondYields = data.map(d => d.bond10y);
-  const earningsYields = data.map(d => d.ey);
-  const divEtfPrices = data.map(d => d.divEtf);
-
-  const buyLine = Array(dates.length).fill(buyThreshold);
-  const sellLine = Array(dates.length).fill(sellThreshold);
-
-  const ctx1 = document.getElementById('chartSpread').getContext('2d');
-  chartSpread = new Chart(ctx1, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [
-        { label: '股债利差 (%)', data: spreads, borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.08)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-        { label: `买入阈值 (${buyThreshold}%)`, data: buyLine, borderColor: greenColor, borderDash: [6,4], borderWidth: 2, pointRadius: 0, fill: false },
-        { label: `卖出阈值 (${sellThreshold}%)`, data: sellLine, borderColor: grayColor, borderDash: [3,3], borderWidth: 1.8, pointRadius: 0, fill: false },
-        { label: '盈利收益率 E/P (%)', data: earningsYields, borderColor: darkBlue, borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true },
-        { label: '10Y国债收益率 (%)', data: bondYields, borderColor: '#adb5bd', borderWidth: 1.2, pointRadius: 0, fill: false, tension: 0.3, hidden: true }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: { mode: 'index', intersect: false } },
-      scales: { x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } }, y: { title: { display: true, text: '%' } } }
-    }
-  });
-
-  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
-  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
-
-  const ctx2 = document.getElementById('chartSignal').getContext('2d');
-  chartSignal = new Chart(ctx2, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [
-        { label: '563020', data: divEtfPrices, borderColor: darkBlue, backgroundColor: 'rgba(13,110,253,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
-        { label: '买入区间', data: buyZone, backgroundColor: 'rgba(25,135,84,0.18)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
-        { label: '卖出区间', data: sellZone, backgroundColor: 'rgba(220,53,69,0.15)', borderColor: 'transparent', fill: true, pointRadius: 0, borderWidth: 0, yAxisID: 'y' },
-        { label: '股债利差 (%)', data: spreads, borderColor: redColor, borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
-        { label: `买入 ${buyThreshold}%`, data: buyLine, borderColor: greenColor, borderDash: [5,3], borderWidth: 1.5, pointRadius: 0, yAxisID: 'y1' },
-        { label: `卖出 ${sellThreshold}%`, data: sellLine, borderColor: grayColor, borderDash: [3,3], borderWidth: 1.2, pointRadius: 0, yAxisID: 'y1' }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } },
-      scales: {
-        x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } },
-        y: { type: 'linear', position: 'left', title: { display: true, text: '563020 价格' } },
-        y1: { type: 'linear', position: 'right', title: { display: true, text: '利差 %' }, grid: { drawOnChartArea: false } }
-      }
-    }
-  });
-
-  const bt = runBacktest();
-  const { stratEq, bhEq, positions, cashOnly } = bt;
-
-  const ctx3 = document.getElementById('chartBacktest').getContext('2d');
-  chartBacktest = new Chart(ctx3, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [
-        { label: '股利差策略（含分红+逆回购）', data: stratEq, borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.06)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5 },
-        { label: '买入持有 563020（含分红）', data: bhEq, borderColor: darkBlue, borderWidth: 2, pointRadius: 0, tension: 0.3, borderDash: [4,3] },
-        { label: '纯逆回购 1.5%', data: cashOnly, borderColor: grayColor, borderWidth: 1, pointRadius: 0, borderDash: [2,2] }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } },
-      scales: { x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } }, y: { title: { display: true, text: '净值 (起始=1)' } } }
-    }
-  });
-
-  const ctxPos = document.getElementById('chartPosition').getContext('2d');
-  chartPosition = new Chart(ctxPos, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [
-        { label: '仓位 (%)', data: positions, borderColor: purple, backgroundColor: 'rgba(111,66,193,0.12)', fill: true, tension: 0.2, pointRadius: 0, borderWidth: 2 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } },
-        y: { min: 0, max: 105, title: { display: true, text: '持仓比例 %' }, ticks: { callback: v => v + '%' } }
-      }
-    }
-  });
-
-  function maxDrawdown(series){ let peak = series[0], maxDD = 0; for (let v of series){ if (v > peak) peak = v; const dd = (peak - v) / peak; if (dd > maxDD) maxDD = dd; } return maxDD * 100; }
-  function calcSharpe(series){
-    const rets = [];
-    for (let i = 1; i < series.length; i++) rets.push(series[i] / series[i-1] - 1);
-    const mean = rets.reduce((a,b) => a+b, 0) / rets.length;
-    const std = Math.sqrt(rets.reduce((s,r) => s + Math.pow(r - mean, 2), 0) / rets.length);
-    return std > 0 ? mean / std * Math.sqrt(12) : 0;
-  }
-
-  const finalS = stratEq[stratEq.length-1], finalB = bhEq[bhEq.length-1], finalC = cashOnly[cashOnly.length-1];
-  const yrs = (data.length - 1) / 12;
-  const sAnn = (Math.pow(finalS, 1/yrs) - 1) * 100;
-  const bAnn = (Math.pow(finalB, 1/yrs) - 1) * 100;
-  const sDD = maxDrawdown(stratEq), bDD = maxDrawdown(bhEq);
-  const sSh = calcSharpe(stratEq), bSh = calcSharpe(bhEq);
-  const avgPos = positions.reduce((a,b) => a+b, 0) / positions.length;
-  const buyMonths = positions.filter(p => p >= 90).length;
-  updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, buyMonths);
-
-  const yearly = {};
-  data.forEach((d,i) => { const yr = d.date.substring(0,4); if (!yearly[yr]) yearly[yr] = { s: stratEq[i], b: bhEq[i] }; yearly[yr].s = stratEq[i]; yearly[yr].b = bhEq[i]; });
-  const yl = Object.keys(yearly);
-  let sp = 1, bp = 1; const sy = [], by = [];
-  yl.forEach(y => { const yr = yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp = yr.s; bp = yr.b; });
-
-  const ctx4 = document.getElementById('chartYearly').getContext('2d');
-  chartYearly = new Chart(ctx4, {
-    type: 'bar',
-    data: { labels: yl, datasets: [
-      { label: '策略年度收益 %', data: sy, backgroundColor: 'rgba(220,53,69,0.7)', borderColor: redColor, borderWidth: 1 },
-      { label: '买入持有年度收益 %', data: by, backgroundColor: 'rgba(13,110,253,0.5)', borderColor: darkBlue, borderWidth: 1 }
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } }, scales: { y: { title: { display: true, text: '%' } } } }
-  });
-
-  function ddSeries(eq){ let peak = eq[0]; return eq.map(v => { if (v > peak) peak = v; return -(peak - v) / peak * 100; }); }
-  const ctx5 = document.getElementById('chartDrawdown').getContext('2d');
-  chartDrawdown = new Chart(ctx5, {
-    type: 'line',
-    data: { labels: dates, datasets: [
-      { label: '策略回撤 %', data: ddSeries(stratEq), borderColor: redColor, backgroundColor: 'rgba(220,53,69,0.08)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-      { label: '买入持有回撤 %', data: ddSeries(bhEq), borderColor: darkBlue, backgroundColor: 'rgba(13,110,253,0.05)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 1.5 }
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } }, scales: { x: { ticks: { maxTicksLimit: 20, callback: v => data[v]?.date.replace('-','/') } }, y: { title: { display: true, text: '%' }, max: 0 } } }
-  });
-}
-
-function updateMetrics(finalS, finalB, sAnn, bAnn, sDD, bDD, sSh, bSh, avgPos, buyMonths){
-  document.getElementById('backtestMetrics').innerHTML = `
-    <div class="metric"><div class="mlabel">策略年化收益</div><div class="mval red">${sAnn.toFixed(2)}%</div><div class="msub">vs BH: ${bAnn.toFixed(2)}%</div></div>
-    <div class="metric"><div class="mlabel">策略累计收益</div><div class="mval red">${((finalS-1)*100).toFixed(1)}%</div><div class="msub">vs BH: ${((finalB-1)*100).toFixed(1)}%</div></div>
-    <div class="metric"><div class="mlabel">策略最大回撤</div><div class="mval">${sDD.toFixed(1)}%</div><div class="msub">vs BH: ${bDD.toFixed(1)}%</div></div>
-    <div class="metric"><div class="mlabel">夏普比率</div><div class="mval">${sSh.toFixed(2)}</div><div class="msub">vs BH: ${bSh.toFixed(2)}</div></div>
-    <div class="metric"><div class="mlabel">平均仓位</div><div class="mval">${avgPos.toFixed(0)}%</div><div class="msub">全仓月份: ${buyMonths}</div></div>
-    <div class="metric"><div class="mlabel">vs 买入持有</div><div class="mval ${finalS > finalB ? 'green' : 'red'}">${finalS > finalB ? '战胜' : '跑输'}</div><div class="msub">超额 ${((finalS - finalB)*100).toFixed(1)}%</div></div>
-  `;
-}
-
-function updateCharts(){
-  const dates = data.map(d => d.date);
-  const spreads = data.map(d => d.spread);
-  const divEtfPrices = data.map(d => d.divEtf);
-  const buyLine = Array(dates.length).fill(buyThreshold);
-  const sellLine = Array(dates.length).fill(sellThreshold);
-
-  chartSpread.data.datasets[1].data = buyLine;
-  chartSpread.data.datasets[1].label = `买入阈值 (${buyThreshold}%)`;
-  chartSpread.data.datasets[2].data = sellLine;
-  chartSpread.data.datasets[2].label = `卖出阈值 (${sellThreshold}%)`;
-  chartSpread.update();
-
-  const buyZone = spreads.map(s => s >= buyThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
-  const sellZone = spreads.map(s => s < sellThreshold ? Math.max(...divEtfPrices) * 1.05 : null);
-  chartSignal.data.datasets[1].data = buyZone;
-  chartSignal.data.datasets[2].data = sellZone;
-  chartSignal.data.datasets[4].data = buyLine;
-  chartSignal.data.datasets[4].label = `买入 ${buyThreshold}%`;
-  chartSignal.data.datasets[5].data = sellLine;
-  chartSignal.data.datasets[5].label = `卖出 ${sellThreshold}%`;
-  chartSignal.update();
-
-  const bt = runBacktest();
-  const { stratEq, bhEq, positions, cashOnly } = bt;
-
-  chartBacktest.data.datasets[0].data = stratEq;
-  chartBacktest.data.datasets[1].data = bhEq;
-  chartBacktest.data.datasets[2].data = cashOnly;
-  chartBacktest.update();
-
-  chartPosition.data.datasets[0].data = positions;
-  chartPosition.update();
-
-  const finalS = stratEq[stratEq.length-1], finalB = bhEq[bhEq.length-1];
-  const yrs = (data.length-1)/12;
-  updateMetrics(finalS, finalB,
-    (Math.pow(finalS,1/yrs)-1)*100, (Math.pow(finalB,1/yrs)-1)*100,
-    maxDrawdown(stratEq), maxDrawdown(bhEq),
-    calcSharpe(stratEq), calcSharpe(bhEq),
-    positions.reduce((a,b)=>a+b,0)/positions.length,
-    positions.filter(p=>p>=90).length);
-
-  const yearly = {};
-  data.forEach((d,i) => { const yr = d.date.substring(0,4); if (!yearly[yr]) yearly[yr] = { s: stratEq[i], b: bhEq[i] }; yearly[yr].s = stratEq[i]; yearly[yr].b = bhEq[i]; });
-  const yl = Object.keys(yearly);
-  let sp = 1, bp = 1; const sy = [], by = [];
-  yl.forEach(y => { const yr = yearly[y]; sy.push((yr.s/sp-1)*100); by.push((yr.b/bp-1)*100); sp = yr.s; bp = yr.b; });
-  chartYearly.data.datasets[0].data = sy;
-  chartYearly.data.datasets[1].data = by;
-  chartYearly.data.labels = yl;
-  chartYearly.update();
-
-  function dd(eq){ let p = eq[0]; return eq.map(v => { if (v > p) p = v; return -(p - v) / p * 100; }); }
-  chartDrawdown.data.datasets[0].data = dd(stratEq);
-  chartDrawdown.data.datasets[1].data = dd(bhEq);
-  chartDrawdown.update();
-}
-
-function maxDrawdown(series){ let peak = series[0], maxDD = 0; for (let v of series){ if (v > peak) peak = v; const dd = (peak - v) / peak; if (dd > maxDD) maxDD = dd; } return maxDD * 100; }
-function calcSharpe(series){
-  const rets = [];
-  for (let i = 1; i < series.length; i++) rets.push(series[i]/series[i-1]-1);
-  const mean = rets.reduce((a,b)=>a+b,0)/rets.length;
-  const std = Math.sqrt(rets.reduce((s,r)=>s+Math.pow(r-mean,2),0)/rets.length);
-  return std > 0 ? mean/std*Math.sqrt(12) : 0;
-}
-
-function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelector(`.tab[onclick*="${name}"]`).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  setTimeout(() => {
-    if (chartSpread) chartSpread.resize();
-    if (chartSignal) chartSignal.resize();
-    if (chartBacktest) chartBacktest.resize();
-    if (chartPosition) chartPosition.resize();
-    if (chartYearly) chartYearly.resize();
-    if (chartDrawdown) chartDrawdown.resize();
-  }, 100);
-}
-
-// ==================== INIT ====================
-buildToggle();
-computeIndicators();
-renderSignal();
-renderDashboard();
-renderDetails();
-renderNowCard();
-renderBuySell();
-updateUI();
-initCharts();
-</script>
-</body>
-</html>
+<footer>
+  红利交易助手 · 仅供研究参考，非投资建议<br>
+  生成于 2026-07-15 18:32 ·
+  <a href="https://hebin1979.github.io/" style="color:#b91c1c">返回工具箱首页</a> ·
+  <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#b91c1c">反馈/建议</a>
+</footer>
+</div></body></html>
