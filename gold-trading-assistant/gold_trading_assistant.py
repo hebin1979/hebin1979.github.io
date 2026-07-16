@@ -15,6 +15,8 @@
   6. 避险情绪 VIX                 权重 9   —— 避险需求支撑金价
   7. 季节因子 (当月)              权重 5   —— 9-11月/12-1月旺季，夏秋淡季
 
+评分机制（两层）：价格(估值分位)锚定买卖方向占 60%，其余 6 指标作为环境分调制力度占 40%，
+  故价位区间(便宜/贵)与综合信号方向必然一致，环境只决定买多/卖少的力度。
 综合评分 -> 行动信号（双向）：
   >=68  强烈买入（分批建仓/加仓）
   55-67 条件合适·可小仓位建仓
@@ -308,7 +310,12 @@ def analyze(d):
         "vix": score_vix(d["vix_1y_pct"]),
         "season": season_score,
     }
-    composite = sum(WEIGHTS[k] * ind[k] for k in WEIGHTS) / 100.0
+    # —— 两层框架：价格(估值分位)锚定买卖方向(60%)，其余6指标为环境分调制力度(40%) ——
+    # 保证"便宜→偏多 / 贵→偏谨慎"的方向与价位区间一致，宏观/趋势只调节买多卖少的力度。
+    anchor = ind["valuation"]
+    env_w = {k: w for k, w in WEIGHTS.items() if k != "valuation"}
+    env = sum(env_w[k] * ind[k] for k in env_w) / sum(env_w.values())
+    composite = 0.6 * anchor + 0.4 * env
 
     if composite >= 68:
         signal = "强烈买入 · 分批建仓"
@@ -334,7 +341,8 @@ def analyze(d):
     ctx = dict(
         gold_pct=gold_pct, trend_ratio=trend_ratio, dxy_pct=dxy_pct,
         month=month, season_score=season_score,
-        indicators=ind, composite=composite, signal=signal, color=color, advice=advice,
+        indicators=ind, composite=composite, env=env, env_fav=(env >= 50),
+        signal=signal, color=color, advice=advice,
     )
     return ctx
 
@@ -368,38 +376,28 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, gold_pct):
-    """说明「价位区间」(价格安全边际) 与「综合信号」(7指标加权) 的关系。
-    关键修复：措辞随价格位置走，不再写死"技术面低位提供安全边际"；
-    并只列举与价格位置方向相反、用于解释分歧的因子。"""
-    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]
-    if gold_pct < 20:   pos, cheap = "处于年内低位、安全边际高", True
-    elif gold_pct < 40: pos, cheap = "处于年内偏低位置、具备吸引力", True
-    elif gold_pct < 65: pos, cheap = "处于历史中枢附近", True
-    elif gold_pct < 85: pos, cheap = "处于年内偏高位置、安全边际有限", False
-    else:               pos, cheap = "逼近年内高位、性价比下降", False
-
-    # 压制金价的负面因子（解释"便宜却不强买"）
+    """两层框架的桥梁：价格(估值分位)锚定买卖方向，其余指标(环境分)只调制力度。
+    方向必与价位区间一致：便宜→偏多，贵→偏谨慎；环境好则加大力度，环境差则减小。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]; env = ctx["env"]
+    cheap = gold_pct < 40
+    pos = ("处于年内偏低位置、安全边际高" if cheap else
+           "处于历史中枢附近" if gold_pct < 65 else
+           "处于年内偏高位置、安全边际有限")
     bear = []
     if d["tips"] > 2.0: bear.append(f"实际利率偏高(TIPS {d['tips']:.2f}% 压制金价)")
     if ctx["dxy_pct"] > 70: bear.append(f"美元处历史偏强位(分位 {ctx['dxy_pct']:.0f}%)")
-    if ctx["trend_ratio"] < 0.98: bear.append(f"价格低于长期均线({d['gold_ma']:.3f})")
     if ind["season"] <= 45: bear.append(f"当前为淡季(季节评分 {ind['season']:.0f})")
-    # 支撑金价的正面因子（解释"偏贵却仍买"）
     bull = []
     if d["vix_1y_pct"] > 80: bull.append(f"VIX 处历史高位({d['vix_1y_pct']:.0f}%分位,避险需求升温)")
-
-    if cheap and comp < 55:
-        reasons = "；".join(bear) or "宏观面暂无共振利多"
+    if cheap:
+        tail = ("；".join(bear) + "，故小仓位分批、不一次性满仓") if bear else "，可直接小仓位分批布局"
         return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽处低位、安全边际高，"
-                f"但{reasons}，宏观面压制金价，故采用「小仓位、逢低分批」而非一次性满仓强买。")
-    if (not cheap) and comp >= 55:
-        reasons = "；".join(bull) or "动能与风险偏好利多"
-        return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽偏高、安全边际有限，"
-                f"但{reasons}，动能与宏观支撑金价，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+                f"价格处低位→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(估值分位)锚定方向、"
+                f"其余指标(环境分 {env:.0f})调制力度：虽便宜可逢低布局，但{tail}。")
+    tail = ("；".join(bull) + "，但价格已偏高、安全边际有限，故以持有/观望为主、不追高") if bull else "，且价格偏高、安全边际有限，故以持有/观望为主、不追高"
     return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
-            f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
+            f"价格偏高→方向偏谨慎；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格锚定方向、"
+            f"其余指标(环境分 {env:.0f})调制力度：{tail}。")
 
 # ----------------------------------------------------------------------------
 # 6. HTML 报告
@@ -542,7 +540,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 </style></head><body><div class="wrap">
 <header>
   <h1>🪙 黄金交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：518850 黄金ETF华夏（A股可直接交易，与现货金价高度联动）｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
+  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：518850 黄金ETF华夏（A股可直接交易，与现货金价高度联动）｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
 </header>

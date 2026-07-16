@@ -16,6 +16,8 @@
   6. 高收益信用利差 HY OAS        权重 12  —— 越低=风险偏好健康
   7. VIX 期限结构                 权重 8   —— Contango 健康 / Backwardation 恐慌
 
+评分机制（两层）：价格(估值分位)锚定买卖方向占 60%，其余 6 指标作为环境分调制力度占 40%，
+  故价位区间(便宜/贵)与综合信号方向必然一致，环境只决定买多/卖少的力度。
 综合评分 -> 唯一行动信号（双向）：
   >=68  强烈买入（分批建仓/加仓）
   55-67 条件合适·可小仓位建仓
@@ -283,7 +285,12 @@ def analyze(d):
         "hy": score_hy_oas(d["hy_oas"]),
         "term": score_term_structure(slope),
     }
-    composite = sum(WEIGHTS[k] * ind[k] for k in WEIGHTS) / 100.0
+    # —— 两层框架：价格(估值分位)锚定买卖方向(60%)，其余6指标为环境分调制力度(40%) ——
+    # 保证"便宜→偏多 / 贵→偏谨慎"的方向与价位区间一致，宏观/趋势只调节买多卖少的力度。
+    anchor = ind["valuation"]
+    env_w = {k: w for k, w in WEIGHTS.items() if k != "valuation"}
+    env = sum(env_w[k] * ind[k] for k in env_w) / sum(env_w.values())
+    composite = 0.6 * anchor + 0.4 * env
 
     if composite >= 68:
         signal = "强烈买入 · 分批建仓"; color = "#16a34a"
@@ -304,7 +311,8 @@ def analyze(d):
     ctx = dict(
         vix=vix, vix_pct=vix_pct, slope=slope, treasury=treasury, ey=ey, erp=erp,
         trend_ratio=trend_ratio, etf_pct=etf_pct, dist_high=dist_high,
-        indicators=ind, composite=composite, signal=signal, color=color, advice=advice,
+        indicators=ind, composite=composite, env=env, env_fav=(env >= 50),
+        signal=signal, color=color, advice=advice,
     )
     return ctx
 
@@ -338,40 +346,28 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, etf_pct):
-    """说明「价位区间」(价格安全边际) 与「综合信号」(7指标加权) 的关系。
-    关键修复：措辞随价格位置走，不再写死"技术面低位提供安全边际"；
-    并只列举与价格位置方向相反、用于解释分歧的因子。"""
-    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]
-    if etf_pct < 20:   pos, cheap = "处于年内低位、安全边际高", True
-    elif etf_pct < 40: pos, cheap = "处于年内偏低位置、具备吸引力", True
-    elif etf_pct < 65: pos, cheap = "处于历史中枢附近", True
-    elif etf_pct < 85: pos, cheap = "处于年内偏高位置、安全边际有限", False
-    else:              pos, cheap = "逼近年内高位、性价比下降", False
-
-    # 拖累信号(解释"便宜却不强买")
+    """两层框架的桥梁：价格(估值分位)锚定买卖方向，其余指标(环境分)只调制力度。
+    方向必与价位区间一致：便宜→偏多，贵→偏谨慎；环境好则加大力度，环境差则减小。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]; env = ctx["env"]
+    cheap = etf_pct < 40
+    pos = ("处于年内偏低位置、安全边际高" if cheap else
+           "处于历史中枢附近" if etf_pct < 65 else
+           "处于年内偏高位置、安全边际有限")
     bear = []
     if ctx["erp"] < 1.0: bear.append(f"股票风险溢价偏低(ERP {ctx['erp']:+.1f}%)")
-    if etf_pct >= 65: bear.append(f"估值分位偏高({etf_pct:.0f}%)")
-    if ctx["vix_pct"] < 20: bear.append(f"波动率处低位(分位 {ctx['vix_pct']:.0f}%) 追高性价比低")
-    # 支撑信号(解释"偏贵却仍买")
     bull = []
     if ctx["trend_ratio"] > 1.05: bull.append(f"趋势站上长期均线({ctx['trend_ratio']:.2f}×) 顺势")
-    if d["hy_oas"] < 320: bull.append(f"信用利差健康(HY OAS {d['hy_oas']:.0f} bps) 风险偏好稳")
+    if d["hy_oas"] < 320: bull.append(f"信用利差健康(HY OAS {d['hy_oas']:.0f} bps)")
     if ctx["slope"] > 1.05: bull.append(f"VIX 期限结构良性(斜率 {ctx['slope']:.2f})")
-    if d["etf_rsi"] < 50 and ind["rsi"] >= 70: bull.append(f"RSI 偏低({d['etf_rsi']:.0f}) 提供均值回归买点")
-
-    if cheap and comp < 55:
-        reasons = "；".join(bear) or "基本面暂无共振利多"
+    if cheap:
+        tail = ("；".join(bear) + "，故小仓位分批、不一次性满仓") if bear else "，可直接小仓位分批布局"
         return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽处低位、安全边际高，"
-                f"但{reasons}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
-    if (not cheap) and comp >= 55:
-        reasons = "；".join(bull) or "动能与风险偏好利多"
-        return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽偏高、安全边际有限，"
-                f"但{reasons}，动能与宏观支撑，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+                f"价格处低位→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(估值分位)锚定方向、"
+                f"其余指标(环境分 {env:.0f})调制力度：虽便宜可逢低布局，但{tail}。")
+    tail = ("；".join(bull) + "，但价格已偏高、安全边际有限，故以持有/观望为主、不追高") if bull else "，且价格偏高、安全边际有限，故以持有/观望为主、不追高"
     return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-            f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
+            f"价格偏高→方向偏谨慎；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格锚定方向、"
+            f"其余指标(环境分 {env:.0f})调制力度：{tail}。")
 
 # ----------------------------------------------------------------------------
 # 6. HTML 报告
@@ -507,7 +503,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 </style></head><body><div class="wrap">
 <header>
   <h1>📈 纳指交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：159696 纳指ETF易方达（跟踪纳斯达克100，A股可直接交易）｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
+  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：159696 纳指ETF易方达（跟踪纳斯达克100，A股可直接交易）｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
 </header>
