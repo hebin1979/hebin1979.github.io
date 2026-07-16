@@ -4,7 +4,8 @@
 红利交易助手 (Dividend Trading Assistant)
 ========================================================
 目的：综合多个市场指标，判断"现在是否适合买入/累积红利低波"，并给出
-      合适的价位区间与时间窗口（标的：563020 易方达中证红利低波动ETF）。
+      合适的价位区间与时间窗口。双卡对比：563020 中证红利低波动ETF 与
+      159545 恒生红利低波ETF，二者共用同一套两层框架（宏观环境共享、各自取数）。
 
 评分机制（两层）：563020 自身价格在 52 周区间的分位锚定买卖**方向**占 60%，
   其余 7 指标作为**环境分**调制**力度**占 40%（env = 7 指标按原权重归一化平均）。
@@ -87,6 +88,50 @@ SNAPSHOT = {
 
 FEEDBACK_URL = "https://github.com/hebin1979/hebin1979.github.io/issues"
 HOMEPAGE_URL = "https://hebin1979.github.io/"
+
+# ----------------------------------------------------------------------------
+# 0c. 双基金配置：563020 与 159545 共用同一套两层框架。
+#     - 宏观环境(沪深300 PE / 10Y / 股债利差) 为两只红利低波 ETF 共享的中国市场背景，
+#       以保证"同标准、可对比"；差异来自各 ETF 自身的：价格52周分位(锚定方向)、股息率、趋势、RSI。
+#     - 159545 为港股通红利低波 ETF，股息率显著高于 563020，价格已贴近其 1 年低位。
+#     刷新某只基金数据：直接改对应 snapshot，或用 --manual 覆盖 563020(默认首只)。
+# ----------------------------------------------------------------------------
+SHARED_MACRO = {
+    "pe": 14.24,            # 沪深300 PE(TTM) —— 共享宏观估值背景
+    "bond10y": 1.73,        # 10Y 国债收益率(%) —— 共享宏观利率背景
+}
+FUNDS = [
+    {
+        "code": "563020",
+        "name": "易方达中证红利低波动ETF",
+        "index": "中证红利低波动(930914)",
+        "market": "A股",
+        "as_of": "2026-07-15",
+        "snapshot": dict(SHARED_MACRO, **{
+            "div_yield": 4.52,     # 563020 股息率(%)（中证红利低波动930914指数口径）
+            "etf_price": 1.144,    # 563020 现价(不复权, 东财)
+            "etf_52w_high": 1.283, # 52周高 (2025-11-12, 不复权)
+            "etf_52w_low": 1.055,  # 52周低 (2026-06-29, 不复权)
+            "etf_ma": 1.186,       # 中期均线 MA12 月线(不复权)
+            "etf_rsi": 70.0,       # RSI(14) 日线(不复权)
+        }),
+    },
+    {
+        "code": "159545",
+        "name": "易方达恒生红利低波ETF",
+        "index": "恒生港股通高股息低波动",
+        "market": "港股通",
+        "as_of": "2026-07-16",
+        "snapshot": dict(SHARED_MACRO, **{
+            "div_yield": 5.80,     # 159545 股息率(%)（恒生港股通高股息低波动指数口径 ~5.8%）
+            "etf_price": 1.292,    # 159545 现价(不复权, 东财 2026-07-16)
+            "etf_52w_high": 1.54,  # 52周高 (2026年初, 不复权)
+            "etf_52w_low": 1.29,   # 52周低 (2026-07, 不复权；现价已贴近1年低位)
+            "etf_ma": 1.33,        # 中期均线 MA12 月线(快照估算, 现价低于均线)
+            "etf_rsi": 42.0,       # RSI(14) 日线(快照估算, 近期下行、未极端超卖)
+        }),
+    },
+]
 
 # ----------------------------------------------------------------------------
 # 1. 工具
@@ -257,10 +302,11 @@ def current_zone(d):
         z = zs[0]; return z[0], z[4], z[3]
     z = zs[-1]; return z[0], z[4], z[3]
 
-def reconcile_text(d, ctx, zone_name, etf_pct):
-    """两层框架的桥梁：563020 自身价格在 52 周区间分位锚定买卖方向，其余指标(环境分)只调制力度。
+def reconcile_text(d, ctx, zone_name, etf_pct, fund):
+    """两层框架的桥梁：标的自身价格在 52 周区间分位锚定买卖方向，其余指标(环境分)只调制力度。
     方向必与价位区间一致：便宜→偏多，贵→偏谨慎；环境好则加大力度，环境差则减小。"""
     comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]; env = ctx["env"]
+    code = fund["code"]; name = fund["name"]
     cheap = etf_pct < 40
     pos = ("处于年内偏低位置、安全边际高" if cheap else
            "处于历史中枢附近" if etf_pct < 65 else
@@ -276,11 +322,11 @@ def reconcile_text(d, ctx, zone_name, etf_pct):
     if d["etf_rsi"] < 35: bull.append(f"RSI {d['etf_rsi']:.0f} 超卖、提供均值回归买点")
     if cheap:
         tail = ("；".join(bear) + "，故以红利低波收息为本、小仓位分批、不一次性满仓") if bear else "，可直接小仓位分批布局、长期持有收息"
-        return (f"当前 563020 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
+        return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
                 f"价格处低位→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(52周分位)锚定方向、"
                 f"其余指标(环境分 {env:.0f})调制力度：虽便宜可逢低布局，但{tail}。")
     tail = ("；".join(bull) + "，但价格已偏高、安全边际有限，故以持有/观望为主、不追高") if bull else "，且价格偏高、安全边际有限，故以持有/观望为主、不追高"
-    return (f"当前 563020 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
+    return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
             f"价格偏高→方向偏谨慎；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格锚定方向、"
             f"其余指标(环境分 {env:.0f})调制力度：{tail}。")
 
@@ -305,21 +351,22 @@ def gauge(value, color, label, sub=""):
       <div class="g-sub">{html.escape(sub)}</div>
     </div>'''
 
-def build_html(d, ctx):
+def render_panel(d, ctx, fund, active=False):
     import html
     ind = ctx["indicators"]; comp = ctx["composite"]
+    code = fund["code"]; name = fund["name"]; idx = fund["index"]; market = fund["market"]
     cz_name, cz_color, cz_desc = current_zone(d)
-    rec = reconcile_text(d, ctx, cz_name, ctx["etf_pct"])
+    rec = reconcile_text(d, ctx, cz_name, ctx["etf_pct"], fund)
 
-    def card(name, val, score, color, note):
-        return (f'<div class="card"><div class="c-head"><span class="c-name">{name}</span>'
+    def card(cname, val, score, color, note):
+        return (f'<div class="card"><div class="c-head"><span class="c-name">{cname}</span>'
                 f'<span class="c-score" style="color:{color}">{score:.0f}</span></div>'
                 f'<div class="c-val">{val}</div>'
                 f'<div class="bar"><div class="bar-fill" style="width:{score:.0f}%;background:{color}"></div></div>'
                 f'<div class="c-note">{note}</div></div>')
 
     cards = [
-        card("股价分位 (563020 vs 52周)", f"价格位于年内 {ctx['etf_pct']:.0f}% 分位",
+        card(f"股价分位 ({code} vs 52周)", f"价格位于年内 {ctx['etf_pct']:.0f}% 分位",
              ind["price_pct"], "#b45309", "⚓ 锚定方向：价格越低越便宜(偏多)"),
         card("股债利差 (E/P−10Y)", f"利差 {ctx['spread']:.2f}% (E/P {ctx['ey']:.2f}%−{d['bond10y']:.2f}%)",
              ind["spread"], "#dc2626", "核心：股票相对债券越便宜越买"),
@@ -327,7 +374,7 @@ def build_html(d, ctx):
              ind["spread_pct"], "#ea580c", "利差处历史越高，配置价值越突出"),
         card("PE分位 (沪深300)", f"PE {d['pe']:.2f} (分位{ctx['pe_pct']:.0f}%)",
              ind["valuation"], "#2563eb", "环境因子：PE 越低越便宜"),
-        card("股息率 (563020)", f"股息率 {d['div_yield']:.2f}%",
+        card(f"股息率 ({code})", f"股息率 {d['div_yield']:.2f}%",
              ind["dividend"], "#16a34a", "现金流吸引力，越高越香"),
         card("利率环境 (10Y国债)", f"10Y {d['bond10y']:.2f}% (分位{ctx['bond_pct']:.0f}%)",
              ind["rate"], "#0891b2", "利率越低红利相对越香"),
@@ -338,9 +385,9 @@ def build_html(d, ctx):
     ]
 
     zone_rows = ""
-    for name, lo, hi, desc, color in compute_zones(d):
-        mark = "◀ 当前" if name == cz_name else ""
-        zone_rows += (f"<tr><td><b style='color:{color}'>{name}</b></td>"
+    for zn, lo, hi, desc, color in compute_zones(d):
+        mark = "◀ 当前" if zn == cz_name else ""
+        zone_rows += (f"<tr><td><b style='color:{color}'>{zn}</b></td>"
                       f"<td>{lo:.3f}</td><td>{hi:.3f}</td>"
                       f"<td style='text-align:left;font-size:12px;color:#475569'>{desc}</td>"
                       f"<td>{mark}</td></tr>")
@@ -348,23 +395,102 @@ def build_html(d, ctx):
     bull = [("利差极端便宜", f"股债利差升至历史前25%便宜区（分位≥75%，现 {ctx['spread_pct']:.0f}%）→ 重仓分批"),
             ("利率新低", f"10Y 国债跌破 1.5%（现 {d['bond10y']:.2f}%）→ 利差被动走阔"),
             ("估值回落", f"沪深300 PE 分位回落至 <30%（现 {ctx['pe_pct']:.0f}%）"),
-            ("技术买点", f"563020 跌破 MA12({d['etf_ma']:.3f}) 或 RSI<35（现 RSI {d['etf_rsi']:.0f}）")]
+            ("技术买点", f"{code} 跌破 MA12({d['etf_ma']:.3f}) 或 RSI<35（现 RSI {d['etf_rsi']:.0f}）")]
     bear = [("利差极端昂贵", f"股债利差跌至历史后25%便宜区（分位≤25% 或 绝对值<3.5%，现 {ctx['spread_pct']:.0f}% / {ctx['spread']:.2f}%）→ 降至底仓"),
             ("利率上行", f"10Y 国债升破 2.5%（现 {d['bond10y']:.2f}%）→ 利差承压"),
             ("估值偏贵", f"沪深300 PE 分位 >70%（现 {ctx['pe_pct']:.0f}%）→ 吸引力下降"),
-            ("风格拥挤", f"563020 逼近 52 周高({d['etf_52w_high']:.3f}) 且 RSI>70 超买")]
+            ("风格拥挤", f"{code} 逼近 52 周高({d['etf_52w_high']:.3f}) 且 RSI>70 超买")]
 
     bull_html = "".join(f'<div class="rule rule-bull"><span class="r-kind">加仓信号</span><b>{t}</b><br>{v}</div>' for t, v in bull)
     bear_html = "".join(f'<div class="rule rule-bear"><span class="r-kind">止盈信号</span><b>{t}</b><br>{v}</div>' for t, v in bear)
 
     status = {
-        "沪深300 PE / 10Y国债": "东财 / 中国债券信息网 (快照)",
-        "563020 价格·MA·RSI": "东财 (快照)",
-        "股息率": "中证指数 (中证红利低波动 930914)",
+        "沪深300 PE / 10Y国债": "东财 / 中国债券信息网（共享宏观·快照）",
+        f"{code} 价格·MA·RSI": "东财（快照）",
+        "股息率": f"{idx} 指数口径",
         "PE分位 / 利差分位": "基于内嵌历史序列计算",
     }
     st_lines = "".join(f"<li>{k}: {v}</li>" for k, v in status.items())
 
+    return f'''<div class="fund-panel" id="panel-{code}" style="display:{'block' if active else 'none'}">
+<div class="comp-wrap">
+  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'])}</div>
+  <div style="flex:1;min-width:280px">
+    <h2 style="margin-bottom:10px;font-size:15px">{code} 指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+      {''.join(gauge(ind[k], '#b91c1c', n, '') for k,n in
+        [('price_pct','股价分位⚓'),('spread','股债利差'),('spread_pct','利差分位'),('valuation','PE分位'),('dividend','股息率'),
+         ('rate','利率'),('trend','趋势'),('rsi','RSI')])}
+    </div>
+  </div>
+</div>
+
+<div class="recon" style="border:2px solid {cz_color}">
+  <div class="r-col">
+    <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
+    <div class="r-val" style="color:{cz_color}">{cz_name}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 {d['etf_price']:.3f} ｜ 52 周区间分位 {ctx['etf_pct']:.0f}%</div>
+  </div>
+  <div class="r-col">
+    <div class="r-label">🎯 综合信号（{code} 唯一结论）</div>
+    <div class="r-val" style="color:{ctx['color']}">{ctx['signal']}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 {comp:.0f}/100</div>
+  </div>
+  <div class="r-text">{rec}</div>
+</div>
+
+<div class="section"><h2>① 七维指标明细（{code}）</h2><div class="cards">{''.join(cards)}</div></div>
+
+<div class="section"><h2>② 价位区间参考（仅标示价格相对 52 周区间的位置，安全边际参考）</h2>
+  <table><thead><tr>
+    <th>价位区间</th><th>下沿</th><th>上沿</th><th>位置描述</th><th>状态</th>
+  </tr></thead><tbody>{zone_rows}</tbody></table>
+  <p style="font-size:12px;color:#64748b;margin-top:10px">
+  区间基于 {code} 的 52 周高低({d['etf_52w_low']:.3f}–{d['etf_52w_high']:.3f}) 按百分比切分，颜色仅表示"低=绿 / 高=红"。
+  此表为<b>安全边际参考</b>，不单独下买卖命令；具体买入/卖出操作一律以上方「综合信号」为准。
+  红利低波宜长期持有、分红再投，择时仅用于加减仓，不必清仓。</p>
+</div>
+
+<div class="section"><h2>③ 时间窗口与触发条件（何时加仓 / 何时止盈）</h2>
+  <div class="rules">
+    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">加仓信号</div>{bull_html}</div>
+    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈信号</div>{bear_html}</div>
+  </div>
+  <p style="font-size:12px;color:#64748b;margin-top:12px">
+  核心逻辑：股债利差走阔(股票相对债券便宜)+估值低位+利率下行时"逢低累积"；利差收窄+估值偏贵时"分批止盈"。
+  触发阈值基于 2014 年以来历史分位<b>自适应</b>设定，贴合红利低波的收息属性。
+  红利低波以收息为本，宜长线持有、分红再投，择时仅用于加减仓。</p>
+</div>
+
+<div class="section"><h2>④ 数据来源与新鲜度（{code}）</h2>
+  <ul class="status">{st_lines}</ul>
+  <p style="font-size:12px;color:#94a3b8;margin-top:8px">
+  股债利差 = 沪深300 盈利收益率(100/PE) − 10Y 国债收益率；分位基于内嵌 2014 年以来历史序列计算。
+  两只 ETF 共用同一宏观背景(沪深300 PE / 10Y)，以保证"同标准、可对比"；差异来自各自价格52周分位(锚定方向)、股息率、趋势与RSI。
+  数值为快照校准，请以实时数据为准。</p>
+</div>
+</div>'''
+
+
+def build_html(funds_data):
+    import html
+    first_code = funds_data[0][2]["code"]
+    cmp_items = ""
+    for d, ctx, fund in funds_data:
+        cz = current_zone(d)[0]
+        cmp_items += (f'<div class="cmp-card">'
+            f'<div class="cmp-code">{fund["code"]} <span class="cmp-mkt">{fund["market"]}</span></div>'
+            f'<div class="cmp-name">{fund["name"]}</div>'
+            f'<div class="cmp-sig" style="color:{ctx["color"]}">{ctx["signal"]}</div>'
+            f'<div class="cmp-score">综合 {ctx["composite"]:.0f}/100 ｜ 价位「{cz}」</div>'
+            f'</div>')
+    tabs = ""
+    for i, (d, ctx, fund) in enumerate(funds_data):
+        active = " active" if i == 0 else ""
+        tabs += (f'<button class="tab-btn{active}" id="tab-{fund["code"]}" '
+                 f'onclick="showFund(\'{fund["code"]}\')">{fund["code"]} {fund["name"]}</button>')
+    panels = "".join(render_panel(d, ctx, fund, i == 0) for i, (d, ctx, fund) in enumerate(funds_data))
+    as_of = " ｜ ".join(f'{fund["code"]}:{fund["as_of"]}' for d, ctx, fund in funds_data)
     html_doc = f'''<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -376,12 +502,20 @@ body{{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-se
  background:#f8fafc;color:#0f172a;padding:24px}}
 .wrap{{max-width:1080px;margin:0 auto}}
 header{{background:linear-gradient(135deg,#7f1d1d,#b91c1c);color:#fff;border-radius:16px;
- padding:24px 28px;margin-bottom:20px}}
+ padding:24px 28px;margin-bottom:16px}}
 header h1{{font-size:22px;margin-bottom:6px}}
 header .meta{{font-size:12px;opacity:.85}}
-.signal{{display:inline-block;margin-top:12px;padding:8px 18px;border-radius:10px;
- background:{ctx['color']};color:#fff;font-size:18px;font-weight:700}}
-.advice{{margin-top:12px;font-size:14px;line-height:1.6;opacity:.96}}
+.cmp-strip{{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}}
+.cmp-card{{flex:1;min-width:220px;background:rgba(255,255,255,.12);border-radius:12px;padding:12px 14px}}
+.cmp-code{{font-size:13px;font-weight:700}}
+.cmp-mkt{{font-size:11px;background:rgba(255,255,255,.22);border-radius:4px;padding:1px 6px;margin-left:4px}}
+.cmp-name{{font-size:12px;opacity:.85;margin:2px 0 6px}}
+.cmp-sig{{font-size:17px;font-weight:800;color:#fff}}
+.cmp-score{{font-size:12px;opacity:.9;margin-top:3px}}
+.tabs{{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}}
+.tab-btn{{flex:1;min-width:180px;padding:12px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;
+ cursor:pointer;font-size:14px;font-weight:600;color:#475569;text-align:left}}
+.tab-btn.active{{border-color:#b91c1c;background:#fef2f2;color:#b91c1c}}
 .comp-wrap{{display:flex;gap:20px;align-items:center;background:#fff;border-radius:16px;
  padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);flex-wrap:wrap}}
 .comp-gauge{{flex:0 0 220px}}
@@ -409,11 +543,10 @@ th{{background:#f8fafc;color:#475569;font-weight:600}}
 .r-kind{{display:inline-block;font-size:11px;background:#e2e8f0;color:#475569;
  border-radius:4px;padding:1px 8px;margin-bottom:6px}}
 .recon{{display:flex;gap:20px;align-items:stretch;background:linear-gradient(135deg,#fff7ed,#fef2f2);
- border:2px solid {cz_color};border-radius:14px;padding:18px;margin-bottom:20px;flex-wrap:wrap}}
+ border-radius:14px;padding:18px;margin-bottom:20px;flex-wrap:wrap}}
 .recon .r-col{{flex:1;min-width:200px}}
 .recon .r-label{{font-size:12px;color:#64748b;margin-bottom:4px}}
 .recon .r-val{{font-size:18px;font-weight:800}}
-.recon .r-zone{{color:{cz_color}}}
 .recon .r-text{{flex:2 1 100%;font-size:13px;line-height:1.7;color:#334155;margin-top:14px;
  border-top:1px dashed #fcd9b6;padding-top:12px}}
 .status{{font-size:12px;color:#64748b}}
@@ -424,70 +557,18 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   .cards{{grid-template-columns:1fr 1fr}}
   .rules{{grid-template-columns:1fr}}
   .comp-gauge{{flex:1 1 100%}}
+  .cmp-strip{{flex-direction:column}}
 }}
 </style></head><body><div class="wrap">
 <header>
   <h1>📊 红利交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：563020 易方达中证红利低波动ETF ｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口</div>
-  <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
-  <div class="advice">{ctx['advice']}</div>
+  <div class="meta">数据时间：{as_of} ｜ 双卡对比：563020 / 159545 ｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口</div>
+  <div class="cmp-strip">{cmp_items}</div>
 </header>
 
-<div class="comp-wrap">
-  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'])}</div>
-  <div style="flex:1;min-width:280px">
-    <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
-    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
-      {''.join(gauge(ind[k], '#b91c1c', n, '') for k,n in
-        [('price_pct','股价分位⚓'),('spread','股债利差'),('spread_pct','利差分位'),('valuation','PE分位'),('dividend','股息率'),
-         ('rate','利率'),('trend','趋势'),('rsi','RSI')])}
-    </div>
-  </div>
-</div>
+<div class="tabs">{tabs}</div>
 
-<div class="recon">
-  <div class="r-col">
-    <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
-    <div class="r-val r-zone">{cz_name}　{cz_color and ''}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 {d['etf_price']:.3f} ｜ 52 周区间分位 {ctx['etf_pct']:.0f}%</div>
-  </div>
-  <div class="r-col">
-    <div class="r-label">🎯 综合信号（全页唯一结论）</div>
-    <div class="r-val" style="color:{ctx['color']}">{ctx['signal']}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 {comp:.0f}/100</div>
-  </div>
-  <div class="r-text">{rec}</div>
-</div>
-
-<div class="section"><h2>① 七维指标明细</h2><div class="cards">{''.join(cards)}</div></div>
-
-<div class="section"><h2>② 价位区间参考（仅标示价格相对 52 周区间的位置，安全边际参考）</h2>
-  <table><thead><tr>
-    <th>价位区间</th><th>下沿</th><th>上沿</th><th>位置描述</th><th>状态</th>
-  </tr></thead><tbody>{zone_rows}</tbody></table>
-  <p style="font-size:12px;color:#64748b;margin-top:10px">
-  区间基于 563020 的 52 周高低({d['etf_52w_low']:.3f}–{d['etf_52w_high']:.3f}) 按百分比切分，颜色仅表示"低=绿 / 高=红"。
-  此表为<b>安全边际参考</b>，不单独下买卖命令；具体买入/卖出操作一律以上方「综合信号」为准。
-  红利低波宜长期持有、分红再投，择时仅用于加减仓，不必清仓。</p>
-</div>
-
-<div class="section"><h2>③ 时间窗口与触发条件（何时加仓 / 何时止盈）</h2>
-  <div class="rules">
-    <div><div style="font-weight:700;margin-bottom:8px;color:#16a34a">加仓信号</div>{bull_html}</div>
-    <div><div style="font-weight:700;margin-bottom:8px;color:#dc2626">止盈信号</div>{bear_html}</div>
-  </div>
-  <p style="font-size:12px;color:#64748b;margin-top:12px">
-  核心逻辑：股债利差走阔(股票相对债券便宜)+估值低位+利率下行时"逢低累积"；利差收窄+估值偏贵时"分批止盈"。
-  触发阈值基于 2014 年以来历史分位<b>自适应</b>设定（非旧版固定 6%/4% 硬阈值），贴合沪深300 股债利差的历史分布与红利低波的收息属性。
-  红利低波以收息为本，宜长线持有、分红再投，择时仅用于加减仓。</p>
-</div>
-
-<div class="section"><h2>④ 数据来源与新鲜度</h2>
-  <ul class="status">{st_lines}</ul>
-  <p style="font-size:12px;color:#94a3b8;margin-top:8px">
-  股债利差 = 沪深300 盈利收益率(100/PE) − 10Y 国债收益率；分位基于内嵌 2014 年以来历史序列计算。
-  数值为快照校准，请以实时数据为准。</p>
-</div>
+{panels}
 
 <footer>
   红利交易助手 · 仅供研究参考，非投资建议<br>
@@ -495,6 +576,14 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   <a href="{HOMEPAGE_URL}" style="color:#b91c1c">返回工具箱首页</a> ·
   <a href="{FEEDBACK_URL}" style="color:#b91c1c">反馈/建议</a>
 </footer>
+<script>
+function showFund(id){{
+  document.querySelectorAll('.fund-panel').forEach(function(p){{p.style.display='none';}});
+  document.getElementById('panel-'+id).style.display='block';
+  document.querySelectorAll('.tab-btn').forEach(function(b){{b.classList.remove('active');}});
+  document.getElementById('tab-'+id).classList.add('active');
+}}
+</script>
 </div></body></html>'''
     return html_doc
 
@@ -503,47 +592,39 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 # ----------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(description="红利交易助手 (Dividend Trading Assistant)")
-    ap.add_argument("--manual", default=None, help="手动覆盖JSON(覆盖SNAPSHOT字段)")
+    ap.add_argument("--manual", default=None, help="手动覆盖JSON(覆盖首只基金563020的快照字段)")
     ap.add_argument("--out", default=None, help="HTML 输出路径")
     args = ap.parse_args()
 
-    d = dict(SNAPSHOT)
-    if args.manual:
-        try:
-            d.update(json.loads(args.manual))
-        except Exception as e:
-            print("manual JSON 解析失败:", e)
+    funds_data = []
+    for fi, fund in enumerate(FUNDS):
+        d = dict(fund["snapshot"])
+        if args.manual and fi == 0:   # --manual 仅覆盖首只(563020)，保持向后兼容
+            try:
+                d.update(json.loads(args.manual))
+            except Exception as e:
+                print("manual JSON 解析失败:", e)
+        ctx = analyze(d)
+        funds_data.append((d, ctx, fund))
 
     print("=" * 60)
-    print("  红利交易助手  ·  计算指标 ...")
+    print("  红利交易助手  ·  双卡对比（563020 / 159545）")
     print("=" * 60)
-    ctx = analyze(d)
-    cz_name, _, _ = current_zone(d)
-
-    print(f"\n  数据时间    : {d.get('as_of','')}")
-    print(f"  563020 现价 : {d['etf_price']:.3f}  (52周 {d['etf_52w_low']:.3f}-{d['etf_52w_high']:.3f})")
-    print(f"  价格52周分位: {ctx['etf_pct']:.0f}%  -> 价位区间「{cz_name}」")
-    print(f"  沪深300 PE  : {d['pe']:.2f}  (分位 {ctx['pe_pct']:.0f}%)   E/P {ctx['ey']:.2f}%")
-    print(f"  10Y 国债    : {d['bond10y']:.2f}%  (分位 {ctx['bond_pct']:.0f}%)")
-    print(f"  股债利差    : {ctx['spread']:.2f}%  (分位 {ctx['spread_pct']:.0f}%)   股息率 {d['div_yield']:.2f}%")
-    print("-" * 60)
-    print("  指标评分(0-100, 越高越适合买入):")
-    names = {"spread":"股债利差","spread_pct":"利差分位","valuation":"估值分位","dividend":"股息率",
-             "rate":"利率环境","trend":"趋势MA","rsi":"RSI动量"}
-    for k in WEIGHTS:
-        print(f"    {names[k]:<8} {ctx['indicators'][k]:5.1f}   (权重{WEIGHTS[k]})")
-    print("-" * 60)
-    print(f"  ⚓ 价格锚定  : {ctx['price_score']:.1f} (563020 52周分位 {ctx['etf_pct']:.0f}%, 占60% -> 方向)")
-    print(f"  🌡 环境分    : {ctx['env']:.1f} (7指标加权, 占40% -> 力度)")
-    print(f"  ★ 综合评分  : {ctx['composite']:.1f} / 100")
-    print(f"  ★ 行动信号  : {ctx['signal']}")
-    print(f"  ★ 建议      : {ctx['advice']}")
+    for d, ctx, fund in funds_data:
+        cz_name, _, _ = current_zone(d)
+        print(f"\n  ▶ {fund['code']} {fund['name']}  (数据 {fund['as_of']})")
+        print(f"    现价      : {d['etf_price']:.3f}  (52周 {d['etf_52w_low']:.3f}-{d['etf_52w_high']:.3f})")
+        print(f"    价格52周分位: {ctx['etf_pct']:.0f}%  -> 价位区间「{cz_name}」")
+        print(f"    股息率    : {d['div_yield']:.2f}%  沪深300 PE {d['pe']:.2f}(分位{ctx['pe_pct']:.0f}%)  10Y {d['bond10y']:.2f}%")
+        print(f"    股债利差  : {ctx['spread']:.2f}% (分位{ctx['spread_pct']:.0f}%)")
+        print(f"    ⚓ 价格锚定: {ctx['price_score']:.1f}   🌡 环境分: {ctx['env']:.1f}")
+        print(f"    ★ 综合评分: {ctx['composite']:.1f} / 100  -> 信号「{ctx['signal']}」")
     print("=" * 60)
 
     out = args.out or os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    "dividend_trading_report.html")
     with open(out, "w", encoding="utf-8") as f:
-        f.write(build_html(d, ctx))
+        f.write(build_html(funds_data))
     print(f"  ✅ 报告已生成: {out}\n")
 
 if __name__ == "__main__":
