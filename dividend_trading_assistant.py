@@ -6,7 +6,12 @@
 目的：综合多个市场指标，判断"现在是否适合买入/累积红利低波"，并给出
       合适的价位区间与时间窗口（标的：563020 易方达中证红利低波动ETF）。
 
-指标框架（7 个，权重合计 100）—— 分数越高 = 越适合"买入/累积"红利低波：
+评分机制（两层）：563020 自身价格在 52 周区间的分位锚定买卖**方向**占 60%，
+  其余 7 指标作为**环境分**调制**力度**占 40%（env = 7 指标按原权重归一化平均）。
+  故价位区间(便宜/贵)与综合信号方向必然一致——便宜→偏多、贵→偏谨慎，
+  宏观/估值/趋势只决定买多卖少的力度，杜绝"便宜反让等、贵反让买"的反转。
+
+环境分 7 指标（权重合计 100，分数越高 = 越适合"买入/累积"红利低波）：
   1. 股债利差 (沪深300 E/P − 10Y)  权重 22  —— 核心：股票相对债券越便宜越买
   2. 利差分位 (股债利差历史分位)   权重 12  —— 利差处历史越高配置价值越突出
   3. 估值分位 (沪深300 PE 分位)    权重 16  —— PE 越低越便宜
@@ -157,6 +162,10 @@ def score_rsi(r):
     """RSI(14)：超卖(低)=更好买点。"""
     return lerp([(20,92),(30,85),(45,70),(55,55),(65,40),(75,22)], r)
 
+def score_price_pct(pct):
+    """563020 自身价格在 52 周区间中的分位：越低(越便宜)分越高。锚定买卖方向。"""
+    return lerp([(0,95),(20,82),(40,62),(60,42),(80,22),(100,10)], pct)
+
 WEIGHTS = {
     "spread": 22, "spread_pct": 12, "valuation": 16, "dividend": 16,
     "rate": 14, "trend": 12, "rsi": 8,
@@ -186,8 +195,13 @@ def analyze(d):
         "rate": score_rate(bond_pct),
         "trend": score_trend(trend_ratio),
         "rsi": score_rsi(d["etf_rsi"]),
+        "price_pct": score_price_pct(etf_pct),   # 价格锚定方向(不参与环境分)
     }
-    composite = sum(WEIGHTS[k] * ind[k] for k in WEIGHTS) / 100.0
+    # —— 两层框架：563020 自身 52周价格分位锚定买卖方向(60%)，其余 7 指标为环境分调制力度(40%) ——
+    # 保证"便宜→偏多 / 贵→偏谨慎"的方向与价位区间一致，宏观/估值/趋势只调节买多卖少的力度。
+    anchor = ind["price_pct"]
+    env = sum(WEIGHTS[k] * ind[k] for k in WEIGHTS) / sum(WEIGHTS.values())
+    composite = 0.6 * anchor + 0.4 * env
 
     if composite >= 68:
         signal = "强烈买入 · 分批建仓"; color = "#16a34a"
@@ -207,7 +221,8 @@ def analyze(d):
 
     ctx = dict(
         ey=ey, spread=spread, pe_pct=pe_pct, bond_pct=bond_pct, spread_pct=spread_pct,
-        trend_ratio=trend_ratio, etf_pct=etf_pct, indicators=ind, composite=composite,
+        trend_ratio=trend_ratio, etf_pct=etf_pct, price_score=anchor,
+        indicators=ind, composite=composite, env=env, env_fav=(env >= 50),
         signal=signal, color=color, advice=advice,
     )
     return ctx
@@ -243,24 +258,31 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, etf_pct):
-    """显式说明『技术面价位』与『综合信号』的关系，使全页结论一致、可追溯。"""
-    comp = ctx["composite"]; sig = ctx["signal"]
-    pos = ("处于年内低位、安全边际高" if etf_pct < 20 else
-           "处于年内偏低位置、具备吸引力" if etf_pct < 40 else
+    """两层框架的桥梁：563020 自身价格在 52 周区间分位锚定买卖方向，其余指标(环境分)只调制力度。
+    方向必与价位区间一致：便宜→偏多，贵→偏谨慎；环境好则加大力度，环境差则减小。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]; env = ctx["env"]
+    cheap = etf_pct < 40
+    pos = ("处于年内偏低位置、安全边际高" if cheap else
            "处于历史中枢附近" if etf_pct < 65 else
-           "处于年内偏高位置" if etf_pct < 85 else
-           "逼近年内高位、性价比下降")
-    head = []
-    if ctx["pe_pct"] >= 70: head.append(f"沪深300 估值分位偏高({ctx['pe_pct']:.0f}%)")
-    if ctx["spread_pct"] < 60: head.append(f"股债利差仅处历史{ctx['spread_pct']:.0f}%分位、未达极端")
-    if ctx["trend_ratio"] < 0.98: head.append(f"价格仍低于中期均线(MA12 {d['etf_ma']:.3f})")
-    if etf_pct >= 65 and comp < 55: head.append("技术面偏高而综合信号未转多")
-    if head:
+           "处于年内偏高位置、安全边际有限")
+    bear = []
+    if ctx["pe_pct"] >= 60: bear.append(f"沪深300 PE 分位偏高({ctx['pe_pct']:.0f}%)")
+    if ctx["spread_pct"] < 60: bear.append(f"股债利差仅处历史{ctx['spread_pct']:.0f}%分位、未达极端")
+    if ctx["trend_ratio"] < 0.98: bear.append(f"价格低于中期均线(MA12 {d['etf_ma']:.3f})")
+    if d["etf_rsi"] > 65: bear.append(f"RSI {d['etf_rsi']:.0f} 偏高位、追高性价比低")
+    bull = []
+    if ctx["spread"] >= 5.5: bull.append(f"股债利差走阔({ctx['spread']:.2f}%) 股票相对债券便宜")
+    if d["bond10y"] < 1.8: bull.append(f"10Y 国债低位({d['bond10y']:.2f}%) 红利相对吸引力强")
+    if d["etf_rsi"] < 35: bull.append(f"RSI {d['etf_rsi']:.0f} 超卖、提供均值回归买点")
+    if cheap:
+        tail = ("；".join(bear) + "，故以红利低波收息为本、小仓位分批、不一次性满仓") if bear else "，可直接小仓位分批布局、长期持有收息"
         return (f"当前 563020 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：技术面低位提供安全边际，"
-                f"但{'；'.join(head)}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+                f"价格处低位→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(52周分位)锚定方向、"
+                f"其余指标(环境分 {env:.0f})调制力度：虽便宜可逢低布局，但{tail}。")
+    tail = ("；".join(bull) + "，但价格已偏高、安全边际有限，故以持有/观望为主、不追高") if bull else "，且价格偏高、安全边际有限，故以持有/观望为主、不追高"
     return (f"当前 563020 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-            f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
+            f"价格偏高→方向偏谨慎；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格锚定方向、"
+            f"其余指标(环境分 {env:.0f})调制力度：{tail}。")
 
 # ----------------------------------------------------------------------------
 # 5. HTML 报告
@@ -297,12 +319,14 @@ def build_html(d, ctx):
                 f'<div class="c-note">{note}</div></div>')
 
     cards = [
+        card("股价分位 (563020 vs 52周)", f"价格位于年内 {ctx['etf_pct']:.0f}% 分位",
+             ind["price_pct"], "#b45309", "⚓ 锚定方向：价格越低越便宜(偏多)"),
         card("股债利差 (E/P−10Y)", f"利差 {ctx['spread']:.2f}% (E/P {ctx['ey']:.2f}%−{d['bond10y']:.2f}%)",
              ind["spread"], "#dc2626", "核心：股票相对债券越便宜越买"),
         card("利差历史分位", f"分位 {ctx['spread_pct']:.0f}%",
              ind["spread_pct"], "#ea580c", "利差处历史越高，配置价值越突出"),
-        card("估值分位 (沪深300 PE)", f"PE {d['pe']:.2f} (分位{ctx['pe_pct']:.0f}%)",
-             ind["valuation"], "#2563eb", "PE 越低越便宜"),
+        card("PE分位 (沪深300)", f"PE {d['pe']:.2f} (分位{ctx['pe_pct']:.0f}%)",
+             ind["valuation"], "#2563eb", "环境因子：PE 越低越便宜"),
         card("股息率 (563020)", f"股息率 {d['div_yield']:.2f}%",
              ind["dividend"], "#16a34a", "现金流吸引力，越高越香"),
         card("利率环境 (10Y国债)", f"10Y {d['bond10y']:.2f}% (分位{ctx['bond_pct']:.0f}%)",
@@ -404,7 +428,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
 </style></head><body><div class="wrap">
 <header>
   <h1>📊 红利交易助手</h1>
-  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：563020 易方达中证红利低波动ETF ｜ 框架：7 指标加权打分 + 价位区间 + 时间窗口</div>
+  <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：563020 易方达中证红利低波动ETF ｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
 </header>
@@ -415,7 +439,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
     <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
       {''.join(gauge(ind[k], '#b91c1c', n, '') for k,n in
-        [('spread','股债利差'),('spread_pct','利差分位'),('valuation','估值'),('dividend','股息率'),
+        [('price_pct','股价分位⚓'),('spread','股债利差'),('spread_pct','利差分位'),('valuation','PE分位'),('dividend','股息率'),
          ('rate','利率'),('trend','趋势'),('rsi','RSI')])}
     </div>
   </div>
@@ -509,6 +533,8 @@ def main():
     for k in WEIGHTS:
         print(f"    {names[k]:<8} {ctx['indicators'][k]:5.1f}   (权重{WEIGHTS[k]})")
     print("-" * 60)
+    print(f"  ⚓ 价格锚定  : {ctx['price_score']:.1f} (563020 52周分位 {ctx['etf_pct']:.0f}%, 占60% -> 方向)")
+    print(f"  🌡 环境分    : {ctx['env']:.1f} (7指标加权, 占40% -> 力度)")
     print(f"  ★ 综合评分  : {ctx['composite']:.1f} / 100")
     print(f"  ★ 行动信号  : {ctx['signal']}")
     print(f"  ★ 建议      : {ctx['advice']}")

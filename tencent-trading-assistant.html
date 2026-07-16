@@ -603,46 +603,54 @@ function panelReco(d){
 }
 
 function fairValue(d){
-  if(!d.fundamentals) return null;
+  if(!d.fundamentals||!d.fundamentals.peHistory) return null;   // 实时模式无真实 PE 历史, 不臆造公允价值
   return d.fundamentals.eps*d.fundamentals.peHistory.median5y;
 }
 
-// 2. 综合评分 (emphasized)
+// PE 估值锚定买卖方向：PE 越低(越便宜)分越高
+function peAnchor(pe){
+  if(pe<=0) return 50;
+  if(pe<12) return 92; if(pe<15) return 88; if(pe<18) return 80;
+  if(pe<22) return 72; if(pe<26) return 62; if(pe<32) return 52;
+  if(pe<40) return 42; if(pe<50) return 30; return 18;
+}
+
+// 2. 综合评分 (emphasized) — 两层框架：PE 估值锚定方向(60%)，技术+情绪环境调制力度(40%)
 function panelScore(d){
-  // Compute scores
   var tech=0;
   if(d.ma.ma5&&d.ma.ma20){
     if(d.price>d.ma.ma5) tech+=20; if(d.price>d.ma.ma20) tech+=20;
     if(d.macd.mval>0) tech+=20; if(d.rsi.rsi14>30&&d.rsi.rsi14<70) tech+=20;
     if(d.kdj.j>20&&d.kdj.j<80) tech+=20;
   } else { tech=50; }
-  var fund=0;
-  if(d.peTTM<15) fund=90; else if(d.peTTM<25) fund=75; else if(d.peTTM<40) fund=55; else fund=30;
+  var anchor=peAnchor(d.peTTM);                 // 价格(估值)锚定方向：便宜→偏多, 贵→偏谨慎
   var sent=60;
   if(d.newsSentiment){sent=Math.round(d.newsSentiment.positive*.8+d.newsSentiment.heatScore*.2);}
-  var val=70;
-  if(d.analysts){val=d.analysts.buyPct;}
+  var env=Math.round(tech*.6+sent*.4);          // 技术为主、情绪为辅的环境分(调制力度)
+  var total=Math.round(anchor*.6+env*.4);       // 方向必与估值一致, 环境只调力度
 
-  var total=Math.round(tech*.3+fund*.25+sent*.2+val*.25);
-  var lvl=total>=75?'high':total>=50?'medium':'low';
-  var lt=total>=75?'强烈看多':total>=50?'中性偏多':'偏空';
+  var lvl=total>=68?'high':total>=55?'medium':total>=45?'medium':'low';
+  var lt=total>=68?'强烈看多':total>=55?'条件合适·偏多':total>=45?'中性观望':'估值偏高·谨慎';
   var lc=lvl==='high'?R:lvl==='medium'?O:G;
 
+  var hasAnly=d.analysts&&d.analysts.total>0;
+  var buyPct=hasAnly?d.analysts.buyPct:'—';
+  var bpCls=hasAnly?(d.analysts.buyPct>=70?'s-high':d.analysts.buyPct>=40?'s-medium':'s-low'):'s-medium';
   var sClass=function(v){return v>=70?'s-high':v>=40?'s-medium':'s-low';};
   var h='<div class="card full score-card">';
   h+='<h3>🧠 综合多维度评分</h3>';
   h+='<div class="score-main">';
   h+='<div class="score-num" style="color:'+lc+'">'+total+'</div>';
   h+='<div class="score-text"><div class="st" style="color:'+lc+'">'+lt+'</div>';
-  h+='<div class="sd">基于技术面、基本面、情绪面、估值面综合加权, 分数越高越看好</div></div>';
+  h+='<div class="sd">本体系以 PE 估值锚定买卖方向、技术面/情绪面调制力度, 分数越高越看好</div></div>';
   h+='</div>';
   h+='<div class="score-grid">';
+  h+='<div class="score-item '+sClass(anchor)+'"><div class="sv">'+anchor+'</div><div class="slbl">估值锚定⚓<br>(PE 方向)</div></div>';
   h+='<div class="score-item '+sClass(tech)+'"><div class="sv">'+tech+'</div><div class="slbl">技术面<br>(均线+指标)</div></div>';
-  h+='<div class="score-item '+sClass(fund)+'"><div class="sv">'+fund+'</div><div class="slbl">基本面<br>(PE+盈利)</div></div>';
   h+='<div class="score-item '+sClass(sent)+'"><div class="sv">'+sent+'</div><div class="slbl">情绪面<br>(新闻+资金)</div></div>';
-  h+='<div class="score-item '+sClass(val)+'"><div class="sv">'+val+'</div><div class="slbl">估值面<br>(机构评级)</div></div>';
+  h+='<div class="score-item '+bpCls+'"><div class="sv">'+buyPct+'</div><div class="slbl">机构评级<br>(信息·不计入)</div></div>';
   h+='</div>';
-  h+='<div class="sl" style="margin-top:8px">权重: 技术30% + 基本25% + 情绪20% + 估值25%</div>';
+  h+='<div class="sl" style="margin-top:8px">权重: 估值锚定 60% + 环境(技术+情绪) 40% ｜ 机构评级仅作参考, 不计入评分(避免实时缺数时失真)</div>';
   h+='</div>';
   return h;
 }
@@ -806,7 +814,7 @@ async function analyzeStock(){
     var _stamp=document.getElementById('dataStamp');
     if(_stamp){ _stamp.textContent='实时行情'+(window.__gtimgDt?(' · '+window.__gtimgDt):'（东财）'); _stamp.className='datastamp'; }
     // Augment with fundamentals (cannot fetch from public API, use defaults)
-    d.fundamentals={eps:+(d.price/15).toFixed(2),bvps:+(d.price/d.pb).toFixed(2),roe:15,profitGrowth:10,revenueGrowth:8,profitMargin:d.peTTM>0?Math.min(40,100/d.peTTM*5):20,opMargin:25,debtRatio:50,currentRatio:1.5,fcf:d.marketCap*0.03,dividendYield:1.5,peHistory:{low5y:Math.max(8,d.peTTM*0.6),high5y:d.peTTM*2,median5y:d.peTTM*1.2}};
+    d.fundamentals={eps:+(d.price/15).toFixed(2),bvps:+(d.price/d.pb).toFixed(2),roe:15,profitGrowth:10,revenueGrowth:8,profitMargin:d.peTTM>0?Math.min(40,100/d.peTTM*5):20,opMargin:25,debtRatio:50,currentRatio:1.5,fcf:d.marketCap*0.03,dividendYield:1.5,peHistory:null};
     d.newsSentiment=d.isDemo?d.newsSentiment:{positive:60,neutral:25,negative:15,heatScore:60};
     d.fundFlow={totalNet:0,majorNet:0,buyRatio:50,sellRatio:50};
     d.keyNews=d.keyNews||[{date:'今日',title:'当前为实时数据, 暂未配置新闻流',s:'neutral'}];
