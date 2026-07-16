@@ -338,21 +338,38 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, etf_pct):
-    comp = ctx["composite"]; sig = ctx["signal"]
-    pos = ("处于年内低位、安全边际高" if etf_pct < 20 else
-           "处于年内偏低位置、具备吸引力" if etf_pct < 40 else
-           "处于历史中枢附近" if etf_pct < 65 else
-           "处于年内偏高位置" if etf_pct < 85 else
-           "逼近年内高位、性价比下降")
-    head = []
-    if ctx["erp"] < 1.0: head.append(f"股票风险溢价偏低(ERP {ctx['erp']:+.1f}%)")
-    if ctx["vix_pct"] > 80: head.append(f"VIX 处历史高位({ctx['vix_pct']:.0f}%分位,恐慌)")
-    if ctx["trend_ratio"] < 0.98: head.append(f"价格低于长期均线({d['etf_ma']:.3f})")
-    if etf_pct >= 65 and comp < 55: head.append("技术面偏高而综合信号未转多")
-    if head:
+    """说明「价位区间」(价格安全边际) 与「综合信号」(7指标加权) 的关系。
+    关键修复：措辞随价格位置走，不再写死"技术面低位提供安全边际"；
+    并只列举与价格位置方向相反、用于解释分歧的因子。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]
+    if etf_pct < 20:   pos, cheap = "处于年内低位、安全边际高", True
+    elif etf_pct < 40: pos, cheap = "处于年内偏低位置、具备吸引力", True
+    elif etf_pct < 65: pos, cheap = "处于历史中枢附近", True
+    elif etf_pct < 85: pos, cheap = "处于年内偏高位置、安全边际有限", False
+    else:              pos, cheap = "逼近年内高位、性价比下降", False
+
+    # 拖累信号(解释"便宜却不强买")
+    bear = []
+    if ctx["erp"] < 1.0: bear.append(f"股票风险溢价偏低(ERP {ctx['erp']:+.1f}%)")
+    if etf_pct >= 65: bear.append(f"估值分位偏高({etf_pct:.0f}%)")
+    if ctx["vix_pct"] < 20: bear.append(f"波动率处低位(分位 {ctx['vix_pct']:.0f}%) 追高性价比低")
+    # 支撑信号(解释"偏贵却仍买")
+    bull = []
+    if ctx["trend_ratio"] > 1.05: bull.append(f"趋势站上长期均线({ctx['trend_ratio']:.2f}×) 顺势")
+    if d["hy_oas"] < 320: bull.append(f"信用利差健康(HY OAS {d['hy_oas']:.0f} bps) 风险偏好稳")
+    if ctx["slope"] > 1.05: bull.append(f"VIX 期限结构良性(斜率 {ctx['slope']:.2f})")
+    if d["etf_rsi"] < 50 and ind["rsi"] >= 70: bull.append(f"RSI 偏低({d['etf_rsi']:.0f}) 提供均值回归买点")
+
+    if cheap and comp < 55:
+        reasons = "；".join(bear) or "基本面暂无共振利多"
         return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：技术面低位提供安全边际，"
-                f"但{'；'.join(head)}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽处低位、安全边际高，"
+                f"但{reasons}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+    if (not cheap) and comp >= 55:
+        reasons = "；".join(bull) or "动能与风险偏好利多"
+        return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
+                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽偏高、安全边际有限，"
+                f"但{reasons}，动能与宏观支撑，故采用「小仓位、逢低分批」而非一次性满仓强买。")
     return (f"当前 159696 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
             f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
 

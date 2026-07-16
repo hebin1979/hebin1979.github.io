@@ -368,22 +368,36 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, gold_pct):
-    comp = ctx["composite"]; sig = ctx["signal"]
-    pos = ("处于年内低位、安全边际高" if gold_pct < 20 else
-           "处于年内偏低位置、具备吸引力" if gold_pct < 40 else
-           "处于历史中枢附近" if gold_pct < 65 else
-           "处于年内偏高位置" if gold_pct < 85 else
-           "逼近年内高位、性价比下降")
-    head = []
-    if d["tips"] > 2.0: head.append(f"实际利率偏高(TIPS {d['tips']:.2f}% 压制金价)")
-    if ctx["dxy_pct"] > 70: head.append(f"美元处历史偏强位(分位 {ctx['dxy_pct']:.0f}%)")
-    if d["vix_1y_pct"] > 80: head.append(f"VIX 处历史高位({d['vix_1y_pct']:.0f}%分位,避险)")
-    if ctx["trend_ratio"] < 0.98: head.append(f"价格低于长期均线({d['gold_ma']:.3f})")
-    if gold_pct >= 65 and comp < 55: head.append("技术面偏高而综合信号未转多")
-    if head:
+    """说明「价位区间」(价格安全边际) 与「综合信号」(7指标加权) 的关系。
+    关键修复：措辞随价格位置走，不再写死"技术面低位提供安全边际"；
+    并只列举与价格位置方向相反、用于解释分歧的因子。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]
+    if gold_pct < 20:   pos, cheap = "处于年内低位、安全边际高", True
+    elif gold_pct < 40: pos, cheap = "处于年内偏低位置、具备吸引力", True
+    elif gold_pct < 65: pos, cheap = "处于历史中枢附近", True
+    elif gold_pct < 85: pos, cheap = "处于年内偏高位置、安全边际有限", False
+    else:               pos, cheap = "逼近年内高位、性价比下降", False
+
+    # 压制金价的负面因子（解释"便宜却不强买"）
+    bear = []
+    if d["tips"] > 2.0: bear.append(f"实际利率偏高(TIPS {d['tips']:.2f}% 压制金价)")
+    if ctx["dxy_pct"] > 70: bear.append(f"美元处历史偏强位(分位 {ctx['dxy_pct']:.0f}%)")
+    if ctx["trend_ratio"] < 0.98: bear.append(f"价格低于长期均线({d['gold_ma']:.3f})")
+    if ind["season"] <= 45: bear.append(f"当前为淡季(季节评分 {ind['season']:.0f})")
+    # 支撑金价的正面因子（解释"偏贵却仍买"）
+    bull = []
+    if d["vix_1y_pct"] > 80: bull.append(f"VIX 处历史高位({d['vix_1y_pct']:.0f}%分位,避险需求升温)")
+
+    if cheap and comp < 55:
+        reasons = "；".join(bear) or "宏观面暂无共振利多"
         return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
-                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：技术面低位提供安全边际，"
-                f"但{'；'.join(head)}，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽处低位、安全边际高，"
+                f"但{reasons}，宏观面压制金价，故采用「小仓位、逢低分批」而非一次性满仓强买。")
+    if (not cheap) and comp >= 55:
+        reasons = "；".join(bull) or "动能与风险偏好利多"
+        return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
+                f"综合评分 {comp:.0f}/100 得出信号「{sig}」。二者并不冲突：价格虽偏高、安全边际有限，"
+                f"但{reasons}，动能与宏观支撑金价，故采用「小仓位、逢低分批」而非一次性满仓强买。")
     return (f"当前 518850 现价 {d['gold_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {gold_pct:.0f}%）。"
             f"综合评分 {comp:.0f}/100 亦指向「{sig}」，技术面与基本面共振，可参照上方区间分批操作。")
 
