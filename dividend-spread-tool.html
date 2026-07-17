@@ -59,6 +59,10 @@ th{background:#f8fafc;color:#475569;font-weight:600}
 .status{font-size:12px;color:#64748b}
 .status li{margin:2px 0;list-style-position:inside}
 footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
+.rt-stamp{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700}
+.rt-ok{background:#dcfce7;color:#166534}
+.rt-warn{background:#fef9c3;color:#854d0e}
+.rt-fail{background:#fee2e2;color:#991b1b}
 @media (max-width:600px){
   body{padding:12px}
   .cards{grid-template-columns:1fr 1fr}
@@ -70,17 +74,18 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 <header>
   <h1>📊 红利交易助手</h1>
   <div class="meta">数据时间：563020:2026-07-17 ｜ 159545:2026-07-17 ｜ 双卡对比：563020 / 159545 ｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口</div>
-  <div class="cmp-strip"><div class="cmp-card"><div class="cmp-code">563020 <span class="cmp-mkt">A股</span></div><div class="cmp-name">易方达中证红利低波动ETF</div><div class="cmp-sig" style="color:#65a30d">条件合适 · 可小仓位建仓</div><div class="cmp-score">综合 60/100 ｜ 价位「价值区」</div></div><div class="cmp-card"><div class="cmp-code">159545 <span class="cmp-mkt">港股通</span></div><div class="cmp-name">易方达恒生红利低波ETF</div><div class="cmp-sig" style="color:#65a30d">条件合适 · 可小仓位建仓</div><div class="cmp-score">综合 68/100 ｜ 价位「价值区」</div></div></div>
+  <div class="cmp-strip"><div class="cmp-card"><div class="cmp-code">563020 <span class="cmp-mkt">A股</span></div><div class="cmp-name">易方达中证红利低波动ETF</div><div class="cmp-sig" id="cmp-sig-563020" style="color:#65a30d">条件合适 · 可小仓位建仓</div><div class="cmp-score" id="cmp-score-563020">综合 60/100 ｜ 价位「价值区」</div></div><div class="cmp-card"><div class="cmp-code">159545 <span class="cmp-mkt">港股通</span></div><div class="cmp-name">易方达恒生红利低波ETF</div><div class="cmp-sig" id="cmp-sig-159545" style="color:#65a30d">条件合适 · 可小仓位建仓</div><div class="cmp-score" id="cmp-score-159545">综合 68/100 ｜ 价位「价值区」</div></div></div>
+  <div id="dataStamp" class="rt-stamp">⏳ 正在获取实时行情…</div>
 </header>
 
 <div class="tabs"><button class="tab-btn active" id="tab-563020" onclick="showFund('563020')">563020 易方达中证红利低波动ETF</button><button class="tab-btn" id="tab-159545" onclick="showFund('159545')">159545 易方达恒生红利低波ETF</button></div>
 
 <div class="fund-panel" id="panel-563020" style="display:block">
 <div class="comp-wrap">
-  <div class="comp-gauge"><div class="gauge">
+  <div class="comp-gauge"><div class="gauge rt-comp">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 125.5 24.2" fill="none" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#65a30d">60</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-comp-arc" d="M 20 100 A 80 80 0 0 1 125.5 24.2" fill="none" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-comp-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#65a30d">60</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">综合评分</div>
@@ -89,10 +94,10 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
   <div style="flex:1;min-width:280px">
     <h2 style="margin-bottom:10px;font-size:15px">563020 指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
-      <div class="gauge">
+      <div class="gauge rt-price_pct">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 131.7 26.5" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">63</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-price_pct-arc" d="M 20 100 A 80 80 0 0 1 131.7 26.5" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-price_pct-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">63</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">股价分位⚓</div>
@@ -137,10 +142,10 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
       </svg>
       <div class="g-label">利率</div>
       <div class="g-sub"></div>
-    </div><div class="gauge">
+    </div><div class="gauge rt-trend">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 82.5 21.9" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">43</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-trend-arc" d="M 20 100 A 80 80 0 0 1 82.5 21.9" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-trend-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">43</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">趋势</div>
@@ -162,17 +167,17 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
   <div class="r-col">
     <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
     <div class="r-val" style="color:#65a30d">价值区</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 1.144 ｜ 52 周区间分位 39%</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-recon-price">现价 1.144 ｜ 52 周区间分位 39%</div>
   </div>
   <div class="r-col">
     <div class="r-label">🎯 综合信号（563020 唯一结论）</div>
-    <div class="r-val" style="color:#65a30d">条件合适 · 可小仓位建仓</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 60/100</div>
+    <div class="r-val rt-signal" style="color:#65a30d">条件合适 · 可小仓位建仓</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-comp-score">综合评分 60/100</div>
   </div>
   <div class="r-text">当前 563020 现价 1.144，价位「价值区」处于年内偏低位置、安全边际高（52 周区间分位 39%）。价格处低位→方向偏多；综合评分 60/100 得出信号「条件合适 · 可小仓位建仓」。本体系以价格(52周分位)锚定方向、其余指标(环境分 56)调制力度：虽便宜可逢低布局，但沪深300 PE 分位偏高(74%)；股债利差仅处历史57%分位、未达极端；价格低于中期均线(MA12 1.189)；RSI 69 偏高位、追高性价比低，故以红利低波收息为本、小仓位分批、不一次性满仓。</div>
 </div>
 
-<div class="section"><h2>① 七维指标明细（563020）</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">股价分位 (563020 vs 52周)</span><span class="c-score" style="color:#b45309">63</span></div><div class="c-val">价格位于年内 39% 分位</div><div class="bar"><div class="bar-fill" style="width:63%;background:#b45309"></div></div><div class="c-note">⚓ 锚定方向：价格越低越便宜(偏多)</div></div><div class="card"><div class="c-head"><span class="c-name">股债利差 (E/P−10Y)</span><span class="c-score" style="color:#dc2626">63</span></div><div class="c-val">利差 5.29% (E/P 7.02%−1.73%)</div><div class="bar"><div class="bar-fill" style="width:63%;background:#dc2626"></div></div><div class="c-note">核心：股票相对债券越便宜越买</div></div><div class="card"><div class="c-head"><span class="c-name">利差历史分位</span><span class="c-score" style="color:#ea580c">62</span></div><div class="c-val">分位 57%</div><div class="bar"><div class="bar-fill" style="width:62%;background:#ea580c"></div></div><div class="c-note">利差处历史越高，配置价值越突出</div></div><div class="card"><div class="c-head"><span class="c-name">PE分位 (沪深300)</span><span class="c-score" style="color:#2563eb">26</span></div><div class="c-val">PE 14.24 (分位74%)</div><div class="bar"><div class="bar-fill" style="width:26%;background:#2563eb"></div></div><div class="c-note">环境因子：PE 越低越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">股息率 (563020)</span><span class="c-score" style="color:#16a34a">70</span></div><div class="c-val">股息率 4.52%</div><div class="bar"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div><div class="c-note">现金流吸引力，越高越香</div></div><div class="card"><div class="c-head"><span class="c-name">利率环境 (10Y国债)</span><span class="c-score" style="color:#0891b2">86</span></div><div class="c-val">10Y 1.73% (分位14%)</div><div class="bar"><div class="bar-fill" style="width:86%;background:#0891b2"></div></div><div class="c-note">利率越低红利相对越香</div></div><div class="card"><div class="c-head"><span class="c-name">趋势 (价格/MA12)</span><span class="c-score" style="color:#7c3aed">43</span></div><div class="c-val">比值 0.96×</div><div class="bar"><div class="bar-fill" style="width:43%;background:#7c3aed"></div></div><div class="c-note">站上中期均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">33</span></div><div class="c-val">RSI = 69</div><div class="bar"><div class="bar-fill" style="width:33%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div></div></div>
+<div class="section"><h2>① 七维指标明细（563020）</h2><div class="cards"><div class="card rt-card-price_pct"><div class="c-head"><span class="c-name">股价分位 (563020 vs 52周)</span><span class="c-score" style="color:#b45309">63</span></div><div class="c-val">价格位于年内 39% 分位</div><div class="bar"><div class="bar-fill" style="width:63%;background:#b45309"></div></div><div class="c-note">⚓ 锚定方向：价格越低越便宜(偏多)</div></div><div class="card"><div class="c-head"><span class="c-name">股债利差 (E/P−10Y)</span><span class="c-score" style="color:#dc2626">63</span></div><div class="c-val">利差 5.29% (E/P 7.02%−1.73%)</div><div class="bar"><div class="bar-fill" style="width:63%;background:#dc2626"></div></div><div class="c-note">核心：股票相对债券越便宜越买</div></div><div class="card"><div class="c-head"><span class="c-name">利差历史分位</span><span class="c-score" style="color:#ea580c">62</span></div><div class="c-val">分位 57%</div><div class="bar"><div class="bar-fill" style="width:62%;background:#ea580c"></div></div><div class="c-note">利差处历史越高，配置价值越突出</div></div><div class="card"><div class="c-head"><span class="c-name">PE分位 (沪深300)</span><span class="c-score" style="color:#2563eb">26</span></div><div class="c-val">PE 14.24 (分位74%)</div><div class="bar"><div class="bar-fill" style="width:26%;background:#2563eb"></div></div><div class="c-note">环境因子：PE 越低越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">股息率 (563020)</span><span class="c-score" style="color:#16a34a">70</span></div><div class="c-val">股息率 4.52%</div><div class="bar"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div><div class="c-note">现金流吸引力，越高越香</div></div><div class="card"><div class="c-head"><span class="c-name">利率环境 (10Y国债)</span><span class="c-score" style="color:#0891b2">86</span></div><div class="c-val">10Y 1.73% (分位14%)</div><div class="bar"><div class="bar-fill" style="width:86%;background:#0891b2"></div></div><div class="c-note">利率越低红利相对越香</div></div><div class="card rt-card-trend"><div class="c-head"><span class="c-name">趋势 (价格/MA12)</span><span class="c-score" style="color:#7c3aed">43</span></div><div class="c-val">比值 0.96×</div><div class="bar"><div class="bar-fill" style="width:43%;background:#7c3aed"></div></div><div class="c-note">站上中期均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">33</span></div><div class="c-val">RSI = 69</div><div class="bar"><div class="bar-fill" style="width:33%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div></div></div>
 
 <div class="section"><h2>② 价位区间参考（仅标示价格相对 52 周区间的位置，安全边际参考）</h2>
   <table><thead><tr>
@@ -204,10 +209,10 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 </div>
 </div><div class="fund-panel" id="panel-159545" style="display:none">
 <div class="comp-wrap">
-  <div class="comp-gauge"><div class="gauge">
+  <div class="comp-gauge"><div class="gauge rt-comp">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 142.6 32.3" fill="none" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#65a30d">68</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-comp-arc" d="M 20 100 A 80 80 0 0 1 142.6 32.3" fill="none" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-comp-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#65a30d">68</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">综合评分</div>
@@ -216,10 +221,10 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
   <div style="flex:1;min-width:280px">
     <h2 style="margin-bottom:10px;font-size:15px">159545 指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
-      <div class="gauge">
+      <div class="gauge rt-price_pct">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 155.2 42.1" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">74</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-price_pct-arc" d="M 20 100 A 80 80 0 0 1 155.2 42.1" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-price_pct-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">74</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">股价分位⚓</div>
@@ -264,10 +269,10 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
       </svg>
       <div class="g-label">利率</div>
       <div class="g-sub"></div>
-    </div><div class="gauge">
+    </div><div class="gauge rt-trend">
       <svg viewBox="0 0 200 120" width="100%" height="120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path d="M 20 100 A 80 80 0 0 1 45.4 41.5" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">26</text>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/><path class="rt-trend-arc" d="M 20 100 A 80 80 0 0 1 45.4 41.5" fill="none" stroke="#b91c1c" stroke-width="14" stroke-linecap="round"/>
+        <text class="rt-trend-val" x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="#b91c1c">26</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">趋势</div>
@@ -289,17 +294,17 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
   <div class="r-col">
     <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
     <div class="r-val" style="color:#65a30d">价值区</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 1.289 ｜ 52 周区间分位 28%</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-recon-price">现价 1.289 ｜ 52 周区间分位 28%</div>
   </div>
   <div class="r-col">
     <div class="r-label">🎯 综合信号（159545 唯一结论）</div>
-    <div class="r-val" style="color:#65a30d">条件合适 · 可小仓位建仓</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 68/100</div>
+    <div class="r-val rt-signal" style="color:#65a30d">条件合适 · 可小仓位建仓</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-comp-score">综合评分 68/100</div>
   </div>
   <div class="r-text">当前 159545 现价 1.289，价位「价值区」处于年内偏低位置、安全边际高（52 周区间分位 28%）。价格处低位→方向偏多；综合评分 68/100 得出信号「条件合适 · 可小仓位建仓」。本体系以价格(52周分位)锚定方向、其余指标(环境分 58)调制力度：虽便宜可逢低布局，但沪深300 PE 分位偏高(74%)；股债利差仅处历史57%分位、未达极端；价格低于中期均线(MA12 1.426)，故以红利低波收息为本、小仓位分批、不一次性满仓。</div>
 </div>
 
-<div class="section"><h2>① 七维指标明细（159545）</h2><div class="cards"><div class="card"><div class="c-head"><span class="c-name">股价分位 (159545 vs 52周)</span><span class="c-score" style="color:#b45309">74</span></div><div class="c-val">价格位于年内 28% 分位</div><div class="bar"><div class="bar-fill" style="width:74%;background:#b45309"></div></div><div class="c-note">⚓ 锚定方向：价格越低越便宜(偏多)</div></div><div class="card"><div class="c-head"><span class="c-name">股债利差 (E/P−10Y)</span><span class="c-score" style="color:#dc2626">63</span></div><div class="c-val">利差 5.29% (E/P 7.02%−1.73%)</div><div class="bar"><div class="bar-fill" style="width:63%;background:#dc2626"></div></div><div class="c-note">核心：股票相对债券越便宜越买</div></div><div class="card"><div class="c-head"><span class="c-name">利差历史分位</span><span class="c-score" style="color:#ea580c">62</span></div><div class="c-val">分位 57%</div><div class="bar"><div class="bar-fill" style="width:62%;background:#ea580c"></div></div><div class="c-note">利差处历史越高，配置价值越突出</div></div><div class="card"><div class="c-head"><span class="c-name">PE分位 (沪深300)</span><span class="c-score" style="color:#2563eb">26</span></div><div class="c-val">PE 14.24 (分位74%)</div><div class="bar"><div class="bar-fill" style="width:26%;background:#2563eb"></div></div><div class="c-note">环境因子：PE 越低越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">股息率 (159545)</span><span class="c-score" style="color:#16a34a">91</span></div><div class="c-val">股息率 5.80%</div><div class="bar"><div class="bar-fill" style="width:91%;background:#16a34a"></div></div><div class="c-note">现金流吸引力，越高越香</div></div><div class="card"><div class="c-head"><span class="c-name">利率环境 (10Y国债)</span><span class="c-score" style="color:#0891b2">86</span></div><div class="c-val">10Y 1.73% (分位14%)</div><div class="bar"><div class="bar-fill" style="width:86%;background:#0891b2"></div></div><div class="c-note">利率越低红利相对越香</div></div><div class="card"><div class="c-head"><span class="c-name">趋势 (价格/MA12)</span><span class="c-score" style="color:#7c3aed">26</span></div><div class="c-val">比值 0.90×</div><div class="bar"><div class="bar-fill" style="width:26%;background:#7c3aed"></div></div><div class="c-note">站上中期均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">41</span></div><div class="c-val">RSI = 64</div><div class="bar"><div class="bar-fill" style="width:41%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div></div></div>
+<div class="section"><h2>① 七维指标明细（159545）</h2><div class="cards"><div class="card rt-card-price_pct"><div class="c-head"><span class="c-name">股价分位 (159545 vs 52周)</span><span class="c-score" style="color:#b45309">74</span></div><div class="c-val">价格位于年内 28% 分位</div><div class="bar"><div class="bar-fill" style="width:74%;background:#b45309"></div></div><div class="c-note">⚓ 锚定方向：价格越低越便宜(偏多)</div></div><div class="card"><div class="c-head"><span class="c-name">股债利差 (E/P−10Y)</span><span class="c-score" style="color:#dc2626">63</span></div><div class="c-val">利差 5.29% (E/P 7.02%−1.73%)</div><div class="bar"><div class="bar-fill" style="width:63%;background:#dc2626"></div></div><div class="c-note">核心：股票相对债券越便宜越买</div></div><div class="card"><div class="c-head"><span class="c-name">利差历史分位</span><span class="c-score" style="color:#ea580c">62</span></div><div class="c-val">分位 57%</div><div class="bar"><div class="bar-fill" style="width:62%;background:#ea580c"></div></div><div class="c-note">利差处历史越高，配置价值越突出</div></div><div class="card"><div class="c-head"><span class="c-name">PE分位 (沪深300)</span><span class="c-score" style="color:#2563eb">26</span></div><div class="c-val">PE 14.24 (分位74%)</div><div class="bar"><div class="bar-fill" style="width:26%;background:#2563eb"></div></div><div class="c-note">环境因子：PE 越低越便宜</div></div><div class="card"><div class="c-head"><span class="c-name">股息率 (159545)</span><span class="c-score" style="color:#16a34a">91</span></div><div class="c-val">股息率 5.80%</div><div class="bar"><div class="bar-fill" style="width:91%;background:#16a34a"></div></div><div class="c-note">现金流吸引力，越高越香</div></div><div class="card"><div class="c-head"><span class="c-name">利率环境 (10Y国债)</span><span class="c-score" style="color:#0891b2">86</span></div><div class="c-val">10Y 1.73% (分位14%)</div><div class="bar"><div class="bar-fill" style="width:86%;background:#0891b2"></div></div><div class="c-note">利率越低红利相对越香</div></div><div class="card rt-card-trend"><div class="c-head"><span class="c-name">趋势 (价格/MA12)</span><span class="c-score" style="color:#7c3aed">26</span></div><div class="c-val">比值 0.90×</div><div class="bar"><div class="bar-fill" style="width:26%;background:#7c3aed"></div></div><div class="c-note">站上中期均线顺势，破位防守</div></div><div class="card"><div class="c-head"><span class="c-name">动量 RSI(14)</span><span class="c-score" style="color:#db2777">41</span></div><div class="c-val">RSI = 64</div><div class="bar"><div class="bar-fill" style="width:41%;background:#db2777"></div></div><div class="c-note">超卖(低)=更好买点</div></div></div></div>
 
 <div class="section"><h2>② 价位区间参考（仅标示价格相对 52 周区间的位置，安全边际参考）</h2>
   <table><thead><tr>
@@ -333,7 +338,7 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 
 <footer>
   红利交易助手 · 仅供研究参考，非投资建议<br>
-  生成于 2026-07-17 10:28 ·
+  生成于 2026-07-17 11:30 ·
   <a href="https://hebin1979.github.io/" style="color:#b91c1c">返回工具箱首页</a> ·
   <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#b91c1c">反馈/建议</a>
 </footer>
@@ -345,4 +350,36 @@ function showFund(id){
   document.getElementById('tab-'+id).classList.add('active');
 }
 </script>
-</div></body></html>
+</div><script>var RT_CFG={"kind": "dividend", "funds": [{"scope": "#panel-563020", "secid": "1.563020", "gtimg": "sh563020", "name": "易方达中证红利低波动ETF", "lo": 1.055, "hi": 1.283, "ma": 1.189, "env": {"spread": 62.7, "spread_pct": 61.6, "valuation": 25.7, "dividend": 70.5, "rate": 85.7, "trend": 43.0, "rsi": 33.3}, "weights": {"spread": 22, "spread_pct": 12, "valuation": 16, "dividend": 16, "rate": 14, "trend": 12, "rsi": 8}, "anchors": {"val": [[0, 95], [20, 82], [40, 62], [60, 42], [80, 22], [100, 10]], "trend": [[0.9, 25], [0.96, 42], [1.0, 60], [1.03, 73], [1.08, 86]]}, "cardVal": "price_pct", "cmpSig": "#cmp-sig-563020", "cmpScore": "#cmp-score-563020"}, {"scope": "#panel-159545", "secid": "0.159545", "gtimg": "sz159545", "name": "易方达恒生红利低波ETF", "lo": 1.193, "hi": 1.539, "ma": 1.426, "env": {"spread": 62.7, "spread_pct": 61.6, "valuation": 25.7, "dividend": 90.8, "rate": 85.7, "trend": 26.1, "rsi": 41.2}, "weights": {"spread": 22, "spread_pct": 12, "valuation": 16, "dividend": 16, "rate": 14, "trend": 12, "rsi": 8}, "anchors": {"val": [[0, 95], [20, 82], [40, 62], [60, 42], [80, 22], [100, 10]], "trend": [[0.9, 25], [0.96, 42], [1.0, 60], [1.03, 73], [1.08, 86]]}, "cardVal": "price_pct", "cmpSig": "#cmp-sig-159545", "cmpScore": "#cmp-score-159545"}]};</script>
+<script>
+(function(){
+  if(typeof RT_CFG==='undefined'||!RT_CFG||!RT_CFG.funds) return;
+  function lerp(a,x){ if(x<=a[0][0])return a[0][1]; if(x>=a[a.length-1][0])return a[a.length-1][1]; for(var i=1;i<a.length;i++){ if(x<=a[i][0]){var x0=a[i-1][0],y0=a[i-1][1],x1=a[i][0],y1=a[i][1]; return y0+(x-x0)/(x1-x0)*(y1-y0);} } return a[a.length-1][1]; }
+  function pctOf(x,lo,hi){ if(hi<=lo)return 50; return Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100)); }
+  function colFor(s){ if(s>=68)return '#16a34a'; if(s>=55)return '#65a30d'; if(s>=45)return '#d97706'; if(s>=35)return '#ea580c'; return '#dc2626'; }
+  function sigFor(c){ if(c>=68)return '强烈买入 · 分批建仓'; if(c>=55)return '条件合适 · 可小仓位建仓'; if(c>=45)return '中性 · 观望'; if(c>=35)return (RT_CFG.kind==='dividend'?'估值偏高 · 持有为主':'估值偏高 · 持有为主'); return (RT_CFG.kind==='dividend'?'高估 · 建议减仓':'高估过热/破位 · 建议减仓'); }
+  function zoneFor(p){ if(p<=20)return '深度价值'; if(p<=40)return '价值'; if(p<=60)return '合理'; if(p<=80)return '偏高'; return '高估'; }
+  function arcFor(v){ var ang=180-(v/100)*180, rad=ang*Math.PI/180, x=100+80*Math.cos(rad), y=100-80*Math.sin(rad); return 'M 20 100 A 80 80 0 0 1 '+x.toFixed(1)+' '+y.toFixed(1); }
+  function setT(el,t){ if(el)el.textContent=t; }
+  function compute(f,price){ var p=pctOf(price,f.lo,f.hi); var r=price/f.ma; var aS=lerp(f.anchors.val,p); var tS=lerp(f.anchors.trend,r); var env=JSON.parse(JSON.stringify(f.env)); env.trend=tS; var ws=0,es=0; for(var k in env){ if(f.weights[k]){ ws+=f.weights[k]; es+=f.weights[k]*env[k]; } } var ea=ws>0?es/ws:50; return {pct:p,ratio:r,anchorS:aS,trendS:tS,comp:0.6*aS+0.4*ea}; }
+  function upd(f,r,price){ try{
+    var sc=f.scope?document.querySelector(f.scope):document; if(!sc)return;
+    var rp=sc.querySelector('.rt-recon-price'); if(rp) rp.innerHTML='现价 '+price.toFixed(3)+' ｜ 52 周区间分位 '+r.pct.toFixed(0)+'%';
+    var cv=sc.querySelector('.rt-card-'+f.cardVal); if(cv){ var v=cv.querySelector('.c-val'), s=cv.querySelector('.c-score'), b=cv.querySelector('.bar-fill'); var lbl=RT_CFG.kind==='gold'?'金价位于年内 ':(RT_CFG.kind==='dividend'?'价格位于年内 ':'纳指位于年内 '); setT(v,lbl+r.pct.toFixed(0)+'% 分位'); setT(s,r.anchorS.toFixed(0)); if(b){b.style.width=r.anchorS.toFixed(0)+'%'; b.style.background=colFor(r.anchorS);} }
+    var ct=sc.querySelector('.rt-card-trend'); if(ct){ var v2=ct.querySelector('.c-val'), s2=ct.querySelector('.c-score'), b2=ct.querySelector('.bar-fill'); setT(v2,'比值 '+r.ratio.toFixed(2)+'\u00d7'); setT(s2,r.trendS.toFixed(0)); if(b2){b2.style.width=r.trendS.toFixed(0)+'%'; b2.style.background=colFor(r.trendS);} }
+    var cg=sc.querySelector('.rt-comp'); if(cg){ var cv3=cg.querySelector('.rt-comp-val'); if(cv3)cv3.textContent=r.comp.toFixed(0); var ca=cg.querySelector('.rt-comp-arc'); if(ca)ca.setAttribute('d',arcFor(r.comp)); }
+    ['valuation','price_pct','trend'].forEach(function(tag){ var g=sc.querySelector('.rt-'+tag); if(!g)return; var val=(tag==='trend')?r.trendS:r.anchorS; var g0=g.querySelector('.rt-'+tag+'-val'); if(g0)g0.textContent=val.toFixed(0); var g1=g.querySelector('.rt-'+tag+'-arc'); if(g1)g1.setAttribute('d',arcFor(val)); });
+    var sig=sigFor(r.comp); var rs=sc.querySelector('.rt-signal'); if(rs){rs.textContent=sig; rs.style.color=colFor(r.comp);}
+    var rc=sc.querySelector('.rt-comp-score'); if(rc)rc.textContent='综合评分 '+r.comp.toFixed(0)+'/100';
+    if(f.hdrSignal){ var hs=document.querySelector(f.hdrSignal); if(hs){hs.textContent=sig+'　综合评分 '+r.comp.toFixed(0)+'/100'; hs.style.background=colFor(r.comp);} }
+    if(f.cmpSig){ var cs=document.querySelector(f.cmpSig); if(cs){cs.textContent=sig; cs.style.color=colFor(r.comp);} var css=document.querySelector(f.cmpScore); if(css)css.textContent='综合 '+r.comp.toFixed(0)+'/100 ｜ 价位「'+zoneFor(r.pct)+'」'; }
+  }catch(e){} }
+  function fetchEM(secid,cb){ var cbn='_emcb'+Math.random().toString(36).slice(2); var done=false,s; function clr(){ done=true; try{delete window[cbn];}catch(e){} if(s&&s.parentNode)s.parentNode.removeChild(s);} var t=setTimeout(function(){ if(!done){clr();cb(null);} },8000); window[cbn]=function(data){ if(done)return; clearTimeout(t); cb(data); clr();}; s=document.createElement('script'); s.src='https://push2.eastmoney.com/api/qt/stock/get?secid='+encodeURIComponent(secid)+'&fields=f43,f169,f170&invt=2&fltt=2&cb='+cbn; s.onerror=function(){ if(!done){clearTimeout(t);cb(null);clr();} }; document.head.appendChild(s); }
+  function fetchGT(sym,cb){ var s=document.createElement('script'); var done=false; var t=setTimeout(function(){ if(!done){done=true; if(s.parentNode)s.parentNode.removeChild(s); cb(null);} },8000); s.onload=function(){ if(done)return; done=true; clearTimeout(t); var str=window['v_'+sym]; if(s.parentNode)s.parentNode.removeChild(s); if(!str){cb(null);return;} var p=str.split('~'); var price=parseFloat(p[3]); cb(price>0?{price:price}:null); }; s.onerror=function(){ if(!done){done=true; clearTimeout(t); cb(null);} }; s.src='https://qt.gtimg.cn/q='+sym; document.head.appendChild(s); }
+  var total=RT_CFG.funds.length, doneN=0, ok=0, fail=0;
+  function fin(okf){ doneN++; if(okf)ok++; else fail++; if(doneN===total) stamp(); }
+  function stamp(){ var el=document.getElementById('dataStamp'); if(!el)return; var n=new Date(); var hh=('0'+n.getHours()).slice(-2), mm=('0'+n.getMinutes()).slice(-2); var tx; if(ok===0){ el.className='rt-stamp rt-fail'; tx='\u26a0\ufe0f 显示前一个交易日收盘数据（实时接口失败）'; } else if(fail>0){ el.className='rt-stamp rt-warn'; tx='\u2705 实时行情（'+ok+' 只成功，'+fail+' 只沿用上一交易日收盘）\u00b7 '+hh+':'+mm; } else { el.className='rt-stamp rt-ok'; tx='\u2705 实时行情 \u00b7 数据时间 '+hh+':'+mm; } el.textContent=tx; }
+  RT_CFG.funds.forEach(function(f){ fetchEM(f.secid, function(data){ if(data&&data.f43){ try{ var price=parseFloat(data.f43); if(price>0){ upd(f,compute(f,price),price); fin(true); return; } }catch(e){} } fetchGT(f.gtimg, function(g){ if(g&&g.price>0){ upd(f,compute(f,g.price),g.price); fin(true); } else { fin(false); } }); }); });
+})();
+</script>
+</body></html>
