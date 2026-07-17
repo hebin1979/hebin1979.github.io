@@ -246,6 +246,38 @@ function loadScriptRaw(url,timeout){
     s.src=url;document.head.appendChild(s);
   });
 }
+
+// ---- 本地缓存：保存/读取最近一次成功获取的真实行情 ----
+//  接口失败时回退显示此真实数据(带时间戳)，避免显示写死的 451 虚假演示值。
+var CACHE_KEY='tx_helper_cache_v1';
+function saveCache(d){
+  try{
+    var c={
+      price:d.price,open:d.open,high:d.high,low:d.low,prevClose:d.prevClose,
+      change:d.change,changePct:d.changePct,volume:d.volume,amount:d.amount,
+      turnoverRate:d.turnoverRate,marketCap:d.marketCap,peTTM:d.peTTM,pb:d.pb,
+      ma:d.ma,macd:d.macd,rsi:d.rsi,kdj:d.kdj,boll:d.boll,volMA:d.volMA,kline:d.kline,
+      code:d.code,secid:d.secid,market:d.market,name:d.name,currency:d.currency,
+      fundamentals:d.fundamentals,newsSentiment:d.newsSentiment,fundFlow:d.fundFlow,
+      keyNews:d.keyNews,analysts:d.analysts,analystList:d.analystList,
+      cacheTime:Date.now()
+    };
+    localStorage.setItem(CACHE_KEY,JSON.stringify(c));
+  }catch(e){/* 忽略配额/隐私模式限制 */}
+}
+function loadCache(){
+  try{
+    var s=localStorage.getItem(CACHE_KEY); if(!s) return null;
+    var c=JSON.parse(s); if(!c||!c.kline||!c.kline.length) return null;
+    c.isCached=true; return c;
+  }catch(e){ return null; }
+}
+function fmtCacheTime(ts){
+  if(!ts) return '未知时间';
+  var dt=new Date(ts);
+  function p(n){return (n<10?'0':'')+n;}
+  return p(dt.getMonth()+1)+'-'+p(dt.getDate())+' '+p(dt.getHours())+':'+p(dt.getMinutes());
+}
 // 东财实时报价（带重试）
 async function fetchEastmoneyQuote(secid,retries){
   var fields='f43,f44,f45,f46,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170';
@@ -820,14 +852,23 @@ async function analyzeStock(){
     d.keyNews=d.keyNews||[{date:'今日',title:'当前为实时数据, 暂未配置新闻流',s:'neutral'}];
     d.analysts=d.analysts||{total:0,buyPct:0,holdPct:0,sellPct:0,avgTarget:d.price*1.2,highTarget:d.price*1.5,lowTarget:d.price*0.9};
     d.analystList=d.analystList||[];
+    saveCache(d);   // 成功获取真实数据 → 存入本地缓存，供接口失败时回退
   }catch(err){
-    console.error('API fail, using demo:',err);
-    d=getDemoData();
-    if(d.kline&&!d.kline.length) d.kline=genDemoKline();
-    if(!d.kline) d.kline=genDemoKline();
-    mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败, 已切换到内置演示数据: '+err.message+'</div>';
-    var _stamp2=document.getElementById('dataStamp');
-    if(_stamp2){ _stamp2.textContent='⚠️ 演示数据（实时接口失败）'; _stamp2.className='datastamp warn'; }
+    console.error('API fail:',err);
+    var cached=loadCache();
+    if(cached){
+      d=cached; d.isDemo=false; d.isCached=true;
+      mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败，已显示最近一次成功获取的真实数据（缓存于 '+fmtCacheTime(d.cacheTime)+'）。非最新行情，仅供参考。</div>';
+      var _stamp2=document.getElementById('dataStamp');
+      if(_stamp2){ _stamp2.textContent='⚠️ 缓存数据（接口失败 · 更新于 '+fmtCacheTime(d.cacheTime)+'）'; _stamp2.className='datastamp warn'; }
+    }else{
+      d=getDemoData();
+      if(d.kline&&!d.kline.length) d.kline=genDemoKline();
+      if(!d.kline) d.kline=genDemoKline();
+      mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败，且无历史缓存，已切换到内置演示数据: '+err.message+'</div>';
+      var _stamp3=document.getElementById('dataStamp');
+      if(_stamp3){ _stamp3.textContent='⚠️ 演示数据（实时接口失败）'; _stamp3.className='datastamp warn'; }
+    }
   }
 
   var parts=[panelReco(d),panelScore(d),panelFund(d),panelChart(),panelIndi(d),panelMA(d),panelMACDRSI(d),panelKDJBoll(d),panelSent(d),panelAnly(d)];

@@ -1,11 +1,60 @@
 {
   "metadata": {
-    "last_update": "2026年7月15日",
+    "last_update": "2026年7月17日",
     "total_ipos": 85,
     "description": "2026年港股IPO数据",
-    "_deploy_marker": "20260715-1105"
+    "_deploy_marker": "20260717-1030"
   },
-  "currently_subscribing": [],
+  "currently_subscribing": [
+    {
+      "code": "09887",
+      "name": "维立志博-B",
+      "name_en": "Leads Biolabs",
+      "rating": 70,
+      "subscription_start": "7/17",
+      "subscription_end": "7/22",
+      "listing_date": "7/25",
+      "price_range": "31.6–35.0 港元",
+      "entry_fee": 3535.3,
+      "oversubscription": "招股中（数据待更新）",
+      "pros": [
+        "引入10名基石投资者（含腾讯、高毅、易方达等），合计认购约6,900万美元",
+        "摩根士丹利+中信证券联席保荐，发行规模约10.67亿港元",
+        "聚焦肿瘤/自免下一代免疫疗法，核心产品LBL-024处临床阶段"
+      ],
+      "cons": [
+        "公司持续亏损（2024年净亏约3.01亿元），商业化尚未兑现",
+        "生物科技板块波动大，破发风险需关注",
+        "发行估值不低，需看最终定价"
+      ],
+      "analysis": "未盈利生物科技股，基石阵容豪华（腾讯入局）提供一定信心，但盈利兑现遥远，适合风险偏好较高者小仓位参与。",
+      "recommendation": "可现金认购小试，关注最终定价与基石占比；破发风险中等，不建议重仓。"
+    },
+    {
+      "code": "02691",
+      "name": "南华期货",
+      "name_en": "Nanhua Futures",
+      "rating": 65,
+      "subscription_start": "7/12",
+      "subscription_end": "7/17",
+      "listing_date": "7/22",
+      "price_range": "12.0–16.0 港元",
+      "entry_fee": 8080.68,
+      "oversubscription": "公开发售1.91倍（下限12元定价）",
+      "pros": [
+        "A股南华期货(603093.SH)已上市，H股下限12元折价发行",
+        "香港+境外期货龙头，横华国际品牌，跨境业务协同",
+        "公开发售1.91倍，一手中签率74.64%，两手稳获一手"
+      ],
+      "cons": [
+        "最终下限定价反映需求偏弱",
+        "期货行业周期性，受市场成交与利率影响大",
+        "H股流动性与A股联动需观察"
+      ],
+      "analysis": "H股以下限12元定价，较A股有折价，公开发售仅1.91倍，热度一般。上市日期7/22，可关注暗盘与首日表现。",
+      "recommendation": "已截止认购；上市在即(7/22)，可观望暗盘，折价提供一定安全边际，谨慎参与。"
+    }
+  ],
   "listing_tomorrow": [],
   "listed_ipos_2026": [
     {
