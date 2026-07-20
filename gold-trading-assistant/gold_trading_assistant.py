@@ -43,6 +43,8 @@ import sys
 import time
 from datetime import datetime, timezone
 
+import realtime_js  # 浏览器端实时行情脚本（共享）
+
 try:
     import requests
 except ImportError:
@@ -54,15 +56,15 @@ except ImportError:
 #    —— 宏观驱动：Yahoo/FRED 抓取失败时的回退值
 # ----------------------------------------------------------------------------
 SNAPSHOT = {
-    "as_of": "2026-07-13",
+    "as_of": "2026-07-20",
     # —— ETF 自身价格技术面（东财 518850, fqt=0 不复权）——
-    "gold_price": 8.452,            # 518850 现价 (元)
+    "gold_price": 8.408,            # 518850 现价 (元)
     "gold_52w_high": 12.087,
     "gold_52w_low": 7.310,
-    "gold_ma": 9.011,               # 长期均线(约 200 日/月线收盘均值)
-    "gold_rsi": 54.2,
+    "gold_ma": 9.539,               # 长期均线(约 200 日/月线收盘均值)
+    "gold_rsi": 47.4,
     # —— 宏观驱动（实时抓取 Yahoo/FRED，失败回退）——
-    "dxy": 100.91,                  # 美元指数
+    "dxy": 100.74,                  # 美元指数(东财 2026-07-20)
     "dxy_52w_high": 101.80,
     "dxy_52w_low": 95.55,
     "tips": 2.31,                   # 10Y TIPS 实际收益率 (%)
@@ -402,18 +404,21 @@ def reconcile_text(d, ctx, zone_name, gold_pct):
 # ----------------------------------------------------------------------------
 # 6. HTML 报告
 # ----------------------------------------------------------------------------
-def gauge(value, color, label, sub=""):
+def gauge(value, color, label, sub="", rt_tag=None):
     import html
     angle = 180 - (value / 100.0) * 180
     rad = math.radians(angle)
     x = 100 + 80 * math.cos(rad)
     y = 100 - 80 * math.sin(rad)
     arc_bg = f'<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>'
-    arc_fg = f'<path d="M 20 100 A 80 80 0 0 1 {x:.1f} {y:.1f}" fill="none" stroke="{color}" stroke-width="14" stroke-linecap="round"/>'
-    return f'''<div class="gauge">
+    arc_cls = f' class="rt-{rt_tag}-arc"' if rt_tag else ''
+    arc_fg = f'<path{arc_cls} d="M 20 100 A 80 80 0 0 1 {x:.1f} {y:.1f}" fill="none" stroke="{color}" stroke-width="14" stroke-linecap="round"/>'
+    val_cls = f' class="rt-{rt_tag}-val"' if rt_tag else ''
+    div_cls = f'gauge rt-{rt_tag}' if rt_tag else 'gauge'
+    return f'''<div class="{div_cls}">
       <svg viewBox="0 0 200 120" width="100%" height="120">
         {arc_bg}{arc_fg}
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="{color}">{value:.0f}</text>
+        <text{val_cls} x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="{color}">{value:.0f}</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">{html.escape(label)}</div>
@@ -425,17 +430,18 @@ def build_html(d, ctx, status):
     cz_name, cz_color, cz_desc = current_zone(d)
     rec = reconcile_text(d, ctx, cz_name, ctx["gold_pct"])
 
-    def card(name, val, score, color, note):
-        return (f'<div class="card"><div class="c-head"><span class="c-name">{name}</span>'
+    def card(name, val, score, color, note, cid=None):
+        cls = f'card rt-card-{cid}' if cid else 'card'
+        return (f'<div class="{cls}"><div class="c-head"><span class="c-name">{name}</span>'
                 f'<span class="c-score" style="color:{color}">{score:.0f}</span></div>'
                 f'<div class="c-val">{val}</div>'
                 f'<div class="bar"><div class="bar-fill" style="width:{score:.0f}%;background:{color}"></div></div>'
                 f'<div class="c-note">{note}</div></div>')
     cards = [
         card("估值分位 (价格 vs 52周)", f"金价位于年内 {ctx['gold_pct']:.0f}% 分位",
-             ind["valuation"], "#b45309", "越接近年内低位越便宜"),
+             ind["valuation"], "#b45309", "越接近年内低位越便宜", cid='valuation'),
         card("趋势 (价格/长期均线)", f"比值 {ctx['trend_ratio']:.2f}×",
-             ind["trend"], "#16a34a", "不逆强下行趋势"),
+             ind["trend"], "#16a34a", "不逆强下行趋势", cid='trend'),
         card("动量 RSI(14)", f"RSI = {d['gold_rsi']:.0f}",
              ind["rsi"], "#db2777", "超卖(低)=更好买点"),
         card("实际利率 (10Y TIPS)", f"实际收益率 {d['tips']:.2f}%",
@@ -531,6 +537,10 @@ th{{background:#f8fafc;color:#475569;font-weight:600}}
 .status{{font-size:12px;color:#64748b}}
 .status li{{margin:2px 0;list-style-position:inside}}
 footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
+.rt-stamp{{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700}}
+.rt-ok{{background:#dcfce7;color:#166534}}
+.rt-warn{{background:#fef9c3;color:#854d0e}}
+.rt-fail{{background:#fee2e2;color:#991b1b}}
 @media (max-width:600px){{
   body{{padding:12px}}
   .cards{{grid-template-columns:1fr 1fr}}
@@ -543,14 +553,15 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   <div class="meta">数据时间：{d.get('as_of','')} ｜ 标的：518850 黄金ETF华夏（A股可直接交易，与现货金价高度联动）｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口（直接买入现货 ETF）</div>
   <div class="signal">{ctx['signal']}　综合评分 {comp:.0f}/100</div>
   <div class="advice">{ctx['advice']}</div>
+  <div id="dataStamp" class="rt-stamp">⏳ 正在获取实时行情…</div>
 </header>
 
 <div class="comp-wrap">
-  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'])}</div>
+  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'], rt_tag='comp')}</div>
   <div style="flex:1">
     <h2 style="margin-bottom:10px;font-size:15px">指标仪表盘（分数越高 = 越适合买入/累积黄金）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
-      {''.join(gauge(ind[k], '#b45309', n, '') for k,n in
+      {''.join(gauge(ind[k], '#b45309', n, '', rt_tag=('valuation' if k=='valuation' else ('trend' if k=='trend' else None))) for k,n in
         [('valuation','估值'),('trend','趋势'),('rsi','RSI'),('real_yield','实际利率'),
          ('dxy','美元'),('vix','避险'),('season','季节')])}
     </div>
@@ -561,12 +572,12 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   <div class="r-col">
     <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
     <div class="r-val r-zone">{cz_name}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 {d['gold_price']:.3f} ｜ 52 周区间分位 {ctx['gold_pct']:.0f}%</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-recon-price">现价 {d['gold_price']:.3f} ｜ 52 周区间分位 {ctx['gold_pct']:.0f}%</div>
   </div>
   <div class="r-col">
     <div class="r-label">🎯 综合信号（全页唯一结论）</div>
-    <div class="r-val" style="color:{ctx['color']}">{ctx['signal']}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 {comp:.0f}/100</div>
+    <div class="r-val rt-signal" style="color:{ctx['color']}">{ctx['signal']}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-comp-score">综合评分 {comp:.0f}/100</div>
   </div>
   <div class="r-text">{rec}</div>
 </div>
@@ -613,7 +624,21 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   <a href="{HOMEPAGE_URL}" style="color:#b45309">返回工具箱首页</a> ·
   <a href="{FEEDBACK_URL}" style="color:#b45309">反馈/建议</a>
 </footer>
-</div></body></html>'''
+</div>'''
+    # —— 浏览器端实时行情：拉取实时价并刷新价格驱动评分（环境分沿用快照）——
+    rt_cfg = {
+        "kind": "gold",
+        "funds": [{
+            "scope": "", "secid": "1.518850", "gtimg": "sh518850", "name": "518850 黄金ETF华夏",
+            "lo": round(float(d["gold_52w_low"]), 4), "hi": round(float(d["gold_52w_high"]), 4), "ma": round(float(d["gold_ma"]), 4),
+            "env": {"trend": round(float(ind["trend"]), 1), "rsi": round(float(ind["rsi"]), 1), "real_yield": round(float(ind["real_yield"]), 1), "dxy": round(float(ind["dxy"]), 1), "vix": round(float(ind["vix"]), 1), "season": round(float(ind["season"]), 1)},
+            "weights": {"valuation": 18, "trend": 15, "rsi": 18, "real_yield": 20, "dxy": 15, "vix": 9, "season": 5},
+            "anchors": {"val": [[0,95],[20,82],[40,62],[60,42],[80,22],[100,10]], "trend": [[0.85,20],[0.95,45],[1.0,60],[1.05,75],[1.15,88]]},
+            "cardVal": "valuation", "hdrSignal": ".signal"
+        }]
+    }
+    rt_cfg_json = json.dumps(rt_cfg, ensure_ascii=False)
+    html_doc = html_doc + '<script>var RT_CFG=' + rt_cfg_json + ';</script>\n<script>' + realtime_js.REALTIME_JS + '</script>\n</body></html>'
     return html_doc
 
 # ----------------------------------------------------------------------------

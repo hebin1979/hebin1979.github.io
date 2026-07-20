@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "last_update": "2026年7月17日",
+    "last_update": "2026年7月20日",
     "total_ipos": 85,
     "description": "2026年港股IPO数据",
-    "note": "截至 2026-07-17 港股处于打新空窗期：AASTOCKS 新股中心显示「沒有稍後上市IPO」，无招股中/即将上市标的。维立志博-B(09887)与南华期货(02691)均为2025年上市老股，勿误作当前新股。",
-    "_deploy_marker": "20260717-1100-fix"
+    "note": "截至 2026-07-20 港股处于打新空窗期：AASTOCKS 新股中心显示「沒有稍後上市IPO」，无招股中/即将上市标的。维立志博-B(09887)与南华期货(02691)均为2025年上市老股，勿误作当前新股。",
+    "_deploy_marker": "20260720-1413-refresh"
   },
   "currently_subscribing": [],
   "listing_tomorrow": [],

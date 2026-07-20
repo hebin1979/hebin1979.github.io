@@ -46,6 +46,8 @@ import math
 import os
 from datetime import datetime
 
+import realtime_js  # 浏览器端实时行情脚本（共享）
+
 # ----------------------------------------------------------------------------
 # 0. 内嵌历史序列 (月度: [日期, 沪深300点位, 沪深300 PE(TTM), 10Y国债%, 563020后复权价])
 #    用于计算 PE分位 / 利差分位 / MA12 / RSI。历史序列为估算校准，仅最新行为实时值。
@@ -106,14 +108,16 @@ FUNDS = [
         "name": "易方达中证红利低波动ETF",
         "index": "中证红利低波动(930914)",
         "market": "A股",
-        "as_of": "2026-07-15",
+        "secid": "1.563020",
+        "gtimg": "sh563020",
+        "as_of": "2026-07-20",
         "snapshot": dict(SHARED_MACRO, **{
             "div_yield": 4.52,     # 563020 股息率(%)（中证红利低波动930914指数口径）
-            "etf_price": 1.144,    # 563020 现价(不复权, 东财)
+            "etf_price": 1.160,    # 563020 现价(不复权, 东财 2026-07-20)
             "etf_52w_high": 1.283, # 52周高 (2025-11-12, 不复权)
             "etf_52w_low": 1.055,  # 52周低 (2026-06-29, 不复权)
-            "etf_ma": 1.186,       # 中期均线 MA12 月线(不复权)
-            "etf_rsi": 70.0,       # RSI(14) 日线(不复权)
+            "etf_ma": 1.189,       # 中期均线 MA200 日线(不复权)
+            "etf_rsi": 80.7,       # RSI(14) 日线(不复权)
         }),
     },
     {
@@ -121,14 +125,16 @@ FUNDS = [
         "name": "易方达恒生红利低波ETF",
         "index": "恒生港股通高股息低波动",
         "market": "港股通",
-        "as_of": "2026-07-16",
+        "secid": "0.159545",
+        "gtimg": "sz159545",
+        "as_of": "2026-07-20",
         "snapshot": dict(SHARED_MACRO, **{
             "div_yield": 5.80,     # 159545 股息率(%)（恒生港股通高股息低波动指数口径 ~5.8%）
-            "etf_price": 1.292,    # 159545 现价(不复权, 东财 2026-07-16)
-            "etf_52w_high": 1.54,  # 52周高 (2026年初, 不复权)
-            "etf_52w_low": 1.29,   # 52周低 (2026-07, 不复权；现价已贴近1年低位)
-            "etf_ma": 1.33,        # 中期均线 MA12 月线(快照估算, 现价低于均线)
-            "etf_rsi": 42.0,       # RSI(14) 日线(快照估算, 近期下行、未极端超卖)
+            "etf_price": 1.313,    # 159545 现价(不复权, 东财 2026-07-20)
+            "etf_52w_high": 1.539, # 52周高 (不复权)
+            "etf_52w_low": 1.193,  # 52周低 (不复权；现价贴近1年低位)
+            "etf_ma": 1.426,       # 中期均线 MA200 日线(不复权)
+            "etf_rsi": 82.8,       # RSI(14) 日线(不复权)
         }),
     },
 ]
@@ -333,18 +339,21 @@ def reconcile_text(d, ctx, zone_name, etf_pct, fund):
 # ----------------------------------------------------------------------------
 # 5. HTML 报告
 # ----------------------------------------------------------------------------
-def gauge(value, color, label, sub=""):
+def gauge(value, color, label, sub="", rt_tag=None):
     import html
     angle = 180 - (value / 100.0) * 180
     rad = math.radians(angle)
     x = 100 + 80 * math.cos(rad)
     y = 100 - 80 * math.sin(rad)
     arc_bg = '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>'
-    arc_fg = f'<path d="M 20 100 A 80 80 0 0 1 {x:.1f} {y:.1f}" fill="none" stroke="{color}" stroke-width="14" stroke-linecap="round"/>'
-    return f'''<div class="gauge">
+    arc_cls = f' class="rt-{rt_tag}-arc"' if rt_tag else ''
+    arc_fg = f'<path{arc_cls} d="M 20 100 A 80 80 0 0 1 {x:.1f} {y:.1f}" fill="none" stroke="{color}" stroke-width="14" stroke-linecap="round"/>'
+    val_cls = f' class="rt-{rt_tag}-val"' if rt_tag else ''
+    div_cls = f'gauge rt-{rt_tag}' if rt_tag else 'gauge'
+    return f'''<div class="{div_cls}">
       <svg viewBox="0 0 200 120" width="100%" height="120">
         {arc_bg}{arc_fg}
-        <text x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="{color}">{value:.0f}</text>
+        <text{val_cls} x="100" y="92" text-anchor="middle" font-size="30" font-weight="700" fill="{color}">{value:.0f}</text>
         <text x="100" y="112" text-anchor="middle" font-size="11" fill="#6b7280">/100</text>
       </svg>
       <div class="g-label">{html.escape(label)}</div>
@@ -358,8 +367,9 @@ def render_panel(d, ctx, fund, active=False):
     cz_name, cz_color, cz_desc = current_zone(d)
     rec = reconcile_text(d, ctx, cz_name, ctx["etf_pct"], fund)
 
-    def card(cname, val, score, color, note):
-        return (f'<div class="card"><div class="c-head"><span class="c-name">{cname}</span>'
+    def card(cname, val, score, color, note, cid=None):
+        cls = f'card rt-card-{cid}' if cid else 'card'
+        return (f'<div class="{cls}"><div class="c-head"><span class="c-name">{cname}</span>'
                 f'<span class="c-score" style="color:{color}">{score:.0f}</span></div>'
                 f'<div class="c-val">{val}</div>'
                 f'<div class="bar"><div class="bar-fill" style="width:{score:.0f}%;background:{color}"></div></div>'
@@ -367,7 +377,7 @@ def render_panel(d, ctx, fund, active=False):
 
     cards = [
         card(f"股价分位 ({code} vs 52周)", f"价格位于年内 {ctx['etf_pct']:.0f}% 分位",
-             ind["price_pct"], "#b45309", "⚓ 锚定方向：价格越低越便宜(偏多)"),
+             ind["price_pct"], "#b45309", "⚓ 锚定方向：价格越低越便宜(偏多)", cid='price_pct'),
         card("股债利差 (E/P−10Y)", f"利差 {ctx['spread']:.2f}% (E/P {ctx['ey']:.2f}%−{d['bond10y']:.2f}%)",
              ind["spread"], "#dc2626", "核心：股票相对债券越便宜越买"),
         card("利差历史分位", f"分位 {ctx['spread_pct']:.0f}%",
@@ -379,7 +389,7 @@ def render_panel(d, ctx, fund, active=False):
         card("利率环境 (10Y国债)", f"10Y {d['bond10y']:.2f}% (分位{ctx['bond_pct']:.0f}%)",
              ind["rate"], "#0891b2", "利率越低红利相对越香"),
         card("趋势 (价格/MA12)", f"比值 {ctx['trend_ratio']:.2f}×",
-             ind["trend"], "#7c3aed", "站上中期均线顺势，破位防守"),
+             ind["trend"], "#7c3aed", "站上中期均线顺势，破位防守", cid='trend'),
         card("动量 RSI(14)", f"RSI = {d['etf_rsi']:.0f}",
              ind["rsi"], "#db2777", "超卖(低)=更好买点"),
     ]
@@ -414,11 +424,11 @@ def render_panel(d, ctx, fund, active=False):
 
     return f'''<div class="fund-panel" id="panel-{code}" style="display:{'block' if active else 'none'}">
 <div class="comp-wrap">
-  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'])}</div>
+  <div class="comp-gauge">{gauge(comp, ctx['color'], "综合评分", ctx['signal'], rt_tag='comp')}</div>
   <div style="flex:1;min-width:280px">
     <h2 style="margin-bottom:10px;font-size:15px">{code} 指标仪表盘（分数越高 = 越适合买入/累积红利低波）</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
-      {''.join(gauge(ind[k], '#b91c1c', n, '') for k,n in
+      {''.join(gauge(ind[k], '#b91c1c', n, '', rt_tag=('price_pct' if k=='price_pct' else ('trend' if k=='trend' else None))) for k,n in
         [('price_pct','股价分位⚓'),('spread','股债利差'),('spread_pct','利差分位'),('valuation','PE分位'),('dividend','股息率'),
          ('rate','利率'),('trend','趋势'),('rsi','RSI')])}
     </div>
@@ -429,12 +439,12 @@ def render_panel(d, ctx, fund, active=False):
   <div class="r-col">
     <div class="r-label">📍 技术面价位（价格相对 52 周区间）</div>
     <div class="r-val" style="color:{cz_color}">{cz_name}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">现价 {d['etf_price']:.3f} ｜ 52 周区间分位 {ctx['etf_pct']:.0f}%</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-recon-price">现价 {d['etf_price']:.3f} ｜ 52 周区间分位 {ctx['etf_pct']:.0f}%</div>
   </div>
   <div class="r-col">
     <div class="r-label">🎯 综合信号（{code} 唯一结论）</div>
-    <div class="r-val" style="color:{ctx['color']}">{ctx['signal']}</div>
-    <div style="font-size:12px;color:#64748b;margin-top:4px">综合评分 {comp:.0f}/100</div>
+    <div class="r-val rt-signal" style="color:{ctx['color']}">{ctx['signal']}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:4px" class="rt-comp-score">综合评分 {comp:.0f}/100</div>
   </div>
   <div class="r-text">{rec}</div>
 </div>
@@ -481,8 +491,8 @@ def build_html(funds_data):
         cmp_items += (f'<div class="cmp-card">'
             f'<div class="cmp-code">{fund["code"]} <span class="cmp-mkt">{fund["market"]}</span></div>'
             f'<div class="cmp-name">{fund["name"]}</div>'
-            f'<div class="cmp-sig" style="color:{ctx["color"]}">{ctx["signal"]}</div>'
-            f'<div class="cmp-score">综合 {ctx["composite"]:.0f}/100 ｜ 价位「{cz}」</div>'
+            f'<div class="cmp-sig" id="cmp-sig-{fund["code"]}" style="color:{ctx["color"]}">{ctx["signal"]}</div>'
+            f'<div class="cmp-score" id="cmp-score-{fund["code"]}">综合 {ctx["composite"]:.0f}/100 ｜ 价位「{cz}」</div>'
             f'</div>')
     tabs = ""
     for i, (d, ctx, fund) in enumerate(funds_data):
@@ -552,6 +562,10 @@ th{{background:#f8fafc;color:#475569;font-weight:600}}
 .status{{font-size:12px;color:#64748b}}
 .status li{{margin:2px 0;list-style-position:inside}}
 footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
+.rt-stamp{{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700}}
+.rt-ok{{background:#dcfce7;color:#166534}}
+.rt-warn{{background:#fef9c3;color:#854d0e}}
+.rt-fail{{background:#fee2e2;color:#991b1b}}
 @media (max-width:600px){{
   body{{padding:12px}}
   .cards{{grid-template-columns:1fr 1fr}}
@@ -564,6 +578,7 @@ footer{{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}}
   <h1>📊 红利交易助手</h1>
   <div class="meta">数据时间：{as_of} ｜ 双卡对比：563020 / 159545 ｜ 框架：价格锚定方向+环境调制力度 + 价位区间 + 时间窗口</div>
   <div class="cmp-strip">{cmp_items}</div>
+  <div id="dataStamp" class="rt-stamp">⏳ 正在获取实时行情…</div>
 </header>
 
 <div class="tabs">{tabs}</div>
@@ -584,7 +599,24 @@ function showFund(id){{
   document.getElementById('tab-'+id).classList.add('active');
 }}
 </script>
-</div></body></html>'''
+</div>'''
+    # —— 浏览器端实时行情：逐基金拉实时价并刷新价格驱动评分（环境分沿用快照）——
+    rt_funds = []
+    for (d, ctx, fund) in funds_data:
+        code = fund["code"]
+        indd = ctx["indicators"]
+        rt_funds.append({
+            "scope": "#panel-" + code,
+            "secid": fund["secid"], "gtimg": fund["gtimg"], "name": fund["name"],
+            "lo": round(float(d["etf_52w_low"]), 4), "hi": round(float(d["etf_52w_high"]), 4), "ma": round(float(d["etf_ma"]), 4),
+            "env": {"spread": round(float(indd["spread"]),1), "spread_pct": round(float(indd["spread_pct"]),1), "valuation": round(float(indd["valuation"]),1), "dividend": round(float(indd["dividend"]),1), "rate": round(float(indd["rate"]),1), "trend": round(float(indd["trend"]),1), "rsi": round(float(indd["rsi"]),1)},
+            "weights": {"spread": 22, "spread_pct": 12, "valuation": 16, "dividend": 16, "rate": 14, "trend": 12, "rsi": 8},
+            "anchors": {"val": [[0,95],[20,82],[40,62],[60,42],[80,22],[100,10]], "trend": [[0.90,25],[0.96,42],[1.0,60],[1.03,73],[1.08,86]]},
+            "cardVal": "price_pct", "cmpSig": "#cmp-sig-" + code, "cmpScore": "#cmp-score-" + code
+        })
+    rt_cfg = {"kind": "dividend", "funds": rt_funds}
+    rt_cfg_json = json.dumps(rt_cfg, ensure_ascii=False)
+    html_doc = html_doc + '<script>var RT_CFG=' + rt_cfg_json + ';</script>\n<script>' + realtime_js.REALTIME_JS + '</script>\n</body></html>'
     return html_doc
 
 # ----------------------------------------------------------------------------
