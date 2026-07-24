@@ -62,7 +62,7 @@ tbody tr:last-child td{border-bottom:none}
 
 <div class="header">
   <h1>📋 今日投资简报</h1>
-  <div class="meta">数据日期：<b id="dataDate">2026-07-23</b> ｜ 港股打新 · 腾讯 · 红利 · 纳指 · 黄金 五模块核心建议汇总</div>
+  <div class="meta">数据日期：<b id="dataDate">2026-07-24</b> ｜ 港股打新 · 腾讯 · 红利 · 纳指 · 黄金 五模块核心建议汇总</div>
 </div>
 
 <div class="wrap">
@@ -85,11 +85,11 @@ tbody tr:last-child td{border-bottom:none}
   <div class="section">
     <h2>🔗 打开对应工具</h2>
     <div class="links">
-      <a href="/hk-ipo/?v=20260723"><span class="ic">🚀</span>港股打新助手</a>
-      <a href="/tencent-trading-assistant.html?v=20260723"><span class="ic">🔮</span>腾讯交易助手</a>
-      <a href="/dividend-spread-tool.html?v=20260723"><span class="ic">📊</span>红利交易助手</a>
-      <a href="/nasdaq-trading-assistant/?v=20260723"><span class="ic">📈</span>纳指交易助手</a>
-      <a href="/gold-trading-assistant/?v=20260723"><span class="ic">🪙</span>黄金交易助手</a>
+      <a href="/hk-ipo/?v=20260724"><span class="ic">🚀</span>港股打新助手</a>
+      <a href="/tencent-trading-assistant.html?v=20260724"><span class="ic">🔮</span>腾讯交易助手</a>
+      <a href="/dividend-spread-tool.html?v=20260724"><span class="ic">📊</span>红利交易助手</a>
+      <a href="/nasdaq-trading-assistant/?v=20260724"><span class="ic">📈</span>纳指交易助手</a>
+      <a href="/gold-trading-assistant/?v=20260724"><span class="ic">🪙</span>黄金交易助手</a>
     </div>
   </div>
 
@@ -115,7 +115,7 @@ tbody tr:last-child td{border-bottom:none}
 //  今日简报数据（每次刷新时更新此 BRIEFING 对象即可）
 // =============================================================
 var BRIEFING = {
-  date: '2026-07-23',
+  date: '2026-07-24',
   modules: [
     {
       key:'ipo', icon:'🚀', name:'港股打新助手', em:'港股新股',
@@ -127,30 +127,30 @@ var BRIEFING = {
     {
       key:'tencent', icon:'🔮', name:'腾讯交易助手', em:'00700.HK',
       sig:'估值低位·分批低吸', sigType:'buy',
-      advice:'现价 ~446.6 港元（+1.36%），<b>贴近52周区间低位(411–683，分位约13%)</b>，估值安全边际厚；短期情绪修复中、RSI 54 中性。建议<b>分批低吸、不追高</b>，回调至 430 以下加仓更优，中长期配置价值凸显。',
-      key1:'现价 ~446.6 HKD（+1.36%）',
-      key2:'52周分位约13% · RSI 54'
+      advice:'现价 ~435 港元（<b>-2.29%</b>），<b>贴近52周区间低位(411–683，分位约9%)</b>，估值安全边际进一步增厚；中长期配置价值凸显。建议<b>分批低吸、不追高</b>，回调至 425 以下加仓更优，以定投节奏累积仓位。',
+      key1:'现价 ~435 HKD（-2.29%）',
+      key2:'52周分位约9% · 低位'
     },
     {
       key:'dividend', icon:'📊', name:'红利交易助手', em:'沪深300股债利差',
       sig:'条件合适', sigType:'buy',
-      advice:'双卡综合评分 563020 56/100、159545 61/100（≈58.6），价格锚定方向偏多（159545 处价值区）；但沪深300 PE 分位偏高(74%)、股债利差仅历史 57% 分位、RSI 高位(563020 73 / 159545 81)追高性价比低。<b>红利低波收息为本、小仓位分批</b>，利差回升≥6% 再加仓。',
-      key1:'563020 56 · 159545 61',
+      advice:'双卡综合评分 563020 58/100、159545 62/100（≈60），价格锚定方向偏多（159545 处价值区38%分位）；但沪深300 PE 分位仍偏高(74%)、股债利差仅历史 57% 分位、RSI 自高位回落(563020 58 / 159545 60)追高性价比一般。<b>红利低波收息为本、小仓位分批</b>，利差回升≥6% 再加仓。',
+      key1:'563020 58 · 159545 62',
       key2:'双卡均条件合适'
     },
     {
       key:'nasdaq', icon:'📈', name:'纳指交易助手', em:'QQQ (纳指100)',
       sig:'中性 · 观望', sigType:'hold',
-      advice:'综合评分 47/100。价格 52 周分位约 69%(偏高)、安全边际有限；但 RSI 36 超卖偏多、趋势站上长期均线(1.10×)、信用利差健康(HY OAS 270bps)、VIX 低位良性。<b>以持有/观望为主、不追高</b>，等待 5–10% 回撤或恐慌放大(VIX>25)再加仓。',
-      key1:'评分 47/100',
+      advice:'综合评分 49/100。价格 52 周分位约 69%(偏高)、安全边际有限；但 RSI 39 接近超卖偏多、趋势站上长期均线(1.10×)、信用利差健康(HY OAS 270bps)、VIX 低位良性。<b>以持有/观望为主、不追高</b>，等待 5–10% 回撤或恐慌放大(VIX>25)再加仓。',
+      key1:'评分 49/100',
       key2:'价格分位约69% · 观望'
     },
     {
       key:'gold', icon:'🪙', name:'黄金交易助手', em:'金价 XAU',
       sig:'条件合适', sigType:'buy',
-      advice:'综合评分 62/100。金价 52 周分位约 28%(价值区)、可逢低布局；但实际利率偏高(TIPS 2.31% 压制)、美元处历史偏强位(分位 88%)、当前淡季。<b>小仓位分批、不一次性满仓</b>，待实际利率回落或美元走弱再加码。',
-      key1:'评分 62/100',
-      key2:'金价分位约28% · 价值区'
+      advice:'综合评分 64/100。金价 52 周分位约 24%(价值区)、可逢低布局；但实际利率偏高(TIPS 2.31% 压制)、美元处历史偏强位、当前淡季。<b>小仓位分批、不一次性满仓</b>，待实际利率回落或美元走弱再加码。',
+      key1:'评分 64/100',
+      key2:'金价分位约24% · 价值区'
     }
   ]
 };
