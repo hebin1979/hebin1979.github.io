@@ -1,42 +1,25 @@
 {
   "metadata": {
-    "last_update": "2026年8月3日",
+    "last_update": "2026年8月10日",
     "total_ipos": 86,
     "description": "2026年港股IPO数据",
-    "note": "截至 2026-08-03：拿森科技(02261.HK)招股中（招股 07/30–08/04，08/07 上市，08/06 暗盘），AASTOCKS 新股中心「即将上市」聚合页原始HTML核实当前列表仅此一只。中际旭创(03308.HK)已于 07/30 上市（无暗盘），已归档至 listed_ipos_2026。",
-    "_deploy_marker": "20260803-1530-refresh"
+    "note": "截至 2026-08-10：AASTOCKS 新股中心「即将上市」聚合页原始HTML核实——当前无新股招股/待上市（页面显示「没有稍後上市IPO」），暗盘页亦显示「沒有即將上市新股暗盤」，港股打新进入空窗期。拿森科技(02261.HK)已于 08/07 上市：招股价下限定价 10.42，公开发售超购 2,512.5 倍、一手中签率 8%，暗盘(08/06)收 16.70(+60.27%)、首日 +64.11%，现价约 18.80、累计 +80.4%，已归档至 listed_ipos_2026。中际旭创(03308.HK) 07/30 上市(无暗盘)首日 -2.04%、累计 +10.2%，记录已补全。",
+    "_deploy_marker": "20260810-1010-refresh"
   },
-  "currently_subscribing": [
+  "currently_subscribing": [],
+  "listing_tomorrow": [],
+  "listed_ipos_2026": [
     {
       "code": "02261",
       "name": "拿森科技",
       "name_en": "NASN Tech",
-      "subscription_start": "2026/07/30",
-      "subscription_end": "2026/08/04",
-      "listing_date": "2026/08/07",
-      "dark_pool_date": "2026/08/06",
-      "price_range": "HKD 10.42–11.18",
-      "lot_size": 100,
-      "entry_fee": "1,129.27",
-      "industry": "机动车零配件与设备（汽车线控底盘/制动）",
-      "sponsors": "海通国际资本、中银国际亚洲（包销含富途证券）",
-      "rating": 60,
-      "pros": [
-        "主营汽车线控底盘/制动系统，受益于电动化与智能驾驶渗透率提升",
-        "入场费仅约 HK$1,129/手（100股），散户参与门槛低、友好",
-        "保荐团队含中银国际、海通国际，发行市值约 62–66 亿港元"
-      ],
-      "cons": [
-        "招股 08/04 截止，时间窗口偏紧；汽车零配件行业周期属性较强",
-        "最终定价与公开发售超额认购倍数仍待招股尾段观察",
-        "近期新股首日表现分化，无基石/大单背书弹性有限"
-      ],
-      "analysis": "拿森科技(NASN Tech)为汽车线控底盘/制动供应商，处于智能电动车供应链，发行市值约 62–66 亿港元、入场费仅千余港元，对散户友好。建议关注招股尾段超额认购与定价折让；暗盘 08/06、上市 08/07。",
-      "recommendation": "可小额现金认购博取上市溢价；控制仓位，重点留意招股倍数与暗盘表现后再决定是否加码。"
-    }
-  ],
-  "listing_tomorrow": [],
-  "listed_ipos_2026": [
+      "listing_date": "08/07",
+      "ipo_price": 10.42,
+      "dark_pool_price": 16.7,
+      "dark_pool_pct": 60.27,
+      "first_day_pct": 64.11,
+      "cumulative_pct": 80.42
+    },
     {
       "code": "02249",
       "name": "晶合集成",
@@ -907,11 +890,11 @@
       "name": "中际旭创",
       "name_en": "ZJ InnoLight",
       "listing_date": "07/30",
-      "ipo_price": 1010,
+      "ipo_price": 980,
       "dark_pool_price": null,
       "dark_pool_pct": null,
-      "first_day_pct": null,
-      "cumulative_pct": null
+      "first_day_pct": -2.04,
+      "cumulative_pct": 10.204
     }
   ]
 }
