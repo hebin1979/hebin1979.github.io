@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美股卖PUT折价筛选 · 8/24到期·折价30%</title><style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:#f4f6f9; color:#1f2733; font-size:14px; }
+  .wrap { max-width:960px; margin:0 auto; padding:16px; }
+  header { background:linear-gradient(135deg,#1f3a5f,#2d6cdf); color:#fff; border-radius:14px; padding:18px 18px 16px; }
+  header h1 { margin:0 0 4px; font-size:19px; }
+  header p { margin:2px 0; font-size:12.5px; opacity:.92; }
+  .pill { display:inline-block; background:rgba(255,255,255,.18); border-radius:20px; padding:3px 10px; font-size:11.5px; margin:4px 4px 0 0; }
+  h2 { font-size:15px; margin:20px 4px 10px; }
+  .cards { display:grid; grid-template-columns:1fr; gap:10px; }
+  @media(min-width:640px) { .cards { grid-template-columns:1fr 1fr; } }
+  .card { background:#fff; border-radius:12px; padding:12px 14px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .card-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .card-h .tk { font-size:17px; font-weight:700; }
+  .card-b { display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+  .card-b > div { display:flex; justify-content:space-between; font-size:12.5px; border-bottom:1px dashed #eef0f3; padding:3px 0; }
+  .card-b .k { color:#7a8699; } .card-b .v { font-weight:600; }
+  .table-scroll { overflow-x:auto; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  table { border-collapse:collapse; width:100%; min-width:760px; font-size:12.5px; }
+  th,td { padding:9px 8px; text-align:right; white-space:nowrap; }
+  th:first-child,td:first-child { text-align:left; position:sticky; left:0; background:#fff; font-weight:700; }
+  thead th { background:#eef2f7; color:#46566b; cursor:pointer; user-select:none; }
+  tbody tr:nth-child(even) { background:#fafbfc; }
+  tbody tr:hover { background:#eef5ff; }
+  td.tk { font-weight:700; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .hi { background:#e6f7ec; color:#0a8a3f; } .mid { background:#eaf3ff; color:#1f6fd6; } .lo { background:#f1f3f5; color:#6b7785; }
+  .note { background:#fff; border-radius:12px; padding:14px 16px; margin-top:14px; font-size:12.5px; line-height:1.7; color:#46566b; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .note b { color:#1f2733; }
+  .disclaim { background:#fff5e6; border:1px solid #ffe0a3; border-radius:12px; padding:12px 14px; margin-top:14px; font-size:12px; color:#8a5a00; line-height:1.7; }
+  .empty { text-align:center; color:#9aa5b3; padding:30px 0; font-size:13px; }
+  footer { text-align:center; color:#9aa5b3; font-size:11.5px; padding:18px 0 8px; }
+</style></head><body><div class="wrap">
+  <header>
+    <h1>美股「卖 PUT」折价筛选器 · 8/24到期·折价30%</h1>
+    <p>筛选日：2026-08-13 ｜ 数据：CBOE 延迟行情（约 15 分钟延迟）</p>
+    <p>条件：行使价 ≤ 70% 现价（折价≥30%）· 到期日 ≤ 2026-08-24 · 买价且 OI≥10 · 年化 ≥ 3.0%</p>
+    <div><span class="pill">命中 1 只</span><span class="pill">最高年化 3903.5%</span><span class="pill">平均 IV30 80%</span><span class="pill">到期 ≤ 2026-08-24</span></div>
+  </header>
+  <div class="disclaim" style="background:#fff0f0;border:1px solid #ffb3b3;color:#a10000;">
+    ⚠️ <b>本次筛选结果数据质量警示（务必先读）</b><br>
+    在「8/24 到期 · 折价30%」窗口下，全市场仅 LCID 一只标的命中，且其报价<b>明显失真、不可作为交易依据</b>：<br>
+    • 股价 $6.54、行权价 $4.50（虚值 31%），权利金却报 <b>$3.85</b>（占股价 59%）——虚值看跌期权权利金不可能这么高；<br>
+    • 由此算出「年化 3903.5%」「盈亏平衡 $0.65」均为<b>机械失真值</b>（意味着股价跌到 $0.65 你才亏，显然不可能）；<br>
+    • 根因：CBOE 对 LCID 低流动性期权的延迟报价存在脏数据 + 仅 8 天到期(DTE)放大了年化公式分母。<br>
+    <b>结论：该窗口当前没有可交易的优质卖 PUT 机会，建议放宽到期日（参考 9/24 窗口有 SMCI/MSTR/AMAT 等真实命中）或提高折价门槛。</b>
+  </div>
+  <h2>🏆 年化收益率 Top 5</h2><div class="cards">
+  <div class="card">
+    <div class="card-h"><span class="tk">LCID</span><span class="badge hi">3903.5% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$6.54</span></div>
+      <div><span class="k">行权价</span><span class="v">$4.50</span></div>
+      <div><span class="k">折价</span><span class="v">31.2%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-08-21 (8天)</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$3.85</span></div>
+      <div><span class="k">每合约收</span><span class="v">$385</span></div>
+      <div><span class="k">占用本金</span><span class="v">$450</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$0.65</span></div>
+      <div><span class="k">IV30</span><span class="v">79.6%</span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">14.4%*</span></div>
+    </div>
+  </div></div>
+  <h2>📋 全部候选（按年化收益降序 · 点击表头可重排）</h2>
+  <div class="table-scroll"><table id="tbl"><thead><tr>
+    <th data-k="tk">代码</th><th data-k="price">现价</th><th data-k="strike">行权价</th><th data-k="discount">折价%</th>
+    <th data-k="exp">到期</th><th data-k="mid">权利金/股</th><th data-k="credit_c">每合约收</th>
+    <th data-k="notional_c">占用本金</th><th data-k="annual">年化%</th><th data-k="iv30">IV30</th>
+    <th data-k="breakeven">盈亏平衡</th><th data-k="maxloss">最大亏%*</th>
+  </tr></thead><tbody>
+  <tr>
+    <td class="tk">LCID</td><td>$6.54</td><td>$4.50</td>
+    <td>31.2%</td><td>2026-08-21<br><span style="color:#9aa5b3;font-size:11px">8天</span></td>
+    <td>$3.85</td><td>$385</td><td>$450</td>
+    <td><span class="badge hi">3903.5%</span></td><td>79.6%</td>
+    <td>$0.65</td><td>14.4%*</td>
+  </tr></tbody></table></div>
+  
+  <div class="note"><b>📐 怎么读这张表</b><br>
+    • <b>折价%</b> = (现价−行权价)/现价。折价越大，只有股价再跌这么多你才会被指派接货。<br>
+    • <b>年化%</b> = (每张收取权利金 ÷ 行权价) × (365 ÷ 距到期天数)。<br>
+    • <b>占用本金</b> = 行权价 × 100（现金担保 PUT 需冻结的保证金）。<br>
+    • <b>盈亏平衡</b> = 行权价 − 权利金；股价跌破此价你才开始真正亏钱。<br>
+    • 权利金按<b>买卖中间价</b>估算；真实卖出拿到的是<b>买价(bid)</b>，略低。</div>
+  <div class="disclaim">⚠️ <b>风险提示（非投资建议）</b><br>
+    1. 高年化常伴随高 IV30 与高波动个股，被指派接到的可能是正暴跌的股票。<br>
+    2. 现金担保 PUT 需冻结本金，有资金机会成本与下行风险。<br>
+    3. 本表为机械筛选，未做基本面/破产风险评估；LCID、AMC、NVAX 等属高投机标的。<br>
+    4. 期权有到期归零、流动性枯竭、提前指派等风险。</div>
+  <footer>数据来源 CBOE Delayed Quotes ｜ 生成于 2026-08-13 11:50 ｜ 仅供研究参考，非投资建议</footer>
+</div><script>
+  const tbl=document.getElementById('tbl');const tb=tbl.tBodies[0];let asc=false;
+  tbl.querySelectorAll('th').forEach(th=>{th.addEventListener('click',()=>{const k=th.dataset.k;const a=[...tb.rows];
+  a.sort((x,y)=>{let va=x.cells[[...tbl.rows[0].cells].indexOf(th)].textContent;let vb=y.cells[[...tbl.rows[0].cells].indexOf(th)].textContent;va=va.replace(/[$,%]/g,'');vb=vb.replace(/[$,%]/g,'');const na=parseFloat(va),nb=parseFloat(vb);if(!isNaN(na)&&!isNaN(nb))return asc?na-nb:nb-na;return asc?va.localeCompare(vb):vb.localeCompare(va);});asc=!asc;a.forEach(r=>tb.appendChild(r));});});
+</script></body></html>
