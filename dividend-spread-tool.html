@@ -338,7 +338,7 @@ footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
 
 <footer>
   红利交易助手 · 仅供研究参考，非投资建议<br>
-  生成于 2026-08-14 16:52 ·
+  生成于 2026-08-14 17:20 ·
   <a href="https://hebin1979.github.io/" style="color:#b91c1c">返回工具箱首页</a> ·
   <a href="https://github.com/hebin1979/hebin1979.github.io/issues" style="color:#b91c1c">反馈/建议</a>
 </footer>
@@ -357,21 +357,18 @@ function showFund(id){
   function lerp(a,x){ if(x<=a[0][0])return a[0][1]; if(x>=a[a.length-1][0])return a[a.length-1][1]; for(var i=1;i<a.length;i++){ if(x<=a[i][0]){var x0=a[i-1][0],y0=a[i-1][1],x1=a[i][0],y1=a[i][1]; return y0+(x-x0)/(x1-x0)*(y1-y0);} } return a[a.length-1][1]; }
   function pctOf(x,lo,hi){ if(hi<=lo)return 50; return Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100)); }
   function colFor(s){ if(s>=68)return '#16a34a'; if(s>=55)return '#65a30d'; if(s>=45)return '#d97706'; if(s>=35)return '#ea580c'; return '#dc2626'; }
-  // 价位区间 -> 信号映射（与红利引擎一致；dividend 走区间驱动，其余品种沿用综合评分）
+  // 价位区间 -> 信号映射（纳指/黄金/红利 全部走区间驱动；评分仅作力度注脚）
   var ZONE_SIG={
     '深度价值区':{strong:'强烈买入 · 重仓累积', mid:'强烈买入 · 分批累积', col:'#16a34a'},
     '价值区':    {strong:'逢低建仓 · 分批买入', mid:'持有 · 小仓试探',   col:'#65a30d'},
     '合理区':    {strong:'持有 · 定投收息',     col:'#d97706'},
     '偏高区':    {strong:'持有 · 分批止盈',     col:'#ea580c'},
-    '高估区':    {strong:'建议减仓 · 止盈',     col:'#dc2626'}
+    '高估区':    {strong:'建议减仓 · 获利了结', col:'#dc2626'}
   };
   function sigFor(c, kind, zone){
-    if(kind==='dividend'){
-      var m=ZONE_SIG[zone]; if(!m) return '持有';
-      if(zone==='深度价值区'||zone==='价值区') return (c>=68)?m.strong:(m.mid||m.strong);
-      return m.strong;
-    }
-    if(c>=68)return '强烈买入 · 分批建仓'; if(c>=55)return '条件合适 · 可小仓位建仓'; if(c>=45)return '中性 · 观望'; if(c>=35)return '估值偏高 · 持有为主'; return (kind==='gold'?'高估 · 建议减仓':'高估过热/破位 · 建议减仓');
+    var m=ZONE_SIG[zone]; if(!m) return '持有';
+    if(zone==='深度价值区'||zone==='价值区') return (c>=68)?m.strong:(m.mid||m.strong);
+    return m.strong;
   }
   // 区间切分与引擎 compute_zones 对齐：15/40/65/85
   function zoneFor(p){ if(p<=15)return '深度价值区'; if(p<=40)return '价值区'; if(p<=65)return '合理区'; if(p<=85)return '偏高区'; return '高估区'; }
@@ -387,7 +384,7 @@ function showFund(id){
     ['valuation','price_pct','trend'].forEach(function(tag){ var g=sc.querySelector('.rt-'+tag); if(!g)return; var val=(tag==='trend')?r.trendS:r.anchorS; var g0=g.querySelector('.rt-'+tag+'-val'); if(g0)g0.textContent=val.toFixed(0); var g1=g.querySelector('.rt-'+tag+'-arc'); if(g1)g1.setAttribute('d',arcFor(val)); });
     var zone=zoneFor(r.pct);
     var sig=sigFor(r.comp, RT_CFG.kind, zone);
-    var sigCol=(RT_CFG.kind==='dividend')?ZONE_SIG[zone].col:colFor(r.comp);
+    var sigCol=ZONE_SIG[zone].col;
     var rs=sc.querySelector('.rt-signal'); if(rs){rs.textContent=sig; rs.style.color=sigCol;}
     var rc=sc.querySelector('.rt-comp-score'); if(rc)rc.textContent='综合评分 '+r.comp.toFixed(0)+'/100';
     if(f.hdrSignal){ var hs=document.querySelector(f.hdrSignal); if(hs){hs.textContent=sig+'　综合评分 '+r.comp.toFixed(0)+'/100'; hs.style.background=sigCol;} }
