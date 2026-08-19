@@ -575,8 +575,8 @@ function panelReco(d){
   var cp=d.price;
   var fv=fairValue(d);
   var fvPct=fv?((fv-cp)/cp*100):0;
-  var bzlo=d.boll?Math.round(d.boll.lower):Math.round(d.ma.ma20*.93);
-  var bzhi=d.ma.ma20?Math.round(d.ma.ma20*.95):Math.round(cp*.95);
+  var bzlo=d.boll?Math.round(d.boll.lower):Math.round(cp*.94);
+  var bzhi=d.boll?Math.round(d.boll.lower+cp*.015):Math.round(cp*.967);
   var szlo=d.boll?Math.round(d.boll.upper):Math.round(cp*1.05);
   var tgt=d.analysts?d.analysts.avgTarget:Math.round(cp*1.4);
   var riskLabel=cp>d.ma.ma60?'中等风险':'较高风险';
@@ -617,8 +617,8 @@ function panelReco(d){
 
   // 4 reco prices
   h+='<div class="reco-prices">';
-  h+='<div class="reco-price"><div class="rl">🥇最佳买入</div><div class="rv">'+bzlo+'~'+bzhi+'</div><div class="rp">距 '+fmtNum((bzlo-cp)/cp*100,1)+'%~'+fmtNum((bzhi-cp)/cp*100,1)+'%</div><div class="rd">布林下轨至MA20下方</div></div>';
-  h+='<div class="reco-price"><div class="rl">🎯合理建仓</div><div class="rv">'+Math.round(cp*.95)+'~'+Math.round(cp*.99)+'</div><div class="rp">距 -1%~-5%</div><div class="rd">近期回调低点区域</div></div>';
+  h+='<div class="reco-price"><div class="rl">🥇最佳买入</div><div class="rv">'+bzlo+'~'+bzhi+'</div><div class="rp">距 '+fmtNum((bzlo-cp)/cp*100,1)+'%~'+fmtNum((bzhi-cp)/cp*100,1)+'%</div><div class="rd">布林下轨±1.5% · 极值精确入场</div></div>';
+  h+='<div class="reco-price"><div class="rl">🎯合理建仓</div><div class="rv">'+Math.round(cp*.95)+'~'+Math.round(cp*.985)+'</div><div class="rp">距 -1.5%~-5%</div><div class="rd">现价回落1.5%~5% · 分批定投区(含最佳买入)</div></div>';
   h+='<div class="reco-price sp"><div class="rl">📤第一目标</div><div class="rv">'+szlo+'~'+Math.round(cp*1.1)+'</div><div class="rp">+'+fmtNum((szlo-cp)/cp*100,1)+'%~+10%</div><div class="rd">布林上轨至MA60压力</div></div>';
   h+='<div class="reco-price sp"><div class="rl">📤中期目标</div><div class="rv">'+fmtNum(tgt,0)+'</div><div class="rp">+'+fmtNum((tgt-cp)/cp*100,1)+'%</div><div class="rd">'+(d.analysts?'机构平均目标价':'估值修复目标')+'</div></div>';
   h+='</div>';
