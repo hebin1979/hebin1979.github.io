@@ -21,17 +21,19 @@
   6. 趋势 (价格/MA12)              权重 12  —— 站上中期均线顺势
   7. 动量 RSI(14)                 权重 8   —— 超卖(低)=更好买点
 
-综合评分 -> 唯一行动信号（双向，全页以此为准）：
-  >=68  强烈买入（分批建仓/加仓）
-  55-67 条件合适·可小仓位建仓
-  45-54 中性·观望（可极少量试仓）
-  35-44 估值偏高·持有为主
-  <35   高估·建议减仓
+综合信号 -> 由「价位区间」驱动方向（单调梯度），综合评分/环境分只调制力度与信心：
+  价位区间(价格52周分位)        信号(方向)
+  深度价值区 (0~15%)      →  强烈买入 · 重仓累积
+  价值区   (15~40%)       →  逢低建仓 · 分批买入
+  合理区   (40~65%)       →  持有 · 定投收息
+  偏高区   (65~85%)       →  持有 · 分批止盈
+  高估区   (85~103%)      →  建议减仓 · 获利了结
+  （综合评分仍显示作"力度/信心"刻度；环境分越好，建仓力度越足、止盈越可缓。）
 
 重要约定（避免上下矛盾）：
   - 顶部「综合信号」是全页唯一结论，买卖动作只由此给出。
-  - ②「价位区间参考」仅描述"价格在 52 周区间中的相对位置"（安全边际参考），
-    使用中性标签（深度价值区/价值区/合理区/偏高区/高估区），不下买卖命令。
+  - ②「价位区间参考」用中性标签（深度价值区/价值区/合理区/偏高区/高估区）标示价格在 52 周区间位置，
+    并直接对应上方信号；综合评分仅作力度刻度，不单独下买卖命令。
   - 新增「当前定位与结论」卡片，显式说明技术面价位与综合信号的关系，使结论一致可追溯。
 数据来源：沪深300(东财 PE) + 中国债券信息网(10Y) + 563020(东财价格) + 中证指数(股息率)
 用法：
@@ -77,15 +79,15 @@ RAW = [
 # 0b. 快照 (最新实时值, 可用 --manual 覆盖)
 # ----------------------------------------------------------------------------
 SNAPSHOT = {
-    "as_of": "2026-07-15",
-    "pe": 14.24,            # 沪深300 PE(TTM)
-    "bond10y": 1.73,        # 10Y 国债收益率 (%)
+    "as_of": "2026-08-19",
+    "pe": 14.464,           # 沪深300 PE(TTM)
+    "bond10y": 1.69,        # 10Y 国债收益率 (%)
     "div_yield": 4.52,      # 563020 股息率 (%)（中证红利低波动930914指数口径）
-    "etf_price": 1.144,     # 563020 现价(不复权, 东财实时)
+    "etf_price": 1.162,     # 563020 现价(不复权, gtimg 2026-08-19)
     "etf_52w_high": 1.283,  # 52周高 (2025-11-12, 不复权)
     "etf_52w_low": 1.055,   # 52周低 (2026-06-29, 不复权)
-    "etf_ma": 1.186,        # 中期均线 MA12 月线(不复权)
-    "etf_rsi": 70.0,        # RSI(14) 日线(不复权)
+    "etf_ma": 1.1849,       # 中期均线 MA200 日线(不复权)
+    "etf_rsi": 54.64,       # RSI(14) 日线(不复权)
 }
 
 FEEDBACK_URL = "https://github.com/hebin1979/hebin1979.github.io/issues"
@@ -99,8 +101,8 @@ HOMEPAGE_URL = "https://hebin1979.github.io/"
 #     刷新某只基金数据：直接改对应 snapshot，或用 --manual 覆盖 563020(默认首只)。
 # ----------------------------------------------------------------------------
 SHARED_MACRO = {
-    "pe": 14.41,            # 沪深300 PE(TTM) —— 共享宏观估值背景(2026-08-07)
-    "bond10y": 1.71,        # 10Y 国债收益率(%) —— 共享宏观利率背景(中债曲线 2026-08-07)
+    "pe": 14.464,           # 沪深300 PE(TTM) —— 共享宏观估值背景(蛋卷 2026-08-18)
+    "bond10y": 1.69,        # 10Y 国债收益率(%) —— 共享宏观利率背景(中债 2026-08-18)
 }
 FUNDS = [
     {
@@ -110,14 +112,14 @@ FUNDS = [
         "market": "A股",
         "secid": "1.563020",
         "gtimg": "sh563020",
-        "as_of": "2026-08-10",
+        "as_of": "2026-08-19",
         "snapshot": dict(SHARED_MACRO, **{
             "div_yield": 4.52,     # 563020 股息率(%)（中证红利低波动930914指数口径）
-            "etf_price": 1.159,    # 563020 现价(不复权, gtimg 2026-08-10)
+            "etf_price": 1.162,    # 563020 现价(不复权, gtimg 2026-08-19)
             "etf_52w_high": 1.283, # 52周高 (2025-11-12, 不复权)
             "etf_52w_low": 1.055,  # 52周低 (2026-06-29, 不复权)
-            "etf_ma": 1.1875,      # 中期均线 MA200 日线(不复权)
-            "etf_rsi": 52.02,      # RSI(14) 日线(不复权)
+            "etf_ma": 1.1849,      # 中期均线 MA200 日线(不复权)
+            "etf_rsi": 54.64,      # RSI(14) 日线(不复权)
         }),
     },
     {
@@ -127,14 +129,14 @@ FUNDS = [
         "market": "港股通",
         "secid": "0.159545",
         "gtimg": "sz159545",
-        "as_of": "2026-08-10",
+        "as_of": "2026-08-19",
         "snapshot": dict(SHARED_MACRO, **{
             "div_yield": 5.80,     # 159545 股息率(%)（恒生港股通高股息低波动指数口径 ~5.8%）
-            "etf_price": 1.302,    # 159545 现价(不复权, gtimg 2026-08-10)
+            "etf_price": 1.304,    # 159545 现价(不复权, gtimg 2026-08-19)
             "etf_52w_high": 1.541, # 52周高 (不复权)
             "etf_52w_low": 1.193,  # 52周低 (不复权)
-            "etf_ma": 1.4200,      # 中期均线 MA200 日线(不复权)
-            "etf_rsi": 46.99,      # RSI(14) 日线(不复权)
+            "etf_ma": 1.4144,      # 中期均线 MA200 日线(不复权)
+            "etf_rsi": 49.43,      # RSI(14) 日线(不复权)
         }),
     },
 ]
@@ -254,21 +256,28 @@ def analyze(d):
     env = sum(WEIGHTS[k] * ind[k] for k in WEIGHTS) / sum(WEIGHTS.values())
     composite = 0.6 * anchor + 0.4 * env
 
-    if composite >= 68:
-        signal = "强烈买入 · 分批建仓"; color = "#16a34a"
-        advice = "多项指标共振利多：股债利差高、估值便宜、利率低位。建议分批买入红利低波(563020)，现金仅留逆回购机动。"
-    elif composite >= 55:
-        signal = "条件合适 · 可小仓位建仓"; color = "#65a30d"
-        advice = "环境偏友好但非极致。建议先小仓位(1/3)建仓，待利差进一步走阔或估值回落再加码。"
-    elif composite >= 45:
-        signal = "中性 · 观望"; color = "#d97706"
-        advice = "利差与估值中性，性价比一般。可少量定投收息，主仓等待利差走阔或回撤更充分。"
-    elif composite >= 35:
-        signal = "估值偏高 · 持有为主"; color = "#ea580c"
-        advice = "股票相对债券吸引力下降。持有现有仓位收息，逼近前高分批止盈，不宜追高。"
+    # —— 价位区间驱动买卖方向（单调梯度），综合评分/环境分只作力度与信心参考 ——
+    zone_name, zone_color, zone_desc = current_zone(d)
+    if zone_name == "深度价值区":
+        signal = "强烈买入 · 重仓累积"; color = "#16a34a"
+    elif zone_name == "价值区":
+        signal = "逢低建仓 · 分批买入"; color = "#65a30d"
+    elif zone_name == "合理区":
+        signal = "持有 · 定投收息"; color = "#d97706"
+    elif zone_name == "偏高区":
+        signal = "持有 · 分批止盈"; color = "#ea580c"
+    else:  # 高估区
+        signal = "建议减仓 · 获利了结"; color = "#dc2626"
+    # 环境分提供力度/信心注脚（不反转方向）
+    if env >= 55:
+        env_note = "环境偏友好（利率低位、股债利差走阔），建仓力度可足、止盈可缓"
+    elif env >= 45:
+        env_note = "环境中性，按价位区间常规力度操作"
     else:
-        signal = "高估 · 建议减仓"; color = "#dc2626"
-        advice = "利差收窄、估值偏贵。建议减仓转逆回购锁定收益，保留底仓等待更好时点。"
+        env_note = "环境偏谨慎（估值偏高/利差未极端），建仓宜更轻、止盈宜更果断"
+    advice = (f"价位「{zone_name}」（52周分位 {etf_pct:.0f}%）：方向由价格锚定——"
+              f"{'便宜→偏多' if etf_pct < 40 else ('合理→中性' if etf_pct < 65 else '偏贵→偏谨慎')}；"
+              f"{env_note}。综合评分 {composite:.0f}/100（锚 {anchor:.0f} + 环境 {env:.0f}）作力度刻度。")
 
     ctx = dict(
         ey=ey, spread=spread, pe_pct=pe_pct, bond_pct=bond_pct, spread_pct=spread_pct,
@@ -309,32 +318,40 @@ def current_zone(d):
     z = zs[-1]; return z[0], z[4], z[3]
 
 def reconcile_text(d, ctx, zone_name, etf_pct, fund):
-    """两层框架的桥梁：标的自身价格在 52 周区间分位锚定买卖方向，其余指标(环境分)只调制力度。
-    方向必与价位区间一致：便宜→偏多，贵→偏谨慎；环境好则加大力度，环境差则减小。"""
-    comp = ctx["composite"]; sig = ctx["signal"]; ind = ctx["indicators"]; env = ctx["env"]
+    """两层框架的桥梁：标的自身价格在 52 周区间分位锚定买卖方向(价位区间→信号)，其余指标(环境分)只调制力度。
+    方向必与价位区间一致：深度价值/价值→偏多建仓，合理→中性持有，偏高/高估→偏谨慎止盈/减仓。"""
+    comp = ctx["composite"]; sig = ctx["signal"]; env = ctx["env"]
     code = fund["code"]; name = fund["name"]
-    cheap = etf_pct < 40
-    pos = ("处于年内偏低位置、安全边际高" if cheap else
+    pos = ("处于年内偏低位置、安全边际高" if etf_pct < 40 else
            "处于历史中枢附近" if etf_pct < 65 else
            "处于年内偏高位置、安全边际有限")
+    if zone_name in ("深度价值区", "价值区"):
+        # 便宜 → 偏多，分批建仓
+        tail = []
+        if d["etf_rsi"] < 35: tail.append(f"RSI {d['etf_rsi']:.0f} 超卖、提供更好买点")
+        if ctx["spread"] >= 5.5: tail.append(f"股债利差走阔({ctx['spread']:.2f}%) 股票相对债券便宜")
+        if d["bond10y"] < 1.8: tail.append(f"10Y 低位({d['bond10y']:.2f}%) 红利相对吸引力强")
+        t = ("；".join(tail) + "，可逢低分批建仓、分红再投") if tail else "，可逢低分批布局、长期持有收息"
+        return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
+                f"价格偏低→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(52周分位)锚定方向、"
+                f"环境分({env:.0f})调制力度：虽便宜{t}。")
+    if zone_name == "合理区":
+        tail = []
+        if ctx["spread"] >= 5.5: tail.append(f"股债利差走阔({ctx['spread']:.2f}%) 红利相对仍香")
+        if d["bond10y"] < 1.8: tail.append(f"10Y 低位({d['bond10y']:.2f}%)")
+        t = ("；".join(tail) + "，可小额定投摊薄成本") if tail else "，维持现有仓位即可"
+        return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
+                f"价格处历史中枢→方向中性、以持有收息为主；综合评分 {comp:.0f}/100 得出信号「{sig}」。"
+                f"本体系以价格锚定方向、环境分({env:.0f})调制力度：价格合理{t}、不追高。")
+    # 偏高区 / 高估区 → 持有止盈 / 减仓
     bear = []
     if ctx["pe_pct"] >= 60: bear.append(f"沪深300 PE 分位偏高({ctx['pe_pct']:.0f}%)")
-    if ctx["spread_pct"] < 60: bear.append(f"股债利差仅处历史{ctx['spread_pct']:.0f}%分位、未达极端")
-    if ctx["trend_ratio"] < 0.98: bear.append(f"价格低于中期均线(MA12 {d['etf_ma']:.3f})")
-    if d["etf_rsi"] > 65: bear.append(f"RSI {d['etf_rsi']:.0f} 偏高位、追高性价比低")
-    bull = []
-    if ctx["spread"] >= 5.5: bull.append(f"股债利差走阔({ctx['spread']:.2f}%) 股票相对债券便宜")
-    if d["bond10y"] < 1.8: bull.append(f"10Y 国债低位({d['bond10y']:.2f}%) 红利相对吸引力强")
-    if d["etf_rsi"] < 35: bull.append(f"RSI {d['etf_rsi']:.0f} 超卖、提供均值回归买点")
-    if cheap:
-        tail = ("；".join(bear) + "，故以红利低波收息为本、小仓位分批、不一次性满仓") if bear else "，可直接小仓位分批布局、长期持有收息"
-        return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
-                f"价格处低位→方向偏多；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格(52周分位)锚定方向、"
-                f"其余指标(环境分 {env:.0f})调制力度：虽便宜可逢低布局，但{tail}。")
-    tail = ("；".join(bull) + "，但价格已偏高、安全边际有限，故以持有/观望为主、不追高") if bull else "，且价格偏高、安全边际有限，故以持有/观望为主、不追高"
+    if ctx["spread_pct"] < 60: bear.append(f"股债利差仅处历史{ctx['spread_pct']:.0f}%分位")
+    if d["etf_rsi"] > 65: bear.append(f"RSI {d['etf_rsi']:.0f} 偏高位")
+    t = ("；".join(bear) + "，故逼近前高分批止盈、不宜追高") if bear else "，持有收息、不追高"
     return (f"当前 {code} 现价 {d['etf_price']:.3f}，价位「{zone_name}」{pos}（52 周区间分位 {etf_pct:.0f}%）。"
             f"价格偏高→方向偏谨慎；综合评分 {comp:.0f}/100 得出信号「{sig}」。本体系以价格锚定方向、"
-            f"其余指标(环境分 {env:.0f})调制力度：{tail}。")
+            f"环境分({env:.0f})调制力度：{t}。")
 
 # ----------------------------------------------------------------------------
 # 5. HTML 报告
