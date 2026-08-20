@@ -195,7 +195,7 @@ button{font-family:inherit;cursor:pointer}
 // =============================================================
 //  SECTION 1: UTILITIES
 // =============================================================
-var R='#e74c3c',G='#27ae60',O='#f39c12',B='#3498db',P='#8e44ad',T='#1a1a2e',S='#666';
+var R='#e74c3c',G='#27ae60',O='#f39c12',Y='#d97706',B='#3498db',P='#8e44ad',T='#1a1a2e',S='#666';
 
 function parseStockCode(input){
   input=(input||'').trim().toUpperCase();
@@ -661,9 +661,9 @@ function panelScore(d){
   var env=Math.round(tech*.6+sent*.4);          // 技术为主、情绪为辅的环境分(调制力度)
   var total=Math.round(anchor*.6+env*.4);       // 方向必与估值一致, 环境只调力度
 
-  var lvl=total>=68?'high':total>=55?'medium':total>=45?'medium':'low';
-  var lt=total>=68?'强烈看多':total>=55?'条件合适·偏多':total>=45?'中性观望':'估值偏高·谨慎';
-  var lc=lvl==='high'?R:lvl==='medium'?O:G;
+  var lvl=total>=68?'high':total>=58?'medium':total>=45?'medium-low':'low';
+  var lt=total>=68?'强烈看多':total>=58?'条件合适·偏多':total>=45?'中性偏多·可分批布局':'估值偏高·谨慎';
+  var lc=lvl==='high'?R:lvl==='medium'?O:lvl==='medium-low'?Y:G;
 
   var hasAnly=d.analysts&&d.analysts.total>0;
   var buyPct=hasAnly?d.analysts.buyPct:'—';
