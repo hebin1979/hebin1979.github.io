@@ -26,7 +26,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .briefing-cta .dot { width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 0 0 rgba(255,255,255,.7); animation:pulse 1.8s infinite; }
 @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)} 70%{box-shadow:0 0 0 8px rgba(255,255,255,0)} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0)} }
 .container { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 18px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card-placeholder { visibility: hidden; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; text-decoration: none; color: inherit; transition: all 0.25s; position: relative; overflow: hidden; }
 .card:hover { transform: translateY(-4px); border-color: var(--accent2); box-shadow: 0 8px 30px rgba(59,130,246,0.15); }
 .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; }
@@ -35,6 +36,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .card:nth-child(3)::before { background: var(--accent3); }
 .card:nth-child(4)::before { background: var(--accent4); }
 .card:nth-child(5)::before { background: var(--accent2); }
+.card:nth-child(6)::before { background: var(--accent3); }
+.card:nth-child(7)::before { background: var(--accent3); }
+.card:nth-child(8)::before { background: var(--accent4); }
+.card:nth-child(9)::before { background: var(--accent1); }
 .card .icon { font-size: 2rem; margin-bottom: 12px; }
 .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
 .card .desc { font-size: 0.85rem; color: var(--sub); line-height: 1.6; margin-bottom: 14px; }
@@ -50,6 +55,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   .hero { padding: 40px 16px 24px; }
   .hero h1 { font-size: 1.5rem; }
   .cards { grid-template-columns: 1fr; }
+  .card-placeholder { display: none; }
   .card { padding: 22px 18px; }
 }
 </style>
@@ -89,6 +95,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
         <span class="tag">交易信号</span>
       </div>
     </a>
+
+    <!-- 占位：使第二排起为 红利/纳指/黄金（2-3-2 布局） -->
+    <div class="card-placeholder"></div>
 
     <!-- 红利交易助手 -->
     <a href="/dividend-spread-tool.html?v=20260820" class="card">
