@@ -216,12 +216,21 @@ function fmtNum(n,d){if(n==null||isNaN(n))return'--';d=d||2;return Number(n).toF
 function fmtBn(n){if(n==null)return'--';if(n>=1e12)return(n/1e12).toFixed(1)+'万亿';if(n>=1e8)return(n/1e8).toFixed(0)+'亿';if(n>=1e4)return(n/1e4).toFixed(0)+'万';return n.toFixed(0);}
 
 // =============================================================
-//  SECTION 2: API FETCH (Eastmoney public via JSONP, no proxy needed)
+//  SECTION 2: API FETCH
+//  【数据源策略】(2026-08-31 重写)
+//    主源 : 腾讯 gtimg  —— CORS 开放、大陆直连稳定、港股实时行情完整。
+//           返回 GB18030 文本，用 fetch + TextDecoder 正确解码
+//           （不可用 <script> 标签加载，浏览器按 UTF-8 解析会乱码）。
+//    兜底 : 东方财富 push2 —— JSONP，常有地域/限流问题（实测常无响应）。
+//  【口径约定】两个源统一折算为「东财口径」后交给 buildData：
+//            - 港股/美股价格 x1000，A股 x100
+//            - 百分比(涨跌幅 / PB / 换手率) x100
+//            此前 gtimg 兜底返回原始值被 buildData 二次缩放，价格错成 0.448。
 // =============================================================
 var API_BASE='https://push2.eastmoney.com/api/qt/stock/get';
 var KL_BASE='https://push2his.eastmoney.com/api/qt/stock/kline/get';
 
-// JSONP：东方财富 push2 接口原生支持 cb= 回调，可绕过 CORS，大陆浏览器直连稳定
+// JSONP：东方财富 push2 接口原生支持 cb= 回调，可绕过 CORS
 function jsonp(url,timeout){
   return new Promise(function(resolve,reject){
     var cb='jp_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
@@ -235,21 +244,10 @@ function jsonp(url,timeout){
   });
 }
 
-// 原生 JS 文本接口加载（gtimg 报价用，返回 v_xxx="..." 赋值语句）
-function loadScriptRaw(url,timeout){
-  return new Promise(function(res,rej){
-    var s=document.createElement('script');
-    var t=setTimeout(function(){cleanup();rej(new Error('请求超时'));},timeout||10000);
-    function cleanup(){clearTimeout(t);if(s.parentNode)s.parentNode.removeChild(s);}
-    s.onerror=function(){cleanup();rej(new Error('网络请求失败'));};
-    s.onload=function(){cleanup();res(true);};
-    s.src=url;document.head.appendChild(s);
-  });
-}
-
 // ---- 本地缓存：保存/读取最近一次成功获取的真实行情 ----
-//  接口失败时回退显示此真实数据(带时间戳)，避免显示写死的 451 虚假演示值。
-var CACHE_KEY='tx_helper_cache_v1';
+//  v2：v1 曾缓存过被错误缩放的旧数据(2026-08-20)，升版本号使其自动失效。
+var CACHE_KEY='tx_helper_cache_v2';
+var CACHE_MAX_AGE=3*24*3600*1000;   // 缓存超过 3 天视为过期
 function saveCache(d){
   try{
     var c={
@@ -268,9 +266,19 @@ function saveCache(d){
 function loadCache(){
   try{
     var s=localStorage.getItem(CACHE_KEY); if(!s) return null;
-    var c=JSON.parse(s); if(!c||!c.kline||!c.kline.length) return null;
+    var c=JSON.parse(s);
+    if(!c||!c.kline||!c.kline.length||!c.price) return null;
     c.isCached=true; return c;
   }catch(e){ return null; }
+}
+function cacheAge(ts){ return (ts&&(Date.now()-ts)<CACHE_MAX_AGE); }
+function cacheAgeText(ts){
+  if(!ts) return '未知时间';
+  var dt=new Date(ts);
+  function p(n){return (n<10?'0':'')+n;}
+  var mins=Math.floor((Date.now()-ts)/60000);
+  var rel=mins<60?(mins+' 分钟前'):(Math.floor(mins/60)<24?(Math.floor(mins/60)+' 小时前'):(Math.floor(mins/60/24)+' 天前'));
+  return p(dt.getMonth()+1)+'-'+p(dt.getDate())+' '+p(dt.getHours())+':'+p(dt.getMinutes())+' ('+rel+')';
 }
 function fmtCacheTime(ts){
   if(!ts) return '未知时间';
@@ -278,7 +286,52 @@ function fmtCacheTime(ts){
   function p(n){return (n<10?'0':'')+n;}
   return p(dt.getMonth()+1)+'-'+p(dt.getDate())+' '+p(dt.getHours())+':'+p(dt.getMinutes());
 }
-// 东财实时报价（带重试）
+
+// =============================================================
+//  主源：腾讯 gtimg 实时报价
+//  港股字段索引(实测 2026-08-31):
+//    1名称 3现价 4昨收 5今开 6成交量
+//    30数据时间 31涨跌额 32涨跌幅 33最高 34最低
+//    36成交量(股) 37成交额(元) 38换手率(港股恒为0,不可用) 39PE(TTM)
+//    44总市值(亿港元) 48/49 52周高/低 58市净率PB
+// =============================================================
+async function fetchGtimgQuote(secid){
+  var code=secid.split('.')[1];
+  var resp=await fetch('https://qt.gtimg.cn/q=hk'+code+'&r='+Date.now(),{cache:'no-store'});
+  if(!resp.ok) throw new Error('gtimg HTTP '+resp.status);
+  var buf=await resp.arrayBuffer();
+  var text;
+  try{ text=new TextDecoder('gb18030').decode(buf); }
+  catch(e){ text=new TextDecoder('utf-8').decode(buf); }
+  var m=text.match(/=\s*"([\s\S]*)"/);
+  if(!m||!m[1]||m[1].indexOf('~')<0) throw new Error('gtimg 返回格式异常');
+  var p=m[1].split('~');
+  function N(i){var v=parseFloat(p[i]);return isNaN(v)?null:v;}
+  var px=function(v){return v==null?null:Math.round(v*1000);};  // 价格 -> x1000
+  var pc=function(v){return v==null?null:Math.round(v*100);};   // 百分比 -> x100
+
+  var price=N(3);
+  var mcapYi=N(44);                                   // 总市值(亿港元)
+  var mcap=(mcapYi!=null)?mcapYi*1e8:null;            // -> 元
+  var shares=(mcap!=null&&price)?mcap/price:null;     // 推算总股本
+  var vol=N(36);
+  var turnover=(shares&&vol!=null)?(vol/shares*100):null;  // gtimg 港股换手率恒为 0，自行推算
+
+  window.__gtimgDt=p[30]||'';
+  return {
+    f43:px(price), f46:px(N(5)), f44:px(N(33)), f45:px(N(34)), f60:px(N(4)),
+    f169:px(N(31)), f170:pc(N(32)),
+    f48:N(37),              // 成交额(元)
+    f57:code, f58:p[1]||'腾讯控股',
+    f116:mcap,              // 总市值(元)
+    f162:N(39),             // PE(TTM)
+    f167:pc(N(58)),         // PB
+    f168:pc(turnover),      // 换手率
+    _src:'gtimg'
+  };
+}
+
+// 东财实时报价（兜底，带重试）
 async function fetchEastmoneyQuote(secid,retries){
   var fields='f43,f44,f45,f46,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170';
   var lastErr;
@@ -291,29 +344,33 @@ async function fetchEastmoneyQuote(secid,retries){
   }
   throw lastErr||new Error('东财行情失败');
 }
-// 腾讯 gtimg 实时报价兜底（同厂商域名，大陆访问极稳）
-async function fetchGtimgQuote(secid){
+
+// =============================================================
+//  主源：腾讯 gtimg 日K线（UTF-8 JSON，CORS 开放）
+//  数组格式: [日期, 开, 收, 高, 低, 成交量, (除权信息对象)]
+//  注意：第 7 位是除权信息对象而非成交额，直接 +x[6] 会得到 NaN
+// =============================================================
+async function fetchGtimgKline(secid,limit){
   var code=secid.split('.')[1];
-  var varName='v_hk'+code;
-  await loadScriptRaw('https://qt.gtimg.cn/q=hk'+code);
-  var raw=window[varName];
-  if(!raw) throw new Error('gtimg 无数据');
-  var p=raw.split('~');
-  function numOr(v){var n=parseFloat(v);return isNaN(n)?null:n;}
-  function rng(v,lo,hi){return (v!=null&&v>=lo&&v<=hi)?v:null;}
-  return {
-    f43:numOr(p[3]), f60:numOr(p[4]), f46:numOr(p[5]),
-    f44:numOr(p[34]), f45:numOr(p[35]),
-    f169:numOr(p[32]), f170:numOr(p[33]),
-    f48:numOr(p[38]), f57:code, f58:p[1]||'腾讯控股',
-    f116:(numOr(p[46])!=null)?numOr(p[46])*10000:null,
-    f162:rng(numOr(p[43]),0,200)||rng(numOr(p[44]),0,200),
-    f167:rng(numOr(p[45]),0,50),
-    f168:numOr(p[39])
-  };
-  window.__gtimgDt=p[30]||'';
+  var url='https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=hk'+code+',day,,,'+(limit||300)+',qfq';
+  var resp=await fetch(url,{cache:'no-store'});
+  if(!resp.ok) throw new Error('gtimg K线 HTTP '+resp.status);
+  var j=await resp.json();
+  var node=j&&j.data&&j.data['hk'+code];
+  var arr=(node&&(node.qfqday||node.day))||[];
+  if(!arr.length) throw new Error('gtimg K线为空');
+  var out=arr.map(function(x){
+    return {
+      date:x[0], open:+x[1], close:+x[2], high:+x[3], low:+x[4],
+      volume:+(x[5]||0),
+      amount:(typeof x[6]==='number')?x[6]:0
+    };
+  }).filter(function(x){return !isNaN(x.close)&&x.close>0;});
+  if(!out.length) throw new Error('gtimg K线解析为空');
+  return out;
 }
-// 东财 K线（带重试）
+
+// 东财 K线（兜底，带重试）
 async function fetchEastmoneyKline(secid,limit,retries){
   var lastErr;
   for(var i=0;i<(retries||1);i++){
@@ -325,26 +382,17 @@ async function fetchEastmoneyKline(secid,limit,retries){
   }
   throw lastErr||new Error('东财K线失败');
 }
-// 腾讯 gtimg K线兜底
-async function fetchGtimgKline(secid,limit){
-  var code=secid.split('.')[1];
-  var url='https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=hk'+code+',day,,,'+(limit||120)+',qfq';
-  var j=await jsonp(url);
-  var node=j&&j.data&&j.data['hk'+code];
-  var arr=(node&&(node.qfqday||node.day))||[];
-  if(!arr.length) throw new Error('gtimg K线为空');
-  return arr.map(function(x){return {date:x[0],open:+x[1],close:+x[2],high:+x[3],low:+x[4],volume:+(x[5]||0),amount:+(x[6]||0)};});
-}
-// 统一入口：东财(重试) → 腾讯 gtimg 兜底
+
+// 统一入口：腾讯 gtimg(主) -> 东财(兜底)
 async function fetchQuote(secid){
-  try{ return await fetchEastmoneyQuote(secid,2); }
-  catch(e){ console.warn('东财行情失败, 转 gtimg:',e); }
-  return await fetchGtimgQuote(secid);
+  try{ return await fetchGtimgQuote(secid); }
+  catch(e){ console.warn('gtimg 行情失败, 转东财:',e); }
+  return await fetchEastmoneyQuote(secid,2);
 }
 async function fetchKline(secid,limit){
-  try{ return await fetchEastmoneyKline(secid,limit,2); }
-  catch(e){ console.warn('东财K线失败, 转 gtimg:',e); }
-  return await fetchGtimgKline(secid,limit);
+  try{ return await fetchGtimgKline(secid,limit); }
+  catch(e){ console.warn('gtimg K线失败, 转东财:',e); }
+  return await fetchEastmoneyKline(secid,limit,2);
 }
 
 // =============================================================
@@ -369,13 +417,19 @@ function EMA(data,n){
   }
   return res;
 }
+// MACD(12,26,9)：DIF = EMA12 - EMA26；DEA = EMA9(DIF)；柱 = (DIF-DEA)x2（通达信口径）
+// 修复(2026-08-31)：原实现把「数字数组」传给只认 data[i].close 的 EMA()，
+//   结果恒为 NaN，被 ||0 兜底成 0 —— 导致 DEA 永远是 0、MACD 柱 = DIF*2，完全失真。
 function MACD(data){
   var e12=EMA(data,12),e26=EMA(data,26);
   var dif=[],dea=[],hist=[];
+  var k=2/(9+1),prevDea=null;
   for(var i=0;i<data.length;i++){
-    dif.push(e12[i]-e26[i]);
-    dea.push(EMA(dif.map(function(_,j){return j<=i?dif[j]:null}),9)[i]||0);
-    hist.push((dif[i]-dea[i])*2);
+    var d=e12[i]-e26[i];
+    dif.push(d);
+    prevDea=(prevDea===null)?d:(d*k+prevDea*(1-k));   // DEA = EMA9(DIF)，递推
+    dea.push(prevDea);
+    hist.push((d-prevDea)*2);
   }
   return {dif:dif,dea:dea,macd:hist};
 }
@@ -420,41 +474,6 @@ function Boll(data){
 // =============================================================
 //  SECTION 4: BUILD DATA STRUCTURE
 // =============================================================
-function buildData(quote,kl,info){
-  var closes=kl.map(function(x){return x.close;});
-  var ma=function(n){var v=MA(kl,n);return v[v.length-1];};
-  var maArr={};
-  [5,10,20,30,60,120,250].forEach(function(n){var v=MA(kl,n);maArr['ma'+n]=v[v.length-1];});
-  var m=MACD(kl),r=RSI(kl,14),r6=RSI(kl,6),r24=RSI(kl,24);
-  var kk=KDJ(kl),bb=Boll(kl);
-  var lastIdx=kl.length-1;
-  var lastR=r[lastIdx-1]||50,lastR6=r6[lastIdx-1]||50,lastR24=r24[lastIdx-1]||50;
-  var lastKDJ=kk[lastIdx]||{k:50,d:50,j:50};
-  var lastBoll=bb[lastIdx]||{upper:0,middle:0,lower:0};
-
-  // Volume average
-  var volMA=kl.slice(-20).reduce(function(s,x){return s+x.volume;},0)/20;
-  var currentVol=kl[lastIdx].volume;
-
-  return {
-    code:info.raw,secid:info.secid,market:info.market,name:quote.f58||('股票'+info.raw),
-    currency:info.market==='美股'?'USD':info.market==='港股'?'HKD':'CNY',
-    price:quote.f43,open:quote.f46,high:quote.f44,low:quote.f45,prevClose:quote.f60,
-    change:quote.f169,changePct:quote.f170,
-    volume:currentVol,amount:quote.f48,
-    turnoverRate:quote.f168,
-    marketCap:quote.f116,peTTM:quote.f162,pb:quote.f167,
-    ma:maArr,
-    macd:{dif:m.dif[lastIdx],dea:m.dea[lastIdx],mval:m.macd[lastIdx]},
-    rsi:{rsi6:lastR6,rsi14:lastR,rsi24:lastR24},
-    kdj:{k:lastKDJ.k,d:lastKDJ.d,j:lastKDJ.j},
-    boll:{upper:lastBoll.upper,middle:lastBoll.lower,lower:lastBoll.lower},  // fix below
-    volMA:volMA,
-    kline:kl,
-    isDemo:false
-  };
-}
-
 // Fix the boll middle field (typo above)
 function buildData(quote,kl,info){
   var closes=kl.map(function(x){return x.close;});
@@ -512,15 +531,16 @@ function buildData(quote,kl,info){
 function getDemoData(){
   return {
     code:'00700',secid:'116.00700',market:'港股',name:'腾讯控股',currency:'HKD',
-    price:446.60,open:451.00,high:456.20,low:446.40,prevClose:455.20,
-    change:-8.60,changePct:-1.89,volume:6180138,amount:2781268612,
-    turnoverRate:0.07,marketCap:4065465340000,peTTM:16.33,pb:3.12,
-    ma:{ma5:447.84,ma10:447.72,ma20:457.81,ma30:458.15,ma60:453.84,ma120:471.16,ma250:543.61},
-    macd:{dif:-3.71,dea:-3.12,mval:-1.18},
-    rsi:{rsi6:47.19,rsi14:47.16,rsi24:47.84},
-    kdj:{k:47.82,d:40.81,j:61.82},
-    boll:{upper:491.69,middle:457.81,lower:423.93},
-    volMA:22801354,kline:null,isDemo:true,
+    // 2026-08-31 10:51 实测真实数据（腾讯 gtimg），接口全失败且无缓存时的最后兜底
+    price:448.00,open:451.00,high:456.20,low:446.00,prevClose:455.20,
+    change:-7.20,changePct:-1.58,volume:7584473,amount:3267645796,
+    turnoverRate:0.08,marketCap:4078209750000,peTTM:16.38,pb:3.13,
+    ma:{ma5:447.68,ma10:447.64,ma20:457.77,ma30:458.13,ma60:453.83,ma120:471.15,ma250:543.61},
+    macd:{dif:-3.77,dea:-3.13,mval:-1.28},
+    rsi:{rsi6:46.62,rsi14:46.62,rsi24:47.59},
+    kdj:{k:46.71,d:40.45,j:59.25},
+    boll:{upper:491.69,middle:457.77,lower:423.85},
+    volMA:22839120,kline:null,isDemo:true,
     // Extra info for demo
     fundamentals:{eps:27.81,bvps:143.72,roe:20.51,profitGrowth:21.5,revenueGrowth:9.1,
       profitMargin:30.61,opMargin:34.29,debtRatio:40.94,currentRatio:1.43,
@@ -844,7 +864,11 @@ async function analyzeStock(){
     var kl=await fetchKline(info.secid,120);
     d=buildData(quote,kl,info);
     var _stamp=document.getElementById('dataStamp');
-    if(_stamp){ _stamp.textContent='实时行情'+(window.__gtimgDt?(' · '+window.__gtimgDt):'（东财）'); _stamp.className='datastamp'; }
+    if(_stamp){
+      var _dt=window.__gtimgDt||'';
+      _stamp.textContent='\u2705 实时行情'+(quote&&quote._src==='gtimg'?('（腾讯行情 · 数据时间 '+(_dt||'—')+'）'):'（东方财富）');
+      _stamp.className='datastamp';
+    }
     // Augment with fundamentals (cannot fetch from public API, use defaults)
     d.fundamentals={eps:+(d.price/15).toFixed(2),bvps:+(d.price/d.pb).toFixed(2),roe:15,profitGrowth:10,revenueGrowth:8,profitMargin:d.peTTM>0?Math.min(40,100/d.peTTM*5):20,opMargin:25,debtRatio:50,currentRatio:1.5,fcf:d.marketCap*0.03,dividendYield:1.5,peHistory:null};
     d.newsSentiment=d.isDemo?d.newsSentiment:{positive:60,neutral:25,negative:15,heatScore:60};
@@ -856,11 +880,18 @@ async function analyzeStock(){
   }catch(err){
     console.error('API fail:',err);
     var cached=loadCache();
-    if(cached){
+    var cachedFresh=(cached&&cacheAge(cached.cacheTime));
+    if(cached&&cachedFresh){
       d=cached; d.isDemo=false; d.isCached=true;
-      mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败，已显示最近一次成功获取的真实数据（缓存于 '+fmtCacheTime(d.cacheTime)+'）。非最新行情，仅供参考。</div>';
+      mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ 实时接口失败，已显示最近一次成功获取的真实数据（缓存于 '+cacheAgeText(d.cacheTime)+'）。非最新行情，仅供参考。</div>';
       var _stamp2=document.getElementById('dataStamp');
-      if(_stamp2){ _stamp2.textContent='⚠️ 缓存数据（接口失败 · 更新于 '+fmtCacheTime(d.cacheTime)+'）'; _stamp2.className='datastamp warn'; }
+      if(_stamp2){ _stamp2.textContent='⚠️ 缓存数据（接口失败 · 更新于 '+cacheAgeText(d.cacheTime)+'）'; _stamp2.className='datastamp warn'; }
+    }else if(cached){
+      // 缓存已过期：仍展示但必须强警示，避免用户误当作当日行情
+      d=cached; d.isDemo=false; d.isCached=true; d.isStale=true;
+      mg.innerHTML+='<div class="status-error" style="margin-bottom:8px">⚠️ <b>实时接口失败，且本地缓存已过期</b>（数据时间 '+cacheAgeText(d.cacheTime)+'）。<b>以下数据严重滞后，请勿据此交易</b>，建议刷新重试或稍后再访问。</div>';
+      var _stamp4=document.getElementById('dataStamp');
+      if(_stamp4){ _stamp4.textContent='⚠️ 过期缓存（'+cacheAgeText(d.cacheTime)+'）'; _stamp4.className='datastamp warn'; }
     }else{
       d=getDemoData();
       if(d.kline&&!d.kline.length) d.kline=genDemoKline();
