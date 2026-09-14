@@ -57,6 +57,7 @@ button{font-family:inherit;cursor:pointer}
 .reco-prices{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
 .reco-price{padding:8px 6px;background:#fff;border-radius:6px;text-align:center;border:1px solid var(--border)}
 .reco-price.sp{border-color:var(--g)}
+.reco-price.cur{border:2px solid var(--r);background:#fff6f6;box-shadow:0 0 0 2px rgba(231,76,60,.10)}
 .reco-price .rl{font-size:.62em;color:var(--s)}
 .reco-price .rv{font-size:1em;font-weight:800;color:var(--r);line-height:1.2}
 .reco-price.sp .rv{color:var(--g)}
@@ -327,6 +328,8 @@ async function fetchGtimgQuote(secid){
     f162:N(39),             // PE(TTM)
     f167:pc(N(58)),         // PB
     f168:pc(turnover),      // 换手率
+    w52High:N(48),          // 52周高
+    w52Low:N(49),           // 52周低
     _src:'gtimg'
   };
 }
@@ -489,6 +492,11 @@ function buildData(quote,kl,info){
   var volMA=kl.slice(-20).reduce(function(s,x){return s+x.volume;},0)/20;
   var currentVol=kl[lastIdx].volume;
 
+  // 52周(近250交易日)区间：全页唯一的"价格位置"口径，估值锚/价位区间/结论均由此派生
+  var w52=kl.slice(-250);
+  var w52High=quote.w52High||Math.max.apply(null,w52.map(function(x){return x.high;}));
+  var w52Low=quote.w52Low||Math.min.apply(null,w52.map(function(x){return x.low;}));
+
   // Eastmoney API scaling:
   // HK/US: prices × 1000, A-share: × 100
   // Percentages (PB, turnover, change%): × 100
@@ -521,6 +529,7 @@ function buildData(quote,kl,info){
     rsi:{rsi6:lastR6,rsi14:lastR,rsi24:lastR24},
     kdj:{k:lastKDJ.k,d:lastKDJ.d,j:lastKDJ.j},
     boll:{upper:lastBoll.upper,middle:lastBoll.middle,lower:lastBoll.lower},
+    w52High:w52High,w52Low:w52Low,
     volMA:volMA,
     kline:kl,
     isDemo:false
@@ -595,10 +604,9 @@ function panelReco(d){
   var cp=d.price;
   var fv=fairValue(d);
   var fvPct=fv?((fv-cp)/cp*100):0;
-  var bzlo=d.boll?Math.round(d.boll.lower):Math.round(cp*.94);
-  var bzhi=d.boll?Math.round(d.boll.lower+cp*.015):Math.round(cp*.967);
-  var szlo=d.boll?Math.round(d.boll.upper):Math.round(cp*1.05);
-  var tgt=d.analysts?d.analysts.avgTarget:Math.round(cp*1.4);
+  var szlo=d.boll?Math.round(d.boll.upper):Math.round(cp*1.05);   // 仅用于技术压力位提示
+  var tgt=d.analysts?d.analysts.avgTarget:null;
+  var V=verdict(d), vl=V.val;                                     // ★ 唯一结论源
   var riskLabel=cp>d.ma.ma60?'中等风险':'较高风险';
 
   var h='<div class="card full reco-box">';
@@ -629,26 +637,42 @@ function panelReco(d){
   } else {
     h+='<div class="assess-item"><div class="at">相对估值</div><div class="av">PE '+fmtNum(d.peTTM)+'</div><div class="ad">PB '+fmtNum(d.pb)+'</div></div>';
   }
-  var posLabel=d.peTTM<15?'低估,偏多':d.peTTM<25?'合理,中性':d.peTTM<40?'偏贵,谨慎':'高估,减仓';
-  var posC=d.peTTM<15?R:d.peTTM<25?O:G;
-  h+='<div class="assess-item"><div class="at">点位判断</div><div class="av" style="color:'+posC+'">'+posLabel+'</div><div class="ad">PE历史百分位较低,基本面稳健</div></div>';
+  // 结论格：与下方「综合多维度评分」卡同源同词，不再各自一套阈值
+  h+='<div class="assess-item"><div class="at">综合结论</div><div class="av" style="color:'+V.color+'">'+V.label+'</div><div class="ad">估值位置 '+vl.zone.label+(vl.posPct!=null?' · 52周分位 '+Math.round(vl.posPct)+'%':'')+' · PE '+fmtNum(d.peTTM)+'</div></div>';
   h+='<div class="assess-item"><div class="at">风险提示</div><div class="av" style="color:'+O+';font-size:.85em">'+riskLabel+'</div><div class="ad">中长期均线(60/120/250)仍在上方压制 | 宏观波动</div></div>';
   h+='</div>';
 
-  // 4 reco prices
+  // 价位区间：全部由 52 周区间五档派生，严格递增 → 「最佳买入区」必然低于「合理建仓区」
+  var curZ=vl.zone;
   h+='<div class="reco-prices">';
-  h+='<div class="reco-price"><div class="rl">🥇最佳买入</div><div class="rv">'+bzlo+'~'+bzhi+'</div><div class="rp">距 '+fmtNum((bzlo-cp)/cp*100,1)+'%~'+fmtNum((bzhi-cp)/cp*100,1)+'%</div><div class="rd">布林下轨±1.5% · 极值精确入场</div></div>';
-  h+='<div class="reco-price"><div class="rl">🎯合理建仓</div><div class="rv">'+Math.round(cp*.95)+'~'+Math.round(cp*.985)+'</div><div class="rp">距 -1.5%~-5%</div><div class="rd">现价回落1.5%~5% · 分批定投区(含最佳买入)</div></div>';
-  h+='<div class="reco-price sp"><div class="rl">📤第一目标</div><div class="rv">'+szlo+'~'+Math.round(cp*1.1)+'</div><div class="rp">+'+fmtNum((szlo-cp)/cp*100,1)+'%~+10%</div><div class="rd">布林上轨至MA60压力</div></div>';
-  h+='<div class="reco-price sp"><div class="rl">📤中期目标</div><div class="rv">'+fmtNum(tgt,0)+'</div><div class="rp">+'+fmtNum((tgt-cp)/cp*100,1)+'%</div><div class="rd">'+(d.analysts?'机构平均目标价':'估值修复目标')+'</div></div>';
+  [0,1].forEach(function(i){
+    var z=vl.zones[i], isCur=(i===vl.zoneIdx);
+    h+='<div class="reco-price'+(isCur?' cur':'')+'"><div class="rl">'+z.act+'</div>'
+      +'<div class="rv">'+Math.round(z.lo)+'~'+Math.round(z.hi)+'</div>'
+      +'<div class="rp">距 '+fmtNum((z.lo-cp)/cp*100,1)+'%~'+fmtNum((z.hi-cp)/cp*100,1)+'%</div>'
+      +'<div class="rd">'+z.desc+(isCur?' · ← 现价在此':'')+'</div></div>';
+  });
+  var t1=vl.zones[2].lo, t2=tgt||vl.zones[3].lo;
+  h+='<div class="reco-price sp"><div class="rl">📤第一目标</div><div class="rv">'+Math.round(t1)+'</div>'
+    +'<div class="rp">+'+fmtNum((t1-cp)/cp*100,1)+'%</div><div class="rd">修复至合理区下沿</div></div>';
+  h+='<div class="reco-price sp"><div class="rl">📤中期目标</div><div class="rv">'+Math.round(t2)+'</div>'
+    +'<div class="rp">+'+fmtNum((t2-cp)/cp*100,1)+'%</div><div class="rd">'+(tgt?'机构平均目标价':'偏高区下沿 · 估值修复目标')+'</div></div>';
+  h+='</div>';
+
+  // ★ 现价 vs 建议区间的显式关系句：直接回答"现在到底能不能买"，与综合结论强制一致
+  h+='<div class="ops-box" style="border-left:4px solid '+V.color+'">';
+  h+='<b>📍 当前价 '+fmtNum(cp)+' '+d.currency+' 位于 <span style="color:'+V.color+'">'+curZ.act+'（'+Math.round(curZ.lo)+'~'+Math.round(curZ.hi)+'）</span></b><br>';
+  h+='结论：<b style="color:'+V.color+'">'+V.label+' → '+V.act+'</b>'+(V.note?'（'+V.note+'）':'')+'<br>';
+  h+='<span style="color:'+S+';font-size:.9em">口径：上方区间按 52 周区间（'+Math.round(vl.w52Low)+'~'+Math.round(vl.w52High)+'）五档等分，'
+    +'与综合评分使用同一估值锚，越靠前的区间安全边际越大，故「最佳买入区」始终低于「合理建仓区」。</span>';
   h+='</div>';
 
   h+='<div class="ops-box">';
   h+='<b>📋 操作逻辑:</b><br>';
-  h+='① <span style="color:'+R+'">短期(1-2周)</span>: MACD'+(d.macd.mval>0?'金叉看涨':'死叉看跌')+', RSI中性, 但KDJ的J值'+fmtNum(d.kdj.j,0)+(d.kdj.j>80?'偏高':'')+', 建议回调建仓<br>';
-  h+='② <span style="color:'+O+'">中期(1-3月)</span>: PE历史底部'+(d.analysts?'+机构'+d.analysts.buyPct+'%看多':'')+', 估值修复空间大, 目标+10%~+40%<br>';
+  h+='① <span style="color:'+R+'">短期(1-2周)</span>: MACD'+(d.macd.mval>0?'金叉看涨':'死叉看跌')+', RSI'+rsiL(d.rsi.rsi14)+', KDJ的J值'+fmtNum(d.kdj.j,0)+(d.kdj.j>80?'偏高':d.kdj.j<20?'偏低':'')+' → '+V.act+'<br>';
+  h+='② <span style="color:'+O+'">中期(1-3月)</span>: 估值处'+vl.zone.label+'区'+(d.analysts?'，机构'+d.analysts.buyPct+'%看多':'')+'，'+(vl.zoneIdx<=1?'修复至第一目标 '+Math.round(t1)+' 有 +'+fmtNum((t1-cp)/cp*100,1)+'% 空间':'安全边际不足，等回落至 '+Math.round(vl.zones[1].lo)+'~'+Math.round(vl.zones[1].hi)+' 建仓区')+'<br>';
   h+='③ <span style="color:'+B+'">长期(6-12月)</span>: 基本面稳健, 关注行业催化剂与盈利兑现<br>';
-  h+='④ <span style="color:'+G+'">止损</span>: 跌破近期低点'+fmtNum(d.low)+'需重新评估';
+  h+='④ <span style="color:'+G+'">止损</span>: 跌破近期低点'+fmtNum(d.low)+'或跌出'+Math.round(curZ.lo)+'后需重新评估';
   h+='</div>';
   h+='</div>';
   return h;
@@ -659,31 +683,89 @@ function fairValue(d){
   return d.fundamentals.eps*d.fundamentals.peHistory.median5y;
 }
 
-// PE 估值锚定买卖方向：PE 越低(越便宜)分越高
-function peAnchor(pe){
+// =============================================================
+//  ★ 唯一结论源 SINGLE SOURCE OF TRUTH ★
+//  页面上所有判断(估值位置 / 价位区间 / 综合评分 / 操作建议) 必须且只能由本段派生。
+//  严禁在其它函数里用独立阈值另起一套结论 ——
+//  历史教训：曾并行 4 套互不通气的阈值(PE绝对阈值/综合评分/布林下轨/现价百分比),
+//  导致"点位判断=中性" 与 "最佳买入区间含现价"、"强烈看多" 同时出现, 自相矛盾。
+// =============================================================
+
+// A. PE 绝对分段：PE 越低(越便宜)分越高 (0-100)
+function peScore(pe){
   if(pe<=0) return 50;
   if(pe<12) return 92; if(pe<15) return 88; if(pe<18) return 80;
   if(pe<22) return 72; if(pe<26) return 62; if(pe<32) return 52;
   if(pe<40) return 42; if(pe<50) return 30; return 18;
 }
+function peAnchor(pe){ return peScore(pe); }   // 向后兼容别名
 
-// 2. 综合评分 (emphasized) — 两层框架：PE 估值锚定方向(60%)，技术+情绪环境调制力度(40%)
-function panelScore(d){
+// B. 唯一估值对象：PE 分段 + 52周价格位置 合成，并给出严格有序的五档价位区
+function valuate(d){
+  var hi=d.w52High, lo=d.w52Low, cp=d.price;
+  var posPct=(hi&&lo&&hi>lo)?Math.max(0,Math.min(100,(cp-lo)/(hi-lo)*100)):null;
+  var ps=peScore(d.peTTM);
+  var qs=(posPct==null)?ps:Math.round(100-posPct);          // 价格位置分：分位越低越便宜
+  var valScore=(posPct==null)?ps:Math.round(ps*0.5+qs*0.5); // 估值+位置等权
+  var amp=(hi-lo)||0;
+  // 五档价位区：按 52 周区间等分，**严格递增**，因此"最佳买入"必然低于"合理建仓"
+  var zones=[
+    {key:'deep',  label:'深度价值', lo:lo,          hi:lo+amp*0.15, act:'🥇 最佳买入区', desc:'52周区间最低15% · 安全边际最大'},
+    {key:'value', label:'价值',     lo:lo+amp*0.15, hi:lo+amp*0.30, act:'🎯 合理建仓区', desc:'52周区间15%~30% · 可分批'},
+    {key:'fair',  label:'合理',     lo:lo+amp*0.30, hi:lo+amp*0.55, act:'⚖️ 合理持有区', desc:'52周区间30%~55% · 持有不加'},
+    {key:'high',  label:'偏高',     lo:lo+amp*0.55, hi:lo+amp*0.80, act:'📤 逢高减持区', desc:'52周区间55%~80% · 逐步减'},
+    {key:'bubble',label:'高估',     lo:lo+amp*0.80, hi:hi,          act:'🚫 高估回避区', desc:'52周区间80%以上 · 不参与'}
+  ];
+  var zi=(posPct==null)?2:(posPct<15?0:posPct<35?1:posPct<60?2:posPct<80?3:4);
+  var inZone=(cp>=zones[zi].lo&&cp<=zones[zi].hi);
+  return {peScore:ps,posPct:posPct,posScore:qs,valScore:valScore,
+          zoneIdx:zi,zone:zones[zi],zones:zones,amp:amp,inZone:inZone,
+          w52High:hi,w52Low:lo};
+}
+
+// C. 唯一结论：估值锚定方向(60%) + 技术/情绪环境调制力度(40%)
+function verdict(d){
+  var v=valuate(d);
   var tech=0;
   if(d.ma.ma5&&d.ma.ma20){
-    if(d.price>d.ma.ma5) tech+=20; if(d.price>d.ma.ma20) tech+=20;
-    if(d.macd.mval>0) tech+=20; if(d.rsi.rsi14>30&&d.rsi.rsi14<70) tech+=20;
+    if(d.price>d.ma.ma5) tech+=20;
+    if(d.price>d.ma.ma20) tech+=20;
+    if(d.macd.mval>0) tech+=20;
+    if(d.rsi.rsi14>30&&d.rsi.rsi14<70) tech+=20;
     if(d.kdj.j>20&&d.kdj.j<80) tech+=20;
   } else { tech=50; }
-  var anchor=peAnchor(d.peTTM);                 // 价格(估值)锚定方向：便宜→偏多, 贵→偏谨慎
   var sent=60;
-  if(d.newsSentiment){sent=Math.round(d.newsSentiment.positive*.8+d.newsSentiment.heatScore*.2);}
-  var env=Math.round(tech*.6+sent*.4);          // 技术为主、情绪为辅的环境分(调制力度)
-  var total=Math.round(anchor*.6+env*.4);       // 方向必与估值一致, 环境只调力度
+  if(d.newsSentiment){ sent=Math.round(d.newsSentiment.positive*0.8+d.newsSentiment.heatScore*0.2); }
+  var env=Math.round(tech*0.6+sent*0.4);
+  var total=Math.round(v.valScore*0.6+env*0.4);
 
-  var lvl=total>=68?'high':total>=58?'medium':total>=45?'medium-low':'low';
-  var lt=total>=68?'强烈看多':total>=58?'条件合适·偏多':total>=45?'中性偏多·可分批布局':'估值偏高·谨慎';
-  var lc=lvl==='high'?R:lvl==='medium'?O:lvl==='medium-low'?Y:G;
+  var L;
+  if(total>=75)      L={key:'strong',  label:'强烈买入',           act:'现价即可买入',       color:R};
+  else if(total>=62) L={key:'buy',     label:'条件合适·可分批买入', act:'分批建仓',           color:O};
+  else if(total>=48) L={key:'hold',    label:'中性观望',           act:'观望，等更好价位',   color:Y};
+  else if(total>=35) L={key:'cautious',label:'估值偏高·谨慎',       act:'不宜追高',           color:G};
+  else               L={key:'reduce',  label:'减仓 / 回避',        act:'逢高减仓',           color:G};
+
+  // ★ 一致性守卫：杜绝"点位说便宜、结论说中性/减仓"这类无解释的矛盾
+  // 估值在深度价值/价值区，但技术环境拖累导致分数不够 → 必须显式说明原因，不能只写"中性"
+  if(v.zoneIdx<=1 && total<62){
+    L={key:'buy',label:'价值低估但技术偏弱',act:'小仓试探·分批',color:O,
+       note:'价格已处'+v.zone.label+'区(52周分位 '+Math.round(v.posPct)+'%)，但均线/动量仍偏弱(环境分 '+env+')，故不追重仓'};
+  }
+  // 估值已偏高/高估，但情绪推升分数 → 必须提示追高风险，不能给出买入信号
+  if(v.zoneIdx>=3 && total>=62){
+    L={key:'cautious',label:'情绪偏热但估值已高',act:'不追高·逢涨减',color:G,
+       note:'价格已处'+v.zone.label+'区(52周分位 '+Math.round(v.posPct)+'%)，短期动能偏强(环境分 '+env+')但安全边际不足'};
+  }
+  return {val:v,tech:tech,sent:sent,env:env,total:total,
+          key:L.key,label:L.label,act:L.act,color:L.color,note:L.note||''};
+}
+
+// 2. 综合评分 — 与上方「综合结论」格同源(verdict)，此处只展开打分明细，不另起结论
+function panelScore(d){
+  var V=verdict(d), vl=V.val;
+  var anchor=vl.valScore, tech=V.tech, sent=V.sent, env=V.env, total=V.total;
+  var lt=V.label, lc=V.color;
 
   var hasAnly=d.analysts&&d.analysts.total>0;
   var buyPct=hasAnly?d.analysts.buyPct:'—';
@@ -694,15 +776,17 @@ function panelScore(d){
   h+='<div class="score-main">';
   h+='<div class="score-num" style="color:'+lc+'">'+total+'</div>';
   h+='<div class="score-text"><div class="st" style="color:'+lc+'">'+lt+'</div>';
-  h+='<div class="sd">本体系以 PE 估值锚定买卖方向、技术面/情绪面调制力度, 分数越高越看好</div></div>';
+  h+='<div class="sd">'+(V.note?V.note:'估值锚(PE+52周位置) 60% 定方向，技术/情绪 40% 调力度，分数越高越看好')+'</div></div>';
   h+='</div>';
   h+='<div class="score-grid">';
-  h+='<div class="score-item '+sClass(anchor)+'"><div class="sv">'+anchor+'</div><div class="slbl">估值锚定⚓<br>(PE 方向)</div></div>';
+  h+='<div class="score-item '+sClass(anchor)+'"><div class="sv">'+anchor+'</div><div class="slbl">估值锚⚓<br>(PE+52周位置)</div></div>';
   h+='<div class="score-item '+sClass(tech)+'"><div class="sv">'+tech+'</div><div class="slbl">技术面<br>(均线+指标)</div></div>';
   h+='<div class="score-item '+sClass(sent)+'"><div class="sv">'+sent+'</div><div class="slbl">情绪面<br>(新闻+资金)</div></div>';
   h+='<div class="score-item '+bpCls+'"><div class="sv">'+buyPct+'</div><div class="slbl">机构评级<br>(信息·不计入)</div></div>';
   h+='</div>';
-  h+='<div class="sl" style="margin-top:8px">权重: 估值锚定 60% + 环境(技术+情绪) 40% ｜ 机构评级仅作参考, 不计入评分(避免实时缺数时失真)</div>';
+  var posTxt=(vl.posPct==null)?'—':(Math.round(vl.posPct)+'% -> '+vl.posScore+' 分');
+  h+='<div class="sl" style="margin-top:8px">权重: 估值锚 60%（PE '+fmtNum(d.peTTM)+' -> '+vl.peScore+' 分 | 52周分位 '+posTxt+'）= '+anchor
+    +' + 环境 40%（技术 '+tech+' · 情绪 '+sent+' = '+env+'）| 机构评级仅作参考, 不计入评分</div>';
   h+='</div>';
   return h;
 }
@@ -711,10 +795,11 @@ function panelScore(d){
 function panelFund(d){
   var f=d.fundamentals;
   var h='<div class="card full"><h3>💰 基本面 & 估值</h3><div class="metric-row">';
+  var V=verdict(d), vl=V.val;                       // 与全页同源，避免另起一套估值口径
   var pePct=f&&f.peHistory?Math.round((d.peTTM-f.peHistory.low5y)/(f.peHistory.high5y-f.peHistory.low5y)*100):null;
-  var pl=pePct==null?'':pePct<30?'低估区':pePct<70?'合理区':'高估区';
-  var pc=pePct==null?T:pePct<30?R:pePct<70?O:G;
-  h+='<div class="metric-box"><div class="lbl">PE(TTM)</div><div class="val" style="color:'+pc+'">'+fmtNum(d.peTTM)+'</div><div class="sub">'+(pePct!=null?'5年分位 '+pePct+'% '+pl:'估值核心')+'</div></div>';
+  var pl=pePct!=null?(pePct<30?'低估区':pePct<70?'合理区':'高估区'):vl.zone.label;
+  var pc=pePct!=null?(pePct<30?R:pePct<70?O:G):V.color;
+  h+='<div class="metric-box"><div class="lbl">PE(TTM)</div><div class="val" style="color:'+pc+'">'+fmtNum(d.peTTM)+'</div><div class="sub">'+(pePct!=null?'5年PE分位 '+pePct+'% '+pl:(vl.posPct!=null?'52周价格分位 '+Math.round(vl.posPct)+'% '+pl:'估值核心'))+'</div></div>';
   h+='<div class="metric-box"><div class="lbl">PB</div><div class="val">'+fmtNum(d.pb)+'</div><div class="sub">市净率</div></div>';
   if(f){
     h+='<div class="metric-box"><div class="lbl">ROE</div><div class="val" style="color:'+R+'">'+fmtNum(f.roe,1)+'%</div><div class="sub">净资产收益率</div></div>';
