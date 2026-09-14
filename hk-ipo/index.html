@@ -376,6 +376,11 @@
                     </div>` : ''}
                     ${stock.analysis ? `<div class="analysis">💡 ${stock.analysis}</div>` : ''}
                     ${stock.recommendation ? `<div class="recommendation">📝 建议：${stock.recommendation}</div>` : ''}
+                    ${stock.rating_detail && stock.rating_detail.length > 0 ? `
+                    <div style="margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 6px; font-size: 13px; line-height: 1.7;">
+                        <b>评分依据（${stock.rating} 分）</b>
+                        <ul style="margin: 6px 0 0 0; padding-left: 18px;">${stock.rating_detail.map(d => `<li>${d[1]} <b>得分 ${d[0]}</b></li>`).join('')}</ul>
+                    </div>` : ''}
                 </div>
             `).join('');
         }
