@@ -238,6 +238,12 @@
         <div id="notification" class="card" style="display: none;"></div>
 
         <div id="content" style="display: none;">
+            <!-- 市场综述 -->
+            <div class="card" id="market-note-card" style="display: none;">
+                <div class="card-title">📋 市场综述</div>
+                <div id="market-note" style="font-size: 14px; line-height: 1.8;"></div>
+            </div>
+
             <!-- 正在招股 -->
             <div class="card">
                 <div class="card-title">🔥 正在招股新股</div>
@@ -326,19 +332,19 @@
                 <div class="ipo-stock">
                     <div class="stock-header">
                         <div>
-                            <div class="stock-name">${stock.name} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
-                            <div class="stock-code">${stock.code}.HK</div>
+                            <div class="stock-name">${stock.name || '未知'} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
+                            <div class="stock-code">${stock.code || '--'}.HK</div>
                         </div>
                         ${stock.rating ? `<div class="stock-rating">${stock.rating}分</div>` : ''}
                     </div>
                     <div class="stock-info">
                         <div class="info-item">
                             <div class="info-label">招股期</div>
-                            <div class="info-value">${stock.subscription_start} 至 ${stock.subscription_end}</div>
+                            <div class="info-value">${stock.subscription_start || '待定'} 至 ${stock.subscription_end || '待定'}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">上市日期</div>
-                            <div class="info-value">${stock.listing_date}</div>
+                            <div class="info-value">${stock.listing_date || '待定'}</div>
                         </div>
                         ${stock.price_range ? `
                         <div class="info-item">
@@ -387,15 +393,15 @@
                 <div class="ipo-stock">
                     <div class="stock-header">
                         <div>
-                            <div class="stock-name">${stock.name} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
-                            <div class="stock-code">${stock.code}.HK</div>
+                            <div class="stock-name">${stock.name || '未知'} ${stock.name_en ? `(${stock.name_en})` : ''}</div>
+                            <div class="stock-code">${stock.code || '--'}.HK</div>
                         </div>
                         ${stock.rating ? `<div class="stock-rating">${stock.rating}分</div>` : ''}
                     </div>
                     <div class="stock-info">
                         <div class="info-item">
                             <div class="info-label">上市日期</div>
-                            <div class="info-value">${stock.listing_date}</div>
+                            <div class="info-value">${stock.listing_date || '待定'}</div>
                         </div>
                         ${stock.pricing ? `
                         <div class="info-item">
@@ -446,10 +452,10 @@
                     <tbody>
                         ${stocks.map(stock => `
                             <tr style="border-bottom: 1px solid #dee2e6;">
-                                <td style="padding: 8px;">${stock.code}</td>
-                                <td style="padding: 8px;">${stock.name}</td>
-                                <td style="padding: 8px;">${stock.listing_date}</td>
-                                <td style="padding: 8px; text-align: right;">${stock.ipo_price || '--'}</td>
+                                <td style="padding: 8px;">${stock.code || '--'}</td>
+                                <td style="padding: 8px;">${stock.name || '未知'}</td>
+                                <td style="padding: 8px;">${stock.listing_date || '--'}</td>
+                                <td style="padding: 8px; text-align: right;">${stock.ipo_price ?? '--'}</td>
                                 <td style="padding: 8px; text-align: right;">${stock.dark_pool_price || '--'}</td>
                                 <td style="padding: 8px; text-align: right; color: ${stock.dark_pool_pct > 0 ? '#e94560' : stock.dark_pool_pct < 0 ? '#28a745' : '#666'};">${stock.dark_pool_pct !== null && stock.dark_pool_pct !== undefined ? stock.dark_pool_pct + '%' : '--'}</td>
                                 <td style="padding: 8px; text-align: right; color: ${stock.first_day_pct > 0 ? '#e94560' : stock.first_day_pct < 0 ? '#28a745' : '#666'};">${stock.first_day_pct !== null && stock.first_day_pct !== undefined ? stock.first_day_pct + '%' : '--'}</td>
@@ -528,6 +534,12 @@
                 document.getElementById('content').style.display = 'block';
                 
                 // 渲染数据
+                // 渲染市场综述
+                if (data.metadata && data.metadata.note) {
+                    document.getElementById('market-note').innerHTML = data.metadata.note;
+                    document.getElementById('market-note-card').style.display = 'block';
+                }
+
                 renderNotification(data);
                 renderCurrentlySubscribing(data.currently_subscribing);
                 renderListingTomorrow(data.listing_tomorrow);

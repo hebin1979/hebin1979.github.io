@@ -1,68 +1,105 @@
 {
   "metadata": {
-    "last_update": "2026年9月14日",
+    "last_update": "2026年9月14日 15:25",
     "total_ipos": 92,
     "description": "2026年港股IPO数据",
-    "note": "截至 2026-09-14 14:25（AASTOCKS 新股中心原始 HTML 核实 + 阿思达克/经济通新闻交叉验证）：① <b>当前 3 只招股中</b>：<b>星环科技(06727)</b> 招股价 49–61 港元、每手 100 股、入场费 6,161.51 港元，招股 9/11–9/16、9/17 定价、9/18 暗盘、9/21 上市（国产大数据/AI 基础软件，保荐人海通国际）；<b>四方精创(06700)</b> 上限 16 港元、入场费 1,616.13、9/17 截止、9/22 上市；<b>纳真科技(09856)</b> 32.96 港元、入场费 3,329.24、9/17 截止、9/22 上市。② 9/09 上市的<b>优地机器人(03231) 为本轮大肉签</b>：定价 14.45、辉立暗盘收报 29.86（较定价 +107%）、富途暗盘 29.70（+105.5%），首日收 36.68（<b>+153.84%</b>），现价 38.50 <b>累计 +166.44%</b>，超购 139.0 倍、一手中签率 24.5%、稳中 1500 手。③ 其余近月新股仍普遍破发：麦科田(02041) 现价 8.42 <b>累计 -45.40%</b>、江波龙(09976) <b>-20.98%</b>、希音－W(00625) <b>-24.47%</b>、梅卡曼德(09615) <b>-14.85%</b>、君正股份(03223) <b>-7.30%</b>。④ 结论：机器人/硬科技题材（优地 +166%）与高估值消费/制造（希音、麦科田）分化极大，打新应优先看<b>定价折让 + 题材热度 + 基石阵容</b>，避免盲目认购大盘消费股。",
-    "_deploy_marker": "20260914-1425-refresh"
+    "note": "截至 <b>2026-09-14 15:20</b>（AASTOCKS 新股中心原始 HTML + 招股详情页逐只核实，全部 92 只累计涨幅已按腾讯行情 9/14 实时价重算（日K交叉验证），暗盘价取辉立交易平台口径）：<br>① <b>当前 3 只招股中</b>：<b>纳真科技(09856)</b> 32.96 港元、入场费 3,329.24，招股 9/14–9/17、9/21 暗盘、9/22 上市，逾 20 家基石认购约 26.66 亿港元，<b>综合评分 74（本轮最高）</b>；<b>星环科技(06727)</b> 49–61 港元、入场费 6,161.51，招股 9/11–9/16、9/18 暗盘、9/21 上市，孖展约 18.89 倍，<b>评分 60</b>（折让大但持续亏损、无绿鞋、基石仅 8.64%）；<b>四方精创(06700)</b> 上限 16 港元、入场费仅 1,616.13，9/17 截止、9/22 上市，<b>评分 48</b>（收入利润双降、无基石、题材平淡）。<br>② 近月新股表现（累计涨幅）：<b>优地机器人(03231) +168.93%</b> 为本轮大肉签（定价 14.45、暗盘 29.70/+105.5%、首日 +153.84%）；<b>拿森科技(02261) +57.39%</b>；中际旭创(03308) 暗盘 969.5/-1.10%、首日 -2.04%。破发阵营：麦科田(02041) <b>-46.14%</b>、希音－W(00625) <b>-24.30%</b>、江波龙(09976) 暗盘 234.4/-0.68%、首日 -1.02%、累计 <b>-21.82%</b>、梅卡曼德(09615) 暗盘 101.0/-0.69%、累计 <b>-14.65%</b>、君正股份(03223) <b>-7.05%</b>。<br>③ <b>结论</b>：机器人/AI 光模块等硬科技题材（优地 +169%、拿森 +57%）与高估值消费制造（麦科田 -46%、希音 -24%）分化极端，打新应优先看 <b>赛道景气 + 基石阵容 + 定价折让</b>，本轮排序 <b>纳真科技 &gt; 星环科技 &gt; 四方精创</b>。<br><b>评分口径</b>（100 分制）：赛道与基本面 25 + 定价折让与安全垫 25 + 基石/机构阵容 15 + 保荐人实力 10 + 筹码结构（流通盘/绿鞋/回拨）10 + 孖展热度与市场情绪 15。≥70 建议参与、55–69 小注参与、&lt;55 谨慎或不参与。",
+    "_deploy_marker": "20260914-1525-fix"
   },
   "currently_subscribing": [
-    {
-      "code": "06727",
-      "name": "星环科技",
-      "name_en": "Transwarp",
-      "ipo_price_range": "49-61",
-      "entry_fee": 6161.51,
-      "lot_size": 100,
-      "subscribe_start": "2026/09/11",
-      "subscribe_end": "2026/09/16",
-      "pricing_date": "2026/09/17",
-      "result_date": "2026/09/18",
-      "grey_date": "2026/09/18",
-      "listing_date": "2026/09/21",
-      "industry": "新一代信息技术 / 先进硬件及软件(H股)",
-      "sponsor": "海通国际资本有限公司",
-      "note": "国产大数据与AI基础软件厂商（分布式数据库/数据平台）。招股价 49–61 港元、每手 100 股、入场费 6,161.51 港元；上市市值约 66.2–82.4 亿港元。基石：Electronic Channel Limited（港元 35 百万）、洛阳科创集团（美元 4.95 百万）。保荐人海通国际，包销团含交银国际、招银国际、富途证券、申万宏源等。保荐人海通国际既往首日表现参差（曦智科技-P +383.6%、宝济药业-B +138.8%、乐动机器人 +127.6%、拿森科技 +64.1%），需留意估值定价。"
-    },
-    {
-      "code": "06700",
-      "name": "四方精创",
-      "name_en": "Infosys Fintech / Forms Syntron",
-      "ipo_price_range": "最高 16",
-      "entry_fee": 1616.13,
-      "lot_size": 100,
-      "subscribe_end": "2026/09/17",
-      "grey_date": "2026/09/21",
-      "listing_date": "2026/09/22",
-      "industry": "应用软件",
-      "sponsor": "-",
-      "note": "金融软件服务商（A股 300468 四方精创的 H 股）。招股价上限 16 港元、每手 100 股、入场费 1,616.13 港元，入场门槛低。9/22 与纳真科技同日上市。"
-    },
     {
       "code": "09856",
       "name": "纳真科技",
       "name_en": "Nazhen Technology",
-      "ipo_price_range": "32.96",
+      "subscription_start": "9/14",
+      "subscription_end": "9/17",
+      "listing_date": "9/22",
+      "price_range": "32.96 港元（定价）",
       "entry_fee": 3329.24,
-      "lot_size": 100,
-      "subscribe_end": "2026/09/17",
-      "grey_date": "2026/09/21",
-      "listing_date": "2026/09/22",
-      "industry": "电器部件与设备",
-      "sponsor": "-",
-      "note": "招股价 32.96 港元、每手 100 股、入场费 3,329.24 港元。9/22 与四方精创同日上市。"
+      "oversubscription": "招股首日（9/14），孖展数据待公布",
+      "pros": [
+        "光模块 + 光芯片双能力，全球少数同时具备两者研发量产的企业；2025 年全球光模块收入份额 4.0%（全球专业厂商第 5）、中国 10.1%（第 3）",
+        "业绩高增：收入 2023/2024/2025 = 42.39 / 50.87 / 83.55 亿元人民币，2026H1 已达 53.93 亿元",
+        "基石阵容豪华：逾 20 家机构合计认购约 3.4 亿美元（约 26.66 亿港元），含春华投资、东方资管、PAG、未来资产、广发基金、易方达、霸菱、兆易创新、晶晨香港、ORIX 等",
+        "联席保荐人花旗环球金融亚洲 + 中信证券（香港），设有 15% 超额配股权（绿鞋）可兜底",
+        "AI 算力驱动光模块景气，赛道为当前港股最热主线之一"
+      ],
+      "cons": [
+        "募资规模大：全球发售 1.72 亿股、募资净额约 54.45 亿港元，上市后市值约 323.98 亿港元，大盘股首日弹性通常有限",
+        "无 A/H 折价锚（非 A+H），估值只能对标海外光模块同业，定价安全垫不如折价发行股明确",
+        "同期与四方精创分流资金，且近期港股新股分化极端（优地 +169% vs 麦科田 -46%）"
+      ],
+      "analysis": "本轮三只中确定性最高的一只：赛道景气（AI 光模块）+ 基石逾 20 家 + 花旗/中信保荐 + 有绿鞋，机构托底意愿强；代价是盘子大、首日弹性受限，属于「中签率高、涨幅温和」类型。",
+      "recommendation": "建议参与，现金或小额融资均可；适合追求中签率与确定性的账户。重点看 9/21 暗盘，若暗盘涨幅已超 15–20% 可考虑暗盘了结。",
+      "rating": 74
+    },
+    {
+      "code": "06727",
+      "name": "星环科技",
+      "name_en": "Transwarp",
+      "subscription_start": "9/11",
+      "subscription_end": "9/16",
+      "listing_date": "9/21",
+      "price_range": "49.00 – 61.00 港元",
+      "entry_fee": 6161.51,
+      "oversubscription": "孖展约 18.89 倍（9/14 早，预计回拨至 10%）；首日 4.42 亿 / 10.34 倍",
+      "pros": [
+        "18C 机制下首只 A+H 特专科技股，AI 基础设施软件稀缺标的；按收入计为中国第 5 大 AI 基础设施软件供应商（2025 份额 2.7%），是最大独立厂商",
+        "H 股较 A 股（688031，9/11 收 99.6 元）折价约 47%–57%，折让幅度大",
+        "保荐人海通国际近 10 家保荐项目首日 8 涨（80%）、首日平均 +89.41%；软件服务同业近 10 只新股首日 7 涨（70%）",
+        "H 股市值仅 6.87–8.55 亿港元、发行比例 10.37%，小流通盘易被资金撬动"
+      ],
+      "cons": [
+        "持续亏损：2023/2024/2025 净亏 2.89 / 3.44 / 2.45 亿元人民币，2026Q1 仍亏 0.56 亿；2026/3 末现金仅 2.43 亿元人民币，经营现金流持续净流出",
+        "估值不便宜：对应 2025 收入 PS 约 13.6–16.9 倍，PE 因亏损不可算",
+        "无绿鞋、无发售量调整权，上市首日无人兜底",
+        "基石仅 2 家（Electronic Channel Limited、洛阳科创），合计约 0.74 亿港元、仅占全球发售 8.64%，机构托底弱",
+        "18C 机制公开发售初始仅 5%，A 股价格成为情绪锚（9/11 当日 A 股大跌 9.59%）"
+      ],
+      "analysis": "典型「好故事 + 还没赚钱 + 很烧钱」的 18C 特专科技股。小流通盘 + 无绿鞋意味着两头都狠：要么暗盘抽风上涨，要么被 A 股带崩。折价大是最大卖点，但 PS 偏贵、基石薄弱。",
+      "recommendation": "现金小注（1–3 手）娱乐式参与即可，暗盘/首日纪律卖出；不建议融资上乙组，不建议长期持有。9/16 截止，各券商融资认购截止时间不一（约 9:00–10:30）。",
+      "rating": 60
+    },
+    {
+      "code": "06700",
+      "name": "四方精创",
+      "name_en": "Forms Syntron",
+      "subscription_start": "9/14",
+      "subscription_end": "9/17",
+      "listing_date": "9/22",
+      "price_range": "最高 16.00 港元",
+      "entry_fee": 1616.13,
+      "oversubscription": "招股首日（9/14），孖展数据待公布",
+      "pros": [
+        "入场费仅 1,616 港元，是本轮门槛最低的一只，适合小额试水",
+        "H 股较 A 股（300468）最新价折让约 40%，有一定安全垫",
+        "公司持续盈利（非亏损）：2023/2024/2025 期内利润 4,740 / 6,740 / 7,430 万元人民币",
+        "2026Q1 收入 1.5633 亿元人民币，较上年同期 1.3157 亿元增长约 19%"
+      ],
+      "cons": [
+        "基本面走弱：收入 2024→2025 由 7.40 亿降至 6.31 亿元人民币（-14.8%）；2026Q1 利润 1,060 万元反而低于上年同期 1,290 万元",
+        "A 股年内跌逾 40%，A/H 联动下情绪受拖累",
+        "银行金融软件属传统赛道，缺乏 AI/硬科技题材溢价",
+        "未见基石投资者披露，机构托底缺位；保荐人招银国际 + 国信证券（香港），阵容中规中矩",
+        "与纳真科技同日招股、同日上市，资金分流明显"
+      ],
+      "analysis": "本轮最弱的一只：唯一亮点是入场费低 + 较 A 股折让 40%，但收入下滑、利润倒退、无基石、题材平淡，且与纳真科技撞期分流。",
+      "recommendation": "性价比低于同期的纳真科技，资金有限时建议优先纳真；若只想低成本试水可小额现金参与一手，暗盘不恋战。",
+      "rating": 48
     }
   ],
   "listing_tomorrow": [],
   "listed_ipos_2026": [
     {
-      "cumulative_pct": -20.975,
+      "cumulative_pct": -21.822,
       "first_day_pct": -1.02,
       "code": "09976",
       "name": "江波龙",
       "name_en": "Longsys",
       "listing_date": "9/08",
-      "ipo_price": 236.0
+      "ipo_price": 236.0,
+      "dark_pool_price": 234.4,
+      "dark_pool_pct": -0.68
     },
     {
       "listing_date": "9/09",
@@ -70,7 +107,7 @@
       "dark_pool_price": 29.7,
       "dark_pool_pct": 105.54,
       "first_day_pct": 153.84,
-      "cumulative_pct": 166.436,
+      "cumulative_pct": 168.927,
       "code": "03231",
       "name": "优地机器人",
       "name_en": "Udeer Robotics"
@@ -84,7 +121,7 @@
       "dark_pool_price": 11.9,
       "dark_pool_pct": -22.8,
       "first_day_pct": -42.93,
-      "cumulative_pct": -45.396
+      "cumulative_pct": -46.141
     },
     {
       "code": "00625",
@@ -95,7 +132,7 @@
       "dark_pool_price": 42.12,
       "dark_pool_pct": -13.26,
       "first_day_pct": -0.12,
-      "cumulative_pct": -24.465
+      "cumulative_pct": -24.3
     },
     {
       "code": "09615",
@@ -103,10 +140,10 @@
       "name_en": "Mech-Mind Robotics",
       "listing_date": "9/01",
       "ipo_price": 101.7,
-      "dark_pool_price": null,
-      "dark_pool_pct": null,
+      "dark_pool_price": 101.0,
+      "dark_pool_pct": -0.69,
       "first_day_pct": -1.87,
-      "cumulative_pct": -14.848
+      "cumulative_pct": -14.651
     },
     {
       "code": "03223",
@@ -117,7 +154,7 @@
       "dark_pool_price": 99.75,
       "dark_pool_pct": -0.25,
       "first_day_pct": 0.0,
-      "cumulative_pct": -7.3
+      "cumulative_pct": -7.05
     },
     {
       "code": "02261",
@@ -128,7 +165,7 @@
       "dark_pool_price": 16.7,
       "dark_pool_pct": 60.27,
       "first_day_pct": 64.11,
-      "cumulative_pct": 43.954
+      "cumulative_pct": 57.39
     },
     {
       "code": "02249",
@@ -139,7 +176,7 @@
       "dark_pool_price": 36.1,
       "dark_pool_pct": 11.8,
       "first_day_pct": 0.0,
-      "cumulative_pct": 0.0
+      "cumulative_pct": -15.975
     },
     {
       "code": "06745",
@@ -150,7 +187,7 @@
       "dark_pool_price": 2.75,
       "dark_pool_pct": -21.0,
       "first_day_pct": -18.68,
-      "cumulative_pct": -18.68
+      "cumulative_pct": -12.213
     },
     {
       "code": "02475",
@@ -161,7 +198,7 @@
       "dark_pool_price": 60.15,
       "dark_pool_pct": -4.95,
       "first_day_pct": -1.55,
-      "cumulative_pct": -1.55
+      "cumulative_pct": -9.845
     },
     {
       "code": "00537",
@@ -172,7 +209,7 @@
       "dark_pool_price": 38.02,
       "dark_pool_pct": -17.3,
       "first_day_pct": -37.36,
-      "cumulative_pct": -37.36
+      "cumulative_pct": -54.328
     },
     {
       "code": "02797",
@@ -183,7 +220,7 @@
       "dark_pool_price": 15.5,
       "dark_pool_pct": 93.75,
       "first_day_pct": 162.5,
-      "cumulative_pct": 162.5
+      "cumulative_pct": 945.0
     },
     {
       "code": "03752",
@@ -194,7 +231,7 @@
       "dark_pool_price": 37.3,
       "dark_pool_pct": -1.84,
       "first_day_pct": 15.21,
-      "cumulative_pct": 15.21
+      "cumulative_pct": 28.053
     },
     {
       "code": "06951",
@@ -205,7 +242,7 @@
       "dark_pool_price": 95.65,
       "dark_pool_pct": -4.64,
       "first_day_pct": 4.69,
-      "cumulative_pct": 4.69
+      "cumulative_pct": 26.221
     },
     {
       "code": "01770",
@@ -216,7 +253,7 @@
       "dark_pool_price": 81.3,
       "dark_pool_pct": 3.4,
       "first_day_pct": 1.73,
-      "cumulative_pct": 1.73
+      "cumulative_pct": -2.085
     },
     {
       "code": "01377",
@@ -227,7 +264,7 @@
       "dark_pool_price": 340.0,
       "dark_pool_pct": -10.53,
       "first_day_pct": -1.79,
-      "cumulative_pct": -1.79
+      "cumulative_pct": -21.579
     },
     {
       "code": "06880",
@@ -238,7 +275,7 @@
       "dark_pool_price": 294.6,
       "dark_pool_pct": -0.3,
       "first_day_pct": 0.0,
-      "cumulative_pct": 0.0
+      "cumulative_pct": -41.949
     },
     {
       "code": "07656",
@@ -249,7 +286,7 @@
       "dark_pool_price": 17.99,
       "dark_pool_pct": -16.9,
       "first_day_pct": -3.05,
-      "cumulative_pct": -3.05
+      "cumulative_pct": -28.347
     },
     {
       "code": "07687",
@@ -260,7 +297,7 @@
       "dark_pool_price": 91.5,
       "dark_pool_pct": 4.1,
       "first_day_pct": 9.99,
-      "cumulative_pct": 9.99
+      "cumulative_pct": -23.908
     },
     {
       "code": "08090",
@@ -271,7 +308,7 @@
       "dark_pool_price": 6.67,
       "dark_pool_pct": 7.2,
       "first_day_pct": 3.38,
-      "cumulative_pct": 3.38
+      "cumulative_pct": -14.791
     },
     {
       "code": "09971",
@@ -282,7 +319,7 @@
       "dark_pool_price": 35.1,
       "dark_pool_pct": 11.01,
       "first_day_pct": 5.06,
-      "cumulative_pct": 5.06
+      "cumulative_pct": 36.053
     },
     {
       "code": "02667",
@@ -293,7 +330,7 @@
       "dark_pool_price": 4.67,
       "dark_pool_pct": -15.09,
       "first_day_pct": -39.09,
-      "cumulative_pct": -39.09
+      "cumulative_pct": -57.0
     },
     {
       "code": "00668",
@@ -304,7 +341,7 @@
       "dark_pool_price": 94.55,
       "dark_pool_pct": -4.8,
       "first_day_pct": 15.69,
-      "cumulative_pct": 15.69
+      "cumulative_pct": 23.842
     },
     {
       "code": "09637",
@@ -315,7 +352,7 @@
       "dark_pool_price": 42.5,
       "dark_pool_pct": 88.05,
       "first_day_pct": 103.54,
-      "cumulative_pct": 103.54
+      "cumulative_pct": 2.212
     },
     {
       "code": "02672",
@@ -326,7 +363,7 @@
       "dark_pool_price": 58.1,
       "dark_pool_pct": 272.44,
       "first_day_pct": 367.95,
-      "cumulative_pct": 367.95
+      "cumulative_pct": 142.821
     },
     {
       "code": "01191",
@@ -337,7 +374,7 @@
       "dark_pool_price": 213.0,
       "dark_pool_pct": 86.84,
       "first_day_pct": 44.74,
-      "cumulative_pct": 44.74
+      "cumulative_pct": 10.263
     },
     {
       "code": "06228",
@@ -348,7 +385,7 @@
       "dark_pool_price": 26.6,
       "dark_pool_pct": 0.0,
       "first_day_pct": -6.54,
-      "cumulative_pct": -6.54
+      "cumulative_pct": 28.722
     },
     {
       "code": "02272",
@@ -359,7 +396,7 @@
       "dark_pool_price": 119.9,
       "dark_pool_pct": 203.16,
       "first_day_pct": 203.92,
-      "cumulative_pct": 203.92
+      "cumulative_pct": 87.105
     },
     {
       "code": "01956",
@@ -370,7 +407,7 @@
       "dark_pool_price": 115.4,
       "dark_pool_pct": 90.12,
       "first_day_pct": 84.02,
-      "cumulative_pct": 84.02
+      "cumulative_pct": 23.888
     },
     {
       "code": "09630",
@@ -381,7 +418,7 @@
       "dark_pool_price": 445.2,
       "dark_pool_pct": 76.16,
       "first_day_pct": 103.77,
-      "cumulative_pct": 103.77
+      "cumulative_pct": 39.279
     },
     {
       "code": "03661",
@@ -392,7 +429,7 @@
       "dark_pool_price": 105.7,
       "dark_pool_pct": 24.06,
       "first_day_pct": 47.07,
-      "cumulative_pct": 47.07
+      "cumulative_pct": 5.047
     },
     {
       "code": "01688",
@@ -403,7 +440,7 @@
       "dark_pool_price": 12.35,
       "dark_pool_pct": 21.32,
       "first_day_pct": -4.62,
-      "cumulative_pct": -4.62
+      "cumulative_pct": -36.886
     },
     {
       "code": "03952",
@@ -413,7 +450,7 @@
       "dark_pool_price": 101.0,
       "dark_pool_pct": 18.13,
       "first_day_pct": 1.23,
-      "cumulative_pct": 1.23
+      "cumulative_pct": -41.895
     },
     {
       "code": "06915",
@@ -423,7 +460,7 @@
       "dark_pool_price": 10.54,
       "dark_pool_pct": -5.89,
       "first_day_pct": -13.0,
-      "cumulative_pct": -13.0
+      "cumulative_pct": 33.839
     },
     {
       "code": "06715",
@@ -433,7 +470,7 @@
       "dark_pool_price": 103.5,
       "dark_pool_pct": 37.09,
       "first_day_pct": 50.99,
-      "cumulative_pct": 50.99
+      "cumulative_pct": -12.252
     },
     {
       "code": "02697",
@@ -443,7 +480,7 @@
       "dark_pool_price": 326.0,
       "dark_pool_pct": 158.32,
       "first_day_pct": 216.96,
-      "cumulative_pct": 216.96
+      "cumulative_pct": 103.803
     },
     {
       "code": "02335",
@@ -453,7 +490,7 @@
       "dark_pool_price": 35.5,
       "dark_pool_pct": 95.06,
       "first_day_pct": 102.75,
-      "cumulative_pct": 102.75
+      "cumulative_pct": 15.385
     },
     {
       "code": "06106",
@@ -463,7 +500,7 @@
       "dark_pool_price": 94.2,
       "dark_pool_pct": -7.28,
       "first_day_pct": 4.33,
-      "cumulative_pct": 4.33
+      "cumulative_pct": -28.642
     },
     {
       "code": "06132",
@@ -473,7 +510,7 @@
       "dark_pool_price": 79.1,
       "dark_pool_pct": -3.3,
       "first_day_pct": 23.47,
-      "cumulative_pct": 23.47
+      "cumulative_pct": -48.533
     },
     {
       "code": "06067",
@@ -483,7 +520,7 @@
       "dark_pool_price": 12.64,
       "dark_pool_pct": 40.8,
       "first_day_pct": 22.49,
-      "cumulative_pct": 22.49
+      "cumulative_pct": -12.194
     },
     {
       "code": "01392",
@@ -493,7 +530,7 @@
       "dark_pool_price": 26.2,
       "dark_pool_pct": 263.89,
       "first_day_pct": 250.28,
-      "cumulative_pct": 250.28
+      "cumulative_pct": 269.722
     },
     {
       "code": "06675",
@@ -503,7 +540,7 @@
       "dark_pool_price": 31.4,
       "dark_pool_pct": 71.0,
       "first_day_pct": 127.12,
-      "cumulative_pct": 127.12
+      "cumulative_pct": 53.05
     },
     {
       "code": "06658",
@@ -513,7 +550,7 @@
       "dark_pool_price": 99.25,
       "dark_pool_pct": 127.7,
       "first_day_pct": 175.36,
-      "cumulative_pct": 175.36
+      "cumulative_pct": 261.404
     },
     {
       "code": "02553",
@@ -523,7 +560,7 @@
       "dark_pool_price": 36.0,
       "dark_pool_pct": 146.58,
       "first_day_pct": 23.16,
-      "cumulative_pct": 91.93
+      "cumulative_pct": 2.281
     },
     {
       "code": "01081",
@@ -533,7 +570,7 @@
       "dark_pool_price": 63.1,
       "dark_pool_pct": -4.97,
       "first_day_pct": 0.0,
-      "cumulative_pct": -4.44
+      "cumulative_pct": -53.765
     },
     {
       "code": "02290",
@@ -543,7 +580,7 @@
       "dark_pool_price": 5.26,
       "dark_pool_pct": 1.54,
       "first_day_pct": -55.96,
-      "cumulative_pct": -59.87
+      "cumulative_pct": -39.812
     },
     {
       "code": "01779",
@@ -553,7 +590,7 @@
       "dark_pool_price": 150.9,
       "dark_pool_pct": 57.09,
       "first_day_pct": 37.21,
-      "cumulative_pct": 26.69
+      "cumulative_pct": 4.414
     },
     {
       "code": "00901",
@@ -563,7 +600,7 @@
       "dark_pool_price": 63.5,
       "dark_pool_pct": 93.0,
       "first_day_pct": 86.59,
-      "cumulative_pct": 86.59
+      "cumulative_pct": 108.232
     },
     {
       "code": "03310",
@@ -573,7 +610,7 @@
       "dark_pool_price": 25.14,
       "dark_pool_pct": 20.8,
       "first_day_pct": 91.73,
-      "cumulative_pct": 91.73
+      "cumulative_pct": 11.869
     },
     {
       "code": "02723",
@@ -583,7 +620,7 @@
       "dark_pool_price": 149.0,
       "dark_pool_pct": 168.47,
       "first_day_pct": 265.77,
-      "cumulative_pct": 265.77
+      "cumulative_pct": 818.018
     },
     {
       "code": "07688",
@@ -593,7 +630,7 @@
       "dark_pool_price": 39.0,
       "dark_pool_pct": 47.8,
       "first_day_pct": 80.0,
-      "cumulative_pct": 80.0
+      "cumulative_pct": -29.632
     },
     {
       "code": "01511",
@@ -603,7 +640,7 @@
       "dark_pool_price": 59.55,
       "dark_pool_pct": -1.2,
       "first_day_pct": -4.64,
-      "cumulative_pct": -4.64
+      "cumulative_pct": -11.857
     },
     {
       "code": "06871",
@@ -613,7 +650,7 @@
       "dark_pool_price": 54.65,
       "dark_pool_pct": 79.18,
       "first_day_pct": 81.15,
-      "cumulative_pct": 81.15
+      "cumulative_pct": -9.115
     },
     {
       "code": "07630",
@@ -623,7 +660,7 @@
       "dark_pool_price": 32.16,
       "dark_pool_pct": 60.0,
       "first_day_pct": 108.26,
-      "cumulative_pct": 108.26
+      "cumulative_pct": -38.557
     },
     {
       "code": "07666",
@@ -633,7 +670,7 @@
       "dark_pool_price": 30.32,
       "dark_pool_pct": 188.76,
       "first_day_pct": 126.67,
-      "cumulative_pct": 90.34
+      "cumulative_pct": 48.0
     },
     {
       "code": "01236",
@@ -643,7 +680,7 @@
       "dark_pool_price": 49.8,
       "dark_pool_pct": 88.9,
       "first_day_pct": 127.62,
-      "cumulative_pct": 72.05
+      "cumulative_pct": 6.601
     },
     {
       "code": "01187",
@@ -653,7 +690,7 @@
       "dark_pool_price": 40.2,
       "dark_pool_pct": 2.21,
       "first_day_pct": -1.09,
-      "cumulative_pct": -13.3
+      "cumulative_pct": -18.891
     },
     {
       "code": "01609",
@@ -663,7 +700,7 @@
       "dark_pool_price": 290.4,
       "dark_pool_pct": 198.48,
       "first_day_pct": 118.27,
-      "cumulative_pct": 105.08
+      "cumulative_pct": 10.761
     },
     {
       "code": "06810",
@@ -673,7 +710,7 @@
       "dark_pool_price": 94.98,
       "dark_pool_pct": 282.14,
       "first_day_pct": 241.11,
-      "cumulative_pct": 15.2
+      "cumulative_pct": 110.579
     },
     {
       "code": "01879",
@@ -683,7 +720,7 @@
       "dark_pool_price": 825.0,
       "dark_pool_pct": 351.0,
       "first_day_pct": 383.62,
-      "cumulative_pct": 8.5
+      "cumulative_pct": 53.057
     },
     {
       "code": "02493",
@@ -693,7 +730,7 @@
       "dark_pool_price": 28.5,
       "dark_pool_pct": 3.11,
       "first_day_pct": 0.58,
-      "cumulative_pct": -2.1
+      "cumulative_pct": -25.109
     },
     {
       "code": "03296",
@@ -703,7 +740,7 @@
       "dark_pool_price": 91.14,
       "dark_pool_pct": 17.3,
       "first_day_pct": 13.26,
-      "cumulative_pct": -1.5
+      "cumulative_pct": -12.677
     },
     {
       "code": "02476",
@@ -713,7 +750,7 @@
       "dark_pool_price": 336.2,
       "dark_pool_pct": 60.19,
       "first_day_pct": 50.09,
-      "cumulative_pct": 8.3
+      "cumulative_pct": -7.423
     },
     {
       "code": "00068",
@@ -723,7 +760,7 @@
       "dark_pool_price": 20.51,
       "dark_pool_pct": 169.29,
       "first_day_pct": 144.09,
-      "cumulative_pct": 420.15
+      "cumulative_pct": 8.268
     },
     {
       "code": "03277",
@@ -733,7 +770,7 @@
       "dark_pool_price": 68.59,
       "dark_pool_pct": 72.02,
       "first_day_pct": 75.53,
-      "cumulative_pct": -8.9
+      "cumulative_pct": 99.85
     },
     {
       "code": "06656",
@@ -743,7 +780,7 @@
       "dark_pool_price": 597.8,
       "dark_pool_pct": 84.45,
       "first_day_pct": 103.42,
-      "cumulative_pct": 72.3
+      "cumulative_pct": -0.37
     },
     {
       "code": "03625",
@@ -753,7 +790,7 @@
       "dark_pool_price": 83.5,
       "dark_pool_pct": 108.75,
       "first_day_pct": 100.0,
-      "cumulative_pct": 225.8
+      "cumulative_pct": 54.875
     },
     {
       "code": "00664",
@@ -763,7 +800,7 @@
       "dark_pool_price": 41.96,
       "dark_pool_pct": -30.07,
       "first_day_pct": -49.17,
-      "cumulative_pct": -58.4
+      "cumulative_pct": -79.15
     },
     {
       "code": "06636",
@@ -773,7 +810,7 @@
       "dark_pool_price": 61.8,
       "dark_pool_pct": 54.5,
       "first_day_pct": 150.0,
-      "cumulative_pct": 212.5
+      "cumulative_pct": 75.75
     },
     {
       "code": "02726",
@@ -783,7 +820,7 @@
       "dark_pool_price": 105.0,
       "dark_pool_pct": 37.69,
       "first_day_pct": 35.06,
-      "cumulative_pct": -3.2
+      "cumulative_pct": 30.016
     },
     {
       "code": "02526",
@@ -793,7 +830,7 @@
       "dark_pool_price": 199.5,
       "dark_pool_pct": 101.52,
       "first_day_pct": 111.72,
-      "cumulative_pct": 208.9
+      "cumulative_pct": 405.556
     },
     {
       "code": "01021",
@@ -803,7 +840,7 @@
       "dark_pool_price": 18.77,
       "dark_pool_pct": 10.41,
       "first_day_pct": 8.24,
-      "cumulative_pct": 38.5
+      "cumulative_pct": -36.824
     },
     {
       "code": "02729",
@@ -813,7 +850,7 @@
       "dark_pool_price": 30.53,
       "dark_pool_pct": 83.19,
       "first_day_pct": 84.27,
-      "cumulative_pct": 1.8
+      "cumulative_pct": 136.134
     },
     {
       "code": "02632",
@@ -823,7 +860,7 @@
       "dark_pool_price": 49.8,
       "dark_pool_pct": 12.67,
       "first_day_pct": -36.92,
-      "cumulative_pct": -5.6
+      "cumulative_pct": 41.516
     },
     {
       "code": "03355",
@@ -833,7 +870,7 @@
       "dark_pool_price": 60.9,
       "dark_pool_pct": 46.39,
       "first_day_pct": 13.46,
-      "cumulative_pct": 19.8
+      "cumulative_pct": -10.865
     },
     {
       "code": "02701",
@@ -843,7 +880,7 @@
       "dark_pool_price": 11.7,
       "dark_pool_pct": 8.33,
       "first_day_pct": 4.17,
-      "cumulative_pct": 16.4
+      "cumulative_pct": -25.509
     },
     {
       "code": "01989",
@@ -853,7 +890,7 @@
       "dark_pool_price": 95.0,
       "dark_pool_pct": 32.16,
       "first_day_pct": 33.56,
-      "cumulative_pct": 108.5
+      "cumulative_pct": 68.893
     },
     {
       "code": "03268",
@@ -863,7 +900,7 @@
       "dark_pool_price": 29.4,
       "dark_pool_pct": 1.87,
       "first_day_pct": 1.52,
-      "cumulative_pct": -15.8
+      "cumulative_pct": -33.818
     },
     {
       "code": "02715",
@@ -873,7 +910,7 @@
       "dark_pool_price": 14.2,
       "dark_pool_pct": -7.55,
       "first_day_pct": -16.02,
-      "cumulative_pct": 2.1
+      "cumulative_pct": -5.208
     },
     {
       "code": "02692",
@@ -883,7 +920,7 @@
       "dark_pool_price": 84.1,
       "dark_pool_pct": 17.99,
       "first_day_pct": 2.41,
-      "cumulative_pct": 1.2
+      "cumulative_pct": -47.503
     },
     {
       "code": "02649",
@@ -893,7 +930,7 @@
       "dark_pool_price": 14.0,
       "dark_pool_pct": 27.27,
       "first_day_pct": -43.64,
-      "cumulative_pct": -8.5
+      "cumulative_pct": -64.545
     },
     {
       "code": "09981",
@@ -903,7 +940,7 @@
       "dark_pool_price": 21.08,
       "dark_pool_pct": 4.93,
       "first_day_pct": 2.94,
-      "cumulative_pct": 1.8
+      "cumulative_pct": -52.19
     },
     {
       "code": "02706",
@@ -913,7 +950,7 @@
       "dark_pool_price": 84.0,
       "dark_pool_pct": 210.42,
       "first_day_pct": 242.2,
-      "cumulative_pct": -2.8
+      "cumulative_pct": 49.741
     },
     {
       "code": "00470",
@@ -923,7 +960,7 @@
       "dark_pool_price": 46.3,
       "dark_pool_pct": 1.09,
       "first_day_pct": 0.0,
-      "cumulative_pct": 28.6
+      "cumulative_pct": -40.83
     },
     {
       "code": "02720",
@@ -933,7 +970,7 @@
       "dark_pool_price": 24.48,
       "dark_pool_pct": 99.84,
       "first_day_pct": 102.29,
-      "cumulative_pct": 2.5
+      "cumulative_pct": 126.939
     },
     {
       "code": "00600",
@@ -943,7 +980,7 @@
       "dark_pool_price": 27.02,
       "dark_pool_pct": -4.18,
       "first_day_pct": 0.0,
-      "cumulative_pct": -22.4
+      "cumulative_pct": -38.688
     },
     {
       "code": "06809",
@@ -953,7 +990,7 @@
       "dark_pool_price": 149.4,
       "dark_pool_pct": 39.77,
       "first_day_pct": 63.72,
-      "cumulative_pct": 98.2
+      "cumulative_pct": 129.582
     },
     {
       "code": "03200",
@@ -963,7 +1000,7 @@
       "dark_pool_price": 116.6,
       "dark_pool_pct": 21.71,
       "first_day_pct": 14.82,
-      "cumulative_pct": 1.2
+      "cumulative_pct": 5.428
     },
     {
       "code": "02714",
@@ -973,7 +1010,7 @@
       "dark_pool_price": 39.74,
       "dark_pool_pct": 1.9,
       "first_day_pct": 3.9,
-      "cumulative_pct": -1.8
+      "cumulative_pct": -1.179
     },
     {
       "code": "02768",
@@ -983,7 +1020,7 @@
       "dark_pool_price": 49.0,
       "dark_pool_pct": 36.11,
       "first_day_pct": 11.56,
-      "cumulative_pct": 2.8
+      "cumulative_pct": 4.0
     },
     {
       "code": "09980",
@@ -993,7 +1030,7 @@
       "dark_pool_price": 247.8,
       "dark_pool_pct": -0.08,
       "first_day_pct": 1.53,
-      "cumulative_pct": -15.6
+      "cumulative_pct": -59.476
     },
     {
       "code": "03308",
@@ -1001,10 +1038,10 @@
       "name_en": "ZJ InnoLight",
       "listing_date": "07/30",
       "ipo_price": 980,
-      "dark_pool_price": null,
-      "dark_pool_pct": null,
+      "dark_pool_price": 969.5,
+      "dark_pool_pct": -1.1,
       "first_day_pct": -2.04,
-      "cumulative_pct": 9.082
+      "cumulative_pct": 10.816
     }
   ]
 }
