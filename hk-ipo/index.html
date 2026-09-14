@@ -439,6 +439,13 @@
                 return;
             }
 
+            // 百分比统一两位小数，正数带 + 号，空值显示 --
+            const fmtPct = v => (v === null || v === undefined || v === '' || isNaN(Number(v))) 
+                ? '--' 
+                : (Number(v) > 0 ? '+' : '') + Number(v).toFixed(2) + '%';
+            // 价格/日期类统一兜底
+            const fmtVal = v => (v === null || v === undefined || v === '') ? '--' : v;
+
             const tableHTML = `
                 <div class="table-scroll">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -459,12 +466,12 @@
                             <tr style="border-bottom: 1px solid #dee2e6;">
                                 <td style="padding: 8px;">${stock.code || '--'}</td>
                                 <td style="padding: 8px;">${stock.name || '未知'}</td>
-                                <td style="padding: 8px;">${stock.listing_date || '--'}</td>
-                                <td style="padding: 8px; text-align: right;">${stock.ipo_price ?? '--'}</td>
-                                <td style="padding: 8px; text-align: right;">${stock.dark_pool_price || '--'}</td>
-                                <td style="padding: 8px; text-align: right; color: ${stock.dark_pool_pct > 0 ? '#e94560' : stock.dark_pool_pct < 0 ? '#28a745' : '#666'};">${stock.dark_pool_pct !== null && stock.dark_pool_pct !== undefined ? stock.dark_pool_pct + '%' : '--'}</td>
-                                <td style="padding: 8px; text-align: right; color: ${stock.first_day_pct > 0 ? '#e94560' : stock.first_day_pct < 0 ? '#28a745' : '#666'};">${stock.first_day_pct !== null && stock.first_day_pct !== undefined ? stock.first_day_pct + '%' : '--'}</td>
-                                <td style="padding: 8px; text-align: right; color: ${stock.cumulative_pct > 0 ? '#e94560' : stock.cumulative_pct < 0 ? '#28a745' : '#666'};">${stock.cumulative_pct !== null && stock.cumulative_pct !== undefined ? stock.cumulative_pct + '%' : '--'}</td>
+                                <td style="padding: 8px;">${fmtVal(stock.listing_date)}</td>
+                                <td style="padding: 8px; text-align: right;">${fmtVal(stock.ipo_price)}</td>
+                                <td style="padding: 8px; text-align: right;">${fmtVal(stock.dark_pool_price)}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.dark_pool_pct > 0 ? '#e94560' : stock.dark_pool_pct < 0 ? '#28a745' : '#666'};">${fmtPct(stock.dark_pool_pct)}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.first_day_pct > 0 ? '#e94560' : stock.first_day_pct < 0 ? '#28a745' : '#666'};">${fmtPct(stock.first_day_pct)}</td>
+                                <td style="padding: 8px; text-align: right; color: ${stock.cumulative_pct > 0 ? '#e94560' : stock.cumulative_pct < 0 ? '#28a745' : '#666'};">${fmtPct(stock.cumulative_pct)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
