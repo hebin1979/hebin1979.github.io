@@ -85,11 +85,11 @@ tbody tr:last-child td{border-bottom:none}
   <div class="section">
     <h2>🔗 打开对应工具</h2>
     <div class="links">
-      <a href="/hk-ipo/?v=20261023"><span class="ic">🚀</span>港股打新助手</a>
-      <a href="/tencent-trading-assistant.html?v=20261023"><span class="ic">🔮</span>腾讯交易助手</a>
-      <a href="/dividend-spread-tool.html?v=20261023"><span class="ic">📊</span>红利交易助手</a>
-      <a href="/nasdaq-trading-assistant/?v=20261023"><span class="ic">📈</span>纳指交易助手</a>
-      <a href="/gold-trading-assistant/?v=20261023"><span class="ic">🪙</span>黄金交易助手</a>
+      <a href="/hk-ipo/?v=20261026"><span class="ic">🚀</span>港股打新助手</a>
+      <a href="/tencent-trading-assistant.html?v=20261026"><span class="ic">🔮</span>腾讯交易助手</a>
+      <a href="/dividend-spread-tool.html?v=20261026"><span class="ic">📊</span>红利交易助手</a>
+      <a href="/nasdaq-trading-assistant/?v=20261026"><span class="ic">📈</span>纳指交易助手</a>
+      <a href="/gold-trading-assistant/?v=20261026"><span class="ic">🪙</span>黄金交易助手</a>
     </div>
   </div>
 
@@ -115,7 +115,7 @@ tbody tr:last-child td{border-bottom:none}
 //  今日简报数据（每次刷新时更新此 BRIEFING 对象即可）
 // =============================================================
 var BRIEFING = {
-  date: '2026-10-23',
+  date: '2026-10-26',
   modules: [
     {
       key:'ipo', icon:'🚀', name:'港股打新助手', em:'港股新股',
@@ -151,6 +151,12 @@ var BRIEFING = {
       advice:'综合评分 <b>77.2/100</b>（上期 73.4，<b>再升 3.8，连续三期走高</b>），维持 <b>「强烈买入 · 重仓累积」</b>——五张卡里评分最高。现价 <b>8.234</b>（上期 8.633），<b>52 周分位压到 0%</b>（贴住 52 周低 8.228），价格/MA <b>0.86×</b> 显著低于长期均线 9.530，<b>估值分位项 94.9</b>、RSI 动量项 85.9（RSI 29.1 已进入超卖区）。<b>DXY 由 101.78 回落至 101.61（分位 82%）</b>，<b>VIX 19.03（分位 74%）使避险分项维持 77.6 的高位</b>；实际利率小幅改善：<b>10Y TIPS 由 2.78% 微降至 2.76%</b>（FRED DFII10，10/21 值），但 <b>36.3 分仍是七个分项里最低的一项</b>，也是黄金评分的主要压制项。<b>可重仓累积、越跌越买；实际利率明显回落或美元走弱可加仓。</b>需要留意：国际金价 10/22 收 <b>4,025 美元/盎司</b>（当日 -2.8%，较 10/16 的 4,167.99 一周跌约 3.4%）——这轮避险资金更多流向美债而非黄金；国内 518850 因人民币与场内折溢价因素跌幅更深。',
       key1:'评分 77.2/100（↑3.8）',
       key2:'分位 0% · TIPS 2.76%'
+    }    ,{
+      key:'sellput', icon:'💰', name:'卖PUT筛选助手', em:'美股 Sell Put',
+      sig:'Top10 · 最高年化 63.4%', sigType:'hold',
+      advice:'<b>CBOE 延迟行情筛选（2026-10-26 09:57，现价取 10/23 收盘、期权报价 10/26 凌晨）：到期日 <b>2026-11-06（下周五，DTE 11 天）</b>、折价 ≥30%（行权价 ≤70% 现价）、有真实买价且买卖价差 ≤3 倍、OI≥10。</b>扫描 <b>102 只</b>美股与 ETF，<b>命中 17 只</b>，按年化收益率取前十：<b>SOXL 63.4%</b>（现价 83.56 / 行权 55 / 折价 34.2% / 权利金 $1.05 / OI 1,726，A 档报价）、<b>IREN 48.7%</b>（24.90 / 15 / 39.8% / $0.22，C 档）、<b>SMCI 24.5%</b>（32.95 / 23 / 30.2% / $0.17）、<b>MRNA 22.9%</b>（201.34 / 140 / 30.5% / $0.965）、<b>APP 18.4%</b>、<b>CRWV 16.1%</b>、<b>MSTR 11.2%</b>（A 档，OI 2,787 最厚）、<b>COIN 8.1%</b>、<b>PLTR 7.1%</b>、<b>AMD 6.5%</b>。<b>⚠️ 关键提醒：年化是把 11 天收益放大约 33 倍得来的，不代表一年能赚这么多；真实收益看「11 天收益」——前十只有 <b>0.19%~1.91%</b>，即每占用 1 万美元本金 11 天收 <b>19~191 美元</b>。</b>Top10 平均 IV30 高达 <b>80%</b>，高年化正是高波动的定价，不是白捡的钱。<b>SOXL 是 3 倍杠杆 ETF</b>，标的跌 10% 它就跌约 30%，34% 折价的实际保护远小于表面数字。<b>报价质量：A 档（可直接挂单）仅 SOXL、MSTR 两只；C 档（APP / AMD / IREN / CRWV / COIN）价差大、实际成交价会明显低于中间价。</b>本卡为机械筛选，未做基本面与破产风险评估。<i>（本页其余五张卡仍为 10/23 口径，本期仅新增本卡。）</i>',
+      key1:'Top10：SOXL 63.4% · IREN 48.7% · SMCI 24.5%',
+      key2:'11/06 到期 · 折价≥30% · DTE 11天'
     }
   ]
 };

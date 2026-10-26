@@ -1,0 +1,462 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美股卖PUT折价筛选 · 11/06到期·折价≥30%·年化Top10</title><style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:#f4f6f9; color:#1f2733; font-size:14px; }
+  .wrap { max-width:960px; margin:0 auto; padding:16px; }
+  header { background:linear-gradient(135deg,#1f3a5f,#2d6cdf); color:#fff; border-radius:14px; padding:18px 18px 16px; }
+  header h1 { margin:0 0 4px; font-size:19px; }
+  header p { margin:2px 0; font-size:12.5px; opacity:.92; }
+  .pill { display:inline-block; background:rgba(255,255,255,.18); border-radius:20px; padding:3px 10px; font-size:11.5px; margin:4px 4px 0 0; }
+  h2 { font-size:15px; margin:20px 4px 10px; }
+  .cards { display:grid; grid-template-columns:1fr; gap:10px; }
+  @media(min-width:640px) { .cards { grid-template-columns:1fr 1fr; } }
+  .card { background:#fff; border-radius:12px; padding:12px 14px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .card-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .card-h .tk { font-size:17px; font-weight:700; }
+  .card-b { display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+  .card-b > div { display:flex; justify-content:space-between; font-size:12.5px; border-bottom:1px dashed #eef0f3; padding:3px 0; }
+  .card-b .k { color:#7a8699; } .card-b .v { font-weight:600; }
+  .table-scroll { overflow-x:auto; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  table { border-collapse:collapse; width:100%; min-width:1080px; font-size:12.5px; }
+  th,td { padding:9px 8px; text-align:right; white-space:nowrap; }
+  th:first-child,td:first-child { text-align:left; position:sticky; left:0; background:#fff; font-weight:700; }
+  thead th { background:#eef2f7; color:#46566b; cursor:pointer; user-select:none; }
+  tbody tr:nth-child(even) { background:#fafbfc; }
+  tbody tr:hover { background:#eef5ff; }
+  td.tk { font-weight:700; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .hi { background:#e6f7ec; color:#0a8a3f; } .mid { background:#eaf3ff; color:#1f6fd6; } .lo { background:#f1f3f5; color:#6b7785; }
+  .note { background:#fff; border-radius:12px; padding:14px 16px; margin-top:14px; font-size:12.5px; line-height:1.7; color:#46566b; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .note b { color:#1f2733; }
+  .disclaim { background:#fff5e6; border:1px solid #ffe0a3; border-radius:12px; padding:12px 14px; margin-top:14px; font-size:12px; color:#8a5a00; line-height:1.7; }
+  footer { text-align:center; color:#9aa5b3; font-size:11.5px; padding:18px 0 8px; }
+  a { color:#1f6fd6; }
+</style></head><body><div class="wrap">
+  <header>
+    <h1>美股「卖 PUT」折价筛选器 · 11/06 到期 · 折价≥30%</h1>
+    <p>筛选日：2026-10-26（周一） ｜ 数据：CBOE 延迟行情（现价取 10/23 收盘，期权报价 10/26 凌晨）</p>
+    <p>条件：到期日 <b>2026-11-06（下周五，DTE 11 天）</b> · 行使价 ≤ 70% 现价（折价≥30%） · 有真实买价且买卖价差 ≤3 倍 · OI≥10 · 年化 &lt;500%（剔除失真报价）</p>
+    <div><span class="pill">扫描 102 只标的</span><span class="pill">命中 17 只</span>
+      <span class="pill">取年化 Top10</span><span class="pill">最高年化 63.4%</span>
+      <span class="pill">Top10 平均 IV30 87%</span></div>
+  </header>
+
+  <div class="disclaim">
+    ⚠️ <b>先读这段：年化数字是怎么来的</b><br>
+    这 10 张合约距到期只有 <b>11 天</b>。所谓「年化」是把 11 天的权利金收益 ×(365÷11) 放大约 <b>33 倍</b> 得到的，
+    <b>它不代表你一年能赚这么多</b>——真实可复制性取决于你能否每 11 天都找到同等质量的合约（基本不可能）。
+    请优先看 <b>「11天收益」</b> 这一列：Top10 的区间只有 <b>0.19% ~ 1.91%</b>，
+    即每占用 $1 万本金、11 天大约收 $19 ~ $191。
+  </div>
+
+  <h2>🏆 年化收益率 Top 10（按年化降序）</h2>
+  <div class="cards">
+  <div class="card">
+    <div class="card-h"><span class="tk">1. SOXL</span>
+      <span class="badge hi">63.4% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$83.56</span></div>
+      <div><span class="k">行权价</span><span class="v">$55.00</span></div>
+      <div><span class="k">折价</span><span class="v">34.2%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$1.050</span></div>
+      <div><span class="k">每合约收</span><span class="v">$105</span></div>
+      <div><span class="k">占用本金</span><span class="v">$5,500</span></div>
+      <div><span class="k">11天收益</span><span class="v">1.91%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$53.95</span></div>
+      <div><span class="k">IV30</span><span class="v">129.5%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.95 / $1.15</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">1,726 / 865</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge hi">A 档 · 报价扎实</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">98.1%*</span></div>
+    </div><div style="margin-top:8px;font-size:11.5px;color:#a10000;background:#fff0f0;border-radius:8px;padding:6px 8px">⚠️ 3 倍杠杆 ETF：标的跌 10% 它跌约 30%，30% 折价在杠杆产品上安全边际远小于表面数字</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">2. IREN</span>
+      <span class="badge hi">48.7% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$24.90</span></div>
+      <div><span class="k">行权价</span><span class="v">$15.00</span></div>
+      <div><span class="k">折价</span><span class="v">39.8%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.220</span></div>
+      <div><span class="k">每合约收</span><span class="v">$22</span></div>
+      <div><span class="k">占用本金</span><span class="v">$1,500</span></div>
+      <div><span class="k">11天收益</span><span class="v">1.47%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$14.78</span></div>
+      <div><span class="k">IV30</span><span class="v">110.9%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.12 / $0.32</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">185 / 62</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge lo">C 档 · 薄/价差大</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">98.5%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">3. SMCI</span>
+      <span class="badge hi">24.5% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$32.95</span></div>
+      <div><span class="k">行权价</span><span class="v">$23.00</span></div>
+      <div><span class="k">折价</span><span class="v">30.2%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.170</span></div>
+      <div><span class="k">每合约收</span><span class="v">$17</span></div>
+      <div><span class="k">占用本金</span><span class="v">$2,300</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.74%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$22.83</span></div>
+      <div><span class="k">IV30</span><span class="v">86.3%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.14 / $0.20</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">904 / 11</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge mid">B 档 · 报价可用</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.3%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">4. MRNA</span>
+      <span class="badge mid">22.9% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$201.34</span></div>
+      <div><span class="k">行权价</span><span class="v">$140.00</span></div>
+      <div><span class="k">折价</span><span class="v">30.5%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.965</span></div>
+      <div><span class="k">每合约收</span><span class="v">$96</span></div>
+      <div><span class="k">占用本金</span><span class="v">$14,000</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.69%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$139.03</span></div>
+      <div><span class="k">IV30</span><span class="v">90.8%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.65 / $1.28</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">174 / 40</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge mid">B 档 · 报价可用</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.3%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">5. APP</span>
+      <span class="badge mid">18.4% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$260.60</span></div>
+      <div><span class="k">行权价</span><span class="v">$180.00</span></div>
+      <div><span class="k">折价</span><span class="v">30.9%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$1.000</span></div>
+      <div><span class="k">每合约收</span><span class="v">$100</span></div>
+      <div><span class="k">占用本金</span><span class="v">$18,000</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.56%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$179.00</span></div>
+      <div><span class="k">IV30</span><span class="v">81.6%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.75 / $1.25</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">10 / 18</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge lo">C 档 · 薄/价差大</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.4%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">6. CRWV</span>
+      <span class="badge mid">16.1% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$53.95</span></div>
+      <div><span class="k">行权价</span><span class="v">$35.00</span></div>
+      <div><span class="k">折价</span><span class="v">35.1%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.170</span></div>
+      <div><span class="k">每合约收</span><span class="v">$17</span></div>
+      <div><span class="k">占用本金</span><span class="v">$3,500</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.49%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$34.83</span></div>
+      <div><span class="k">IV30</span><span class="v">107.3%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.11 / $0.23</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">1,523 / 82</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge lo">C 档 · 薄/价差大</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.5%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">7. MSTR</span>
+      <span class="badge lo">11.2% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$146.08</span></div>
+      <div><span class="k">行权价</span><span class="v">$95.00</span></div>
+      <div><span class="k">折价</span><span class="v">35.0%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.320</span></div>
+      <div><span class="k">每合约收</span><span class="v">$32</span></div>
+      <div><span class="k">占用本金</span><span class="v">$9,500</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.34%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$94.68</span></div>
+      <div><span class="k">IV30</span><span class="v">71.9%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.28 / $0.36</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">2,787 / 539</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge hi">A 档 · 报价扎实</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.7%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">8. COIN</span>
+      <span class="badge lo">8.1% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$164.28</span></div>
+      <div><span class="k">行权价</span><span class="v">$110.00</span></div>
+      <div><span class="k">折价</span><span class="v">33.0%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.270</span></div>
+      <div><span class="k">每合约收</span><span class="v">$27</span></div>
+      <div><span class="k">占用本金</span><span class="v">$11,000</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.25%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$109.73</span></div>
+      <div><span class="k">IV30</span><span class="v">70.2%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.15 / $0.39</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">2,114 / 90</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge lo">C 档 · 薄/价差大</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.8%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">9. PLTR</span>
+      <span class="badge lo">7.1% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$197.43</span></div>
+      <div><span class="k">行权价</span><span class="v">$135.00</span></div>
+      <div><span class="k">折价</span><span class="v">31.6%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.290</span></div>
+      <div><span class="k">每合约收</span><span class="v">$29</span></div>
+      <div><span class="k">占用本金</span><span class="v">$13,500</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.21%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$134.71</span></div>
+      <div><span class="k">IV30</span><span class="v">64.7%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.21 / $0.37</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">249 / 78</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge mid">B 档 · 报价可用</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.8%*</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="tk">10. AMD</span>
+      <span class="badge lo">6.5% 年化</span></div>
+    <div class="card-b">
+      <div><span class="k">现价</span><span class="v">$516.80</span></div>
+      <div><span class="k">行权价</span><span class="v">$360.00</span></div>
+      <div><span class="k">折价</span><span class="v">30.3%</span></div>
+      <div><span class="k">到期</span><span class="v">2026-11-06（11天）</span></div>
+      <div><span class="k">权利金/股</span><span class="v">$0.700</span></div>
+      <div><span class="k">每合约收</span><span class="v">$70</span></div>
+      <div><span class="k">占用本金</span><span class="v">$36,000</span></div>
+      <div><span class="k">11天收益</span><span class="v">0.19%</span></div>
+      <div><span class="k">盈亏平衡</span><span class="v">$359.30</span></div>
+      <div><span class="k">IV30</span><span class="v">60.5%</span></div>
+      <div><span class="k">买价/卖价</span><span class="v">$0.62 / $0.78</span></div>
+      <div><span class="k">OI / 成交量</span><span class="v">50 / 1</span></div>
+      <div><span class="k">报价质量</span><span class="v"><span class="badge lo">C 档 · 薄/价差大</span></span></div>
+      <div><span class="k">被指派最大亏</span><span class="v">99.8%*</span></div>
+    </div>
+  </div>
+  </div>
+
+  <h2>📋 全部 17 只命中（黄底为 Top10 · 点击表头可重排）</h2>
+  <div class="table-scroll"><table id="tbl"><thead><tr>
+    <th data-k="0">代码</th><th data-k="1">现价</th><th data-k="2">行权价</th><th data-k="3">折价%</th>
+    <th data-k="4">到期</th><th data-k="5">权利金/股</th><th data-k="6">每合约收</th>
+    <th data-k="7">占用本金</th><th data-k="8">11天收益%</th><th data-k="9">年化%</th><th data-k="10">IV30</th>
+    <th data-k="11">盈亏平衡</th><th data-k="12">最大亏%*</th><th data-k="13">OI/量</th><th data-k="14">报价档</th>
+  </tr></thead><tbody>
+  <tr style="background:#fffbe6">
+    <td class="tk">1. SOXL</td><td>$83.56</td><td>$55.00</td>
+    <td>34.2%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$1.050</td><td>$105</td><td>$5,500</td>
+    <td>1.91%</td>
+    <td><span class="badge hi">63.4%</span></td>
+    <td>129.5%</td><td>$53.95</td><td>98.1%*</td>
+    <td>1,726 / 865</td>
+    <td><span class="badge hi">A</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">2. IREN</td><td>$24.90</td><td>$15.00</td>
+    <td>39.8%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.220</td><td>$22</td><td>$1,500</td>
+    <td>1.47%</td>
+    <td><span class="badge hi">48.7%</span></td>
+    <td>110.9%</td><td>$14.78</td><td>98.5%*</td>
+    <td>185 / 62</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">3. SMCI</td><td>$32.95</td><td>$23.00</td>
+    <td>30.2%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.170</td><td>$17</td><td>$2,300</td>
+    <td>0.74%</td>
+    <td><span class="badge mid">24.5%</span></td>
+    <td>86.3%</td><td>$22.83</td><td>99.3%*</td>
+    <td>904 / 11</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">4. MRNA</td><td>$201.34</td><td>$140.00</td>
+    <td>30.5%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.965</td><td>$96</td><td>$14,000</td>
+    <td>0.69%</td>
+    <td><span class="badge mid">22.9%</span></td>
+    <td>90.8%</td><td>$139.03</td><td>99.3%*</td>
+    <td>174 / 40</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">5. APP</td><td>$260.60</td><td>$180.00</td>
+    <td>30.9%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$1.000</td><td>$100</td><td>$18,000</td>
+    <td>0.56%</td>
+    <td><span class="badge mid">18.4%</span></td>
+    <td>81.6%</td><td>$179.00</td><td>99.4%*</td>
+    <td>10 / 18</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">6. CRWV</td><td>$53.95</td><td>$35.00</td>
+    <td>35.1%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.170</td><td>$17</td><td>$3,500</td>
+    <td>0.49%</td>
+    <td><span class="badge mid">16.1%</span></td>
+    <td>107.3%</td><td>$34.83</td><td>99.5%*</td>
+    <td>1,523 / 82</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">7. MSTR</td><td>$146.08</td><td>$95.00</td>
+    <td>35.0%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.320</td><td>$32</td><td>$9,500</td>
+    <td>0.34%</td>
+    <td><span class="badge mid">11.2%</span></td>
+    <td>71.9%</td><td>$94.68</td><td>99.7%*</td>
+    <td>2,787 / 539</td>
+    <td><span class="badge hi">A</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">8. COIN</td><td>$164.28</td><td>$110.00</td>
+    <td>33.0%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.270</td><td>$27</td><td>$11,000</td>
+    <td>0.25%</td>
+    <td><span class="badge lo">8.1%</span></td>
+    <td>70.2%</td><td>$109.73</td><td>99.8%*</td>
+    <td>2,114 / 90</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">9. PLTR</td><td>$197.43</td><td>$135.00</td>
+    <td>31.6%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.290</td><td>$29</td><td>$13,500</td>
+    <td>0.21%</td>
+    <td><span class="badge lo">7.1%</span></td>
+    <td>64.7%</td><td>$134.71</td><td>99.8%*</td>
+    <td>249 / 78</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr style="background:#fffbe6">
+    <td class="tk">10. AMD</td><td>$516.80</td><td>$360.00</td>
+    <td>30.3%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.700</td><td>$70</td><td>$36,000</td>
+    <td>0.19%</td>
+    <td><span class="badge lo">6.5%</span></td>
+    <td>60.5%</td><td>$359.30</td><td>99.8%*</td>
+    <td>50 / 1</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr>
+    <td class="tk">11. INTC</td><td>$86.64</td><td>$60.00</td>
+    <td>30.7%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.115</td><td>$12</td><td>$6,000</td>
+    <td>0.19%</td>
+    <td><span class="badge lo">6.4%</span></td>
+    <td>65.7%</td><td>$59.88</td><td>99.8%*</td>
+    <td>1,018 / 1,155</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr>
+    <td class="tk">12. NOW</td><td>$159.35</td><td>$110.00</td>
+    <td>31.0%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.155</td><td>$16</td><td>$11,000</td>
+    <td>0.14%</td>
+    <td><span class="badge lo">4.7%</span></td>
+    <td>62.0%</td><td>$109.84</td><td>99.9%*</td>
+    <td>617 / 143</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr>
+    <td class="tk">13. HOOD</td><td>$94.60</td><td>$65.00</td>
+    <td>31.3%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.090</td><td>$9</td><td>$6,500</td>
+    <td>0.14%</td>
+    <td><span class="badge lo">4.6%</span></td>
+    <td>68.2%</td><td>$64.91</td><td>99.9%*</td>
+    <td>218 / 146</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr>
+    <td class="tk">14. MU</td><td>$879.90</td><td>$610.00</td>
+    <td>30.7%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.770</td><td>$77</td><td>$61,000</td>
+    <td>0.13%</td>
+    <td><span class="badge lo">4.2%</span></td>
+    <td>53.1%</td><td>$609.23</td><td>99.9%*</td>
+    <td>68 / 2</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  <tr>
+    <td class="tk">15. NVDA</td><td>$211.11</td><td>$145.00</td>
+    <td>31.3%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.120</td><td>$12</td><td>$14,500</td>
+    <td>0.08%</td>
+    <td><span class="badge lo">2.8%</span></td>
+    <td>42.8%</td><td>$144.88</td><td>99.9%*</td>
+    <td>2,208 / 319</td>
+    <td><span class="badge hi">A</span></td>
+  </tr>
+  <tr>
+    <td class="tk">16. TSLA</td><td>$372.45</td><td>$260.00</td>
+    <td>30.2%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.140</td><td>$14</td><td>$26,000</td>
+    <td>0.05%</td>
+    <td><span class="badge lo">1.8%</span></td>
+    <td>39.1%</td><td>$259.86</td><td>100.0%*</td>
+    <td>163 / 215</td>
+    <td><span class="badge mid">B</span></td>
+  </tr>
+  <tr>
+    <td class="tk">17. SMH</td><td>$526.77</td><td>$345.00</td>
+    <td>34.5%</td><td>2026-11-06<br><span style="color:#9aa5b3;font-size:11px">11天</span></td>
+    <td>$0.140</td><td>$14</td><td>$34,500</td>
+    <td>0.04%</td>
+    <td><span class="badge lo">1.4%</span></td>
+    <td>40.5%</td><td>$344.86</td><td>100.0%*</td>
+    <td>26 / 0</td>
+    <td><span class="badge lo">C</span></td>
+  </tr>
+  </tbody></table></div>
+
+  <div class="note"><b>📐 怎么读这张表</b><br>
+    • <b>折价%</b> = (现价−行权价)/现价。折价 30% 意味着股价要再跌 30% 你才会被指派接货。<br>
+    • <b>年化%</b> = (每张收取权利金 ÷ 行权价) × (365 ÷ 距到期天数)；本次 DTE=11，年化被放大约 33 倍，仅供参考排序。<br>
+    • <b>11天收益%</b> = 权利金 ÷ 行权价，这才是这 11 天真实能拿到的收益率。<br>
+    • <b>占用本金</b> = 行权价 × 100（现金担保 PUT 需冻结的保证金）。<br>
+    • <b>盈亏平衡</b> = 行权价 − 权利金；股价跌破此价你才开始真正亏钱。<br>
+    • <b>最大亏%*</b> = 假设股价归零时的亏损比例 = (行权价−权利金)/行权价，<b>不是预期亏损</b>。<br>
+    • <b>报价档</b>：A=买卖价差≤1.5 倍且 OI≥500、成交量≥100（可直接挂单）；B=价差≤2 倍且 OI≥100；C=价差大或持仓薄，<b>实际成交价会明显低于中间价</b>。<br>
+    • 权利金按<b>买卖中间价(mid)</b>估算；真实卖出拿到的是<b>买价(bid)</b>，会比表中略低。</div>
+
+  <div class="disclaim">⚠️ <b>风险提示（非投资建议）</b><br>
+    1. 本次 Top10 的 <b>平均 IV30 高达 87%</b>——市场预期这些标的年化波动率 60%~130%，高年化正是高波动的定价，不是白捡的钱。<br>
+    2. <b>SOXL 是 3 倍杠杆 ETF</b>：标的指数跌 10% 它就跌约 30%，其 34% 折价的实际保护远小于表面数字，且杠杆产品有波动衰减风险。<br>
+    3. IREN / CRWV / MSTR / COIN 属加密与 AI 算力高 Beta 品种，一旦板块回调 30% 折价会被迅速击穿。<br>
+    4. C 档（APP、AMD、IREN、CRWV、COIN）买卖价差大、持仓薄，挂单很可能成交不到中间价。<br>
+    5. 现金担保 PUT 需冻结本金，有资金机会成本与下行风险；期权还有到期归零、流动性枯竭、提前指派等风险。<br>
+    6. 本表为机械筛选，<b>未做基本面/破产风险评估</b>。</div>
+
+  <footer>数据来源 CBOE Delayed Quotes（约 15 分钟延迟）｜生成于 2026-10-26 09:57 ｜
+    <a href="/index.html">← 返回首页</a> ｜ 仅供研究参考，非投资建议</footer>
+</div><script>
+  const tbl=document.getElementById('tbl');const tb=tbl.tBodies[0];let asc=false;
+  tbl.querySelectorAll('th').forEach(th=>{th.addEventListener('click',()=>{const i=+th.dataset.k;const a=[...tb.rows];
+  a.sort((x,y)=>{let va=x.cells[i].textContent;let vb=y.cells[i].textContent;va=va.replace(/[$,%*\/ ]/g,'');vb=vb.replace(/[$,%*\/ ]/g,'');
+  const na=parseFloat(va),nb=parseFloat(vb);if(!isNaN(na)&&!isNaN(nb))return asc?na-nb:nb-na;return asc?va.localeCompare(vb):vb.localeCompare(va);});
+  asc=!asc;a.forEach(r=>tb.appendChild(r));});});
+</script></body></html>
